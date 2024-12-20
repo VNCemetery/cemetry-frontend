@@ -1,7 +1,18 @@
-import React from "react";
+import { Box } from "@mantine/core";
 
-const HeaderWrapper = ({ children }) => {
-  return <div className="z-[999] fixed w-full ">{children}</div>;
-};
-
-export default HeaderWrapper;
+export default function HeaderWrapper({ children }) {
+  return (
+    <Box
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: '#F2E7ED',
+        zIndex: 1000
+      }}
+    >
+      {children}
+    </Box>
+  );
+}
