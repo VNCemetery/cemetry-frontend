@@ -1,4 +1,6 @@
 import Logo from "../ui/Logo";
+import AppHeader from "../ui/AppHeader";
+import AppFooter from "../ui/AppFooter";
 import {
   ActionIcon,
   AppShell,
@@ -42,43 +44,11 @@ function ClientAppLayout() {
   const [currentPath, setCurrentPath] = useState(pathname);
 
   return (
-    <AppShell>
-      <AppShell.Main>
-        <Outlet />
-        {/* <div
-          className={`
-          ${pathname === "/" ? "" : "hidden"}
-          `}
-        >
-          <RoutingPage />
-        </div>
-        <div
-          className={`
-            ${pathname === "/map" ? "" : "hidden"}
-          `}
-        >
-          <MapPage center={[21.028511, 105.804817]} zoom={13} />
-        </div>
-        <div
-          className={`
-            ${pathname === "/contact" ? "" : "hidden"}
-          `}
-        >
-          <NewsPage />
-        </div> */}
-      </AppShell.Main>
-      <AppShell.Footer
-        style={{
-          fontSize: rem(20),
-          zIndex: 1,
-        }}
-      >
-        <TabBar
-          updateCurrentPath={(path) => setCurrentPath(path)}
-          currentPath={currentPath}
-        />
-      </AppShell.Footer>
-    </AppShell>
+    <>
+      <AppHeader />
+      <Outlet />
+      <AppFooter />
+    </>
   );
 }
 
