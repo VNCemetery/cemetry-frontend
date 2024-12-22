@@ -9,12 +9,21 @@ import {
   rem,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { FaMapMarkerAlt, FaNewspaper, FaSearch, FaShare } from "react-icons/fa";
+import {
+  FaGrimace,
+  FaInfo,
+  FaMapMarkerAlt,
+  FaNewspaper,
+  FaSearch,
+  FaShare,
+  FaUser,
+} from "react-icons/fa";
 import TabBar from "../ui/TabBar";
 import { FaMap, FaSailboat } from "react-icons/fa6";
 import { Outlet, useLocation } from "react-router";
 import { BiChevronDown, BiChevronRight, BiSearch } from "react-icons/bi";
 import { CgChevronDoubleDown } from "react-icons/cg";
+import { BsApp, BsAppIndicator } from "react-icons/bs";
 
 function ClientAppLayout() {
   const { pathname } = useLocation();
@@ -22,14 +31,15 @@ function ClientAppLayout() {
 
   return (
     <AppShell
-      // navbar={{
-      //   width: 300,
-      //   breakpoint: "sm",
-      //   collapsed: { mobile: !opened },
-      // }}
-      padding="md"
+    // navbar={{
+    //   width: 300,
+    //   breakpoint: "sm",
+    //   collapsed: { mobile: !opened },
+    // }}
     >
-      <Outlet />
+      <AppShell.Main>
+        <Outlet />
+      </AppShell.Main>
       <AppShell.Footer>
         <TabBar
           currentItem={pathname}
@@ -50,7 +60,7 @@ function ClientAppLayout() {
               to: "/news",
             },
             {
-              icon: <FaSailboat />,
+              icon: <BsAppIndicator />,
               label: "Liên hệ",
               to: "/contact",
             },

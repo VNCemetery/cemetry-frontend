@@ -10,43 +10,28 @@ export default function TabBar({ items, currentItem }) {
   const { pathname } = useLocation();
   return (
     <div>
-      <div className="p-1 gap-2 flex w-full justify-between">
+      <div className="gap-2 flex py-1 w-full justify-between">
         {items.map((item) => {
           return (
             <button
-              className={`flex justify-center   items-center gap-1 w-full py-2 rounded-lg  ${
-                item.to === pathname
-                  ? "bg-blue-500 text-white "
-                  : "text-blue-500"
+              key={item.to}
+              className={`flex py-2 gap-1 transition-all ease-in-out border-[1px] duration-50 justify-center   items-center w-full rounded-lg  ${
+                item.to === pathname ? "text-blue-500 " : "text-slate-500"
               } 
-
+ 
                ${matches ? "flex-row" : "flex-col"}
              
               `}
               onClick={() => navigate(item.to)}
             >
               {item.icon}
-              <span className="text-[0.65rem] font-bold">{item.label}</span>
+              {item.to === pathname && (
+                <span className="text-[0.65rem] font-bold">{item.label}</span>
+              )}
             </button>
           );
         })}
       </div>
     </div>
-    // <Group justify="center" gap={4} className="p-4">
-    //   {items.map((item) => {
-    //     return (
-    //       <Button
-    //         component="a"
-    //         href="https://mantine.dev"
-    //         size="sm"
-    //         aria-label="Open in a new tab"
-    //         onClick={(event) => event.preventDefault()}
-    //       >
-    //         {item.icon}
-    //         {item.label}
-    //       </Button>
-    //     );
-    //   })}
-    // </Group>
   );
 }

@@ -1,4 +1,4 @@
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter } from "react-router-dom";
 import { Box, Button, Pagination, ScrollArea } from "@mantine/core";
 
 // Import styles of packages that you've installed.
@@ -11,7 +11,7 @@ import AdminLayout from "./components/layout/AdminLayout";
 import ClientAppLayout from "./components/layout/ClientAppLayout";
 import RoutingPage from "./components/page/RoutingPage";
 import NewsPage from "./components/page/NewsPage";
-import AboutProjectPage from "./components/page/AboutProjectPag";
+import AboutProjectPage from "./components/page/AboutProjectPage";
 import MapPage from "./components/page/MapPage";
 
 export default function App() {
