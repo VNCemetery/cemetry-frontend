@@ -68,7 +68,7 @@ export default function RoutingPage() {
   }, []);
 
   return (
-    <div className="h-full relative">
+    <div className="h-full relative ">
       <MatyrSearch />
       <div className="h-full w-full top-0 absolute">
         <MapView />

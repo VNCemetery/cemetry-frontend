@@ -40,7 +40,11 @@ function ClientAppLayout() {
       <AppShell.Main>
         <Outlet />
       </AppShell.Main>
-      <AppShell.Footer>
+      <AppShell.Footer
+        style={{
+          zIndex: 1,
+        }}
+      >
         <TabBar
           currentItem={pathname}
           items={[
