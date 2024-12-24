@@ -48,10 +48,10 @@ class ApiClient {
       (response) => response,
       async (error) => {
         const originalRequest = error.config;
-        
+
         if (error.response?.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
-          
+
           try {
             const refreshToken = useAuthStore.getState().refreshToken;
             if (!refreshToken) {
@@ -59,7 +59,7 @@ class ApiClient {
             }
 
             const response = await this.public().post("/auth/refresh-token", {
-              refreshToken: refreshToken
+              refreshToken: refreshToken,
             });
 
             const { access_token, refresh_token } = response.data;

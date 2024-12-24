@@ -7,6 +7,7 @@ import {
   ActionIcon,
   CloseIcon,
   Input,
+  Loader,
   Modal,
   Button,
   Text,
@@ -37,6 +38,9 @@ const MatyrSearch = ({
   onClearRoute,
   onRouteFromCurrentLocation,
   onSelectLocationOnMap,
+  openedDrawer,
+  openDrawer,
+  closeDrawer,
 }) => {
   const { history } = useLocation();
   const location = useLocation();
@@ -184,12 +188,9 @@ const MatyrSearch = ({
   };
 
   const theme = useMantineTheme();
-  const [openedDrawer, { open: openDrawer, close: closeDrawer }] =
-    useDisclosure(false);
 
   return (
     <>
-      <AppDrawer opened={openedDrawer} closeDrawer={closeDrawer} />
       <Modal
         opened={showRoutingHandlerPopup}
         onClose={closeRoutingHandlerPopup}
