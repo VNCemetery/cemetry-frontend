@@ -27,7 +27,6 @@ export default function RoutingPage() {
     return <circle cx={cx} cy={cy} r={4} fill="blue" />;
   }
 
-  // get current location
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -62,20 +61,16 @@ export default function RoutingPage() {
   const handleSearch = (searchData) => {
     try {
       console.log('Thông tin:', searchData);
-      // Thực hiện tìm kiếm với dữ liệu
     } catch (error) {
       console.error('Lỗi khi tìm kiếm:', error);
-      // Hiển thị thông báo lỗi cho người dùng
-    }
+    } 
   };
 
   const handleLocationSearch = (locationData) => {
     try {
       console.log('Vị trí:', locationData);
-      // Thực hiện tìm kiếm với dữ liệu vị trí
     } catch (error) {
       console.error('Lỗi khi tìm kiếm vị trí:', error);
-      // Hiển thị thông báo lỗi cho người dùng
     }
   };
 
