@@ -1,5 +1,7 @@
+import FloatingSelector from "../FloatingSelector";
 import {
   ActionIcon,
+  AppShell,
   Avatar,
   Badge,
   Card,
@@ -10,6 +12,8 @@ import {
   Input,
   Loader,
   Modal,
+  MultiSelect,
+  NumberInput,
   Pagination,
   Select,
   Skeleton,
@@ -32,7 +36,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { Drawer, Button } from "@mantine/core";
 import { FiArrowLeft } from "react-icons/fi";
 import { FaArrowLeft, FaMagic } from "react-icons/fa";
-import { BsArrowLeft, BsRecord } from "react-icons/bs";
+import { BsArrowLeft, BsRecord, BsSourceforge } from "react-icons/bs";
 import { IoRecording } from "react-icons/io5";
 
 import { getAutoComplete } from "../../../services/martyrManagementService";
@@ -137,6 +141,11 @@ const MatyrSearch = () => {
 
     return filtered;
   };
+
+  const [
+    showFilterSetting,
+    { open: openFilterSetting, close: closeFilterSetting },
+  ] = useDisclosure(false);
 
   const [autoSuggestions, setAutoSuggestions] = useState([]);
   const [isLoadingAutoSuggestions, setIsLoadingAutoSuggestions] =
@@ -411,6 +420,101 @@ const MatyrSearch = () => {
                   </div>
                 )}
                 {/* Show search results */}
+                <Modal
+                  opened={showFilterSetting}
+                  onClose={closeFilterSetting}
+                  title="Bộ lọc"
+                  fullScreen
+                  radius={0}
+                  transitionProps={{ transition: "fade", duration: 200 }}
+                >
+                  <div className="min-h-[80vh] overflow-auto">
+                    <Tabs defaultValue="info">
+                      <Tabs.List>
+                        <Tabs.Tab value="info">Thông tin</Tabs.Tab>
+                        <Tabs.Tab value="position">Vị trí</Tabs.Tab>
+                      </Tabs.List>
+
+                      <Tabs.Panel value="info">
+                        <div className="flex flex-col gap-2 py-2">
+                          <Text>Họ và tên</Text>
+                          <Input
+                            radius={"lg"}
+                            placeholder="Nguyễn Văn A"
+                            data={["React", "Angular", "Vue", "Svelte"]}
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2 py-2">
+                          <Text>Năm sinh - năm mất</Text>
+                          <Flex gap={4}>
+                            <NumberInput radius="lg" placeholder="Năm sinh" />
+                            <NumberInput radius="lg" placeholder="Năm mất " />
+                          </Flex>
+                        </div>
+                        <div className="flex flex-col gap-2 py-2">
+                          <Text>Quê quán</Text>
+                          <Select
+                            radius={"xl"}
+                            placeholder="Pick value"
+                            data={["React", "Angular", "Vue", "Svelte"]}
+                            searchable
+                            nothingFoundMessage="Nothing found..."
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2 py-2">
+                          <Text>Sắp xếp theo</Text>
+                          <FloatingSelector />
+                        </div>{" "}
+                      </Tabs.Panel>
+                      <Tabs.Panel value="position">
+                        <div className="flex flex-col gap-2 py-2">
+                          <Text>Khu</Text>
+                          <Select
+                            radius={"xl"}
+                            placeholder="Pick value"
+                            data={["React", "Angular", "Vue", "Svelte"]}
+                            searchable
+                            nothingFoundMessage="Nothing found..."
+                          />
+                        </div>{" "}
+                        <div className="flex flex-col gap-2 py-2">
+                          <Text>Hàng mộ</Text>
+                          <Select
+                            radius={"xl"}
+                            placeholder="Pick value"
+                            data={["React", "Angular", "Vue", "Svelte"]}
+                            searchable
+                            nothingFoundMessage="Nothing found..."
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2 py-2">
+                          <Text>Quê quán</Text>
+                          <Select
+                            radius={"xl"}
+                            placeholder="Pick value"
+                            data={["React", "Angular", "Vue", "Svelte"]}
+                            searchable
+                            nothingFoundMessage="Nothing found..."
+                          />
+                        </div>
+                      </Tabs.Panel>
+                    </Tabs>
+                  </div>
+
+                  <div className="border-b-0 border-l-0 border-r-0 border-[1px] flex gap-2 justify-end px-4 absolute bottom-0  py-4 z-[999] w-full left-0">
+                    <Button
+                      variant="light"
+                      size="md"
+                      radius={"xl"}
+                      fullWidth={true}
+                    >
+                      Xóa
+                    </Button>
+                    <Button size="md" radius={"xl"} fullWidth={true}>
+                      Áp dụng
+                    </Button>
+                  </div>
+                </Modal>
 
                 <div className="bg-white">
                   {/* {searchSession} */}
@@ -430,7 +534,13 @@ const MatyrSearch = () => {
                           <>
                             <div class="flex flex-row gap-4 overflow-y-auto pb-2">
                               <div>
-                                <Button radius={"xl"} variant="filled">
+                                <Button
+                                  onClick={() => {
+                                    openFilterSetting();
+                                  }}
+                                  radius={"xl"}
+                                  variant="filled"
+                                >
                                   <Flex
                                     gap={2}
                                     justify={"center"}
@@ -488,11 +598,7 @@ const MatyrSearch = () => {
                                 {searchResults.length} kết quả
                               </Text>
                             </Flex>
-                            {[
-                              ...searchResults,
-                              ...searchResults,
-                              ...searchResults,
-                            ].map((item) => (
+                            {[...searchResults].map((item) => (
                               <>
                                 <div
                                   key={item.id}
