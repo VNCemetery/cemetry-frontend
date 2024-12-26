@@ -1,17 +1,13 @@
-import { Outlet } from "react-router";
+import { Navigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "../../store/useAuthStore";
 
-export default function AdminProtectedRoute() {
-  // add logic to check role & auth
+export default function AdminProtectedRoute({ children }) {
   const token = useAuthStore((state) => state.token);
+  const location = useLocation();
+  
   if (!token) {
-    return <Navigate to="/admin/login" />;
+    return <Navigate to="/admin/login" state={{ from: location }} replace />;
   }
 
-  return (
-    <div>
-      Admin dashboard
-      <Outlet />
-    </div>
-  );
+  return children;
 }
