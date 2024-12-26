@@ -12,7 +12,7 @@ import {
   Tooltip,
   Legend
 } from 'chart.js';
-import StatsCard from '../ui/StatsCard';
+import StatsCard from '../../ui/admin/StatsCard';
 
 // Đăng ký các components cần thiết cho Chart.js
 ChartJS.register(
