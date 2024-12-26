@@ -5,7 +5,7 @@ export default function MapPage() {
     <div>
       <h1 className="text-2xl font-bold text-center">Map</h1>
       <p>
-        This project uses Leaflet for mapping. The main layout is defined in{" "}
+        This uses Leaflet for mapping. The main layout is defined in{" "}
         <code>src/App.jsx</code> and the map is defined in{" "}
         <code>src/components/page</code> and <code>src/components/layout</code>.
       </p>

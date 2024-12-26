@@ -1,7 +1,11 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { MantineProvider } from '@mantine/core';
+import { MantineProvider } from "@mantine/core";
+import { Box, Button, Pagination, ScrollArea } from "@mantine/core";
+
+// Import styles of packages that you've installed.
+// All packages except `@mantine/hooks` require styles imports
 import "@mantine/core/styles.css";
-import '@mantine/dates/styles.css';
+import "@mantine/dates/styles.css";
 
 // Layouts
 import AdminLayout from "./components/admin/layout/AdminLayout";
@@ -11,7 +15,7 @@ import AdminProtectedRoute from "./components/layout/AdminProtectedRoute";
 // Pages
 import RoutingPage from "./components/page/RoutingPage";
 import NewsPage from "./components/page/NewsPage";
-import AboutProjectPage from "./components/page/AboutProjectPag";
+import AboutProjectPage from "./components/page/AboutProjectPage";
 import MapPage from "./components/page/MapPage";
 import AdminLogin from "./components/page/AdminLogin";
 
@@ -30,7 +34,10 @@ export default function App() {
           {/* Client Routes */}
           <Route path="/" element={<ClientAppLayout />}>
             <Route index element={<RoutingPage />} />
-            <Route path="map" element={<MapPage center={[21.028511, 105.804817]} zoom={13} />} />
+            <Route
+              path="map"
+              element={<MapPage center={[21.028511, 105.804817]} zoom={13} />}
+            />
             <Route path="news" element={<NewsPage />} />
             <Route path="contact" element={<AboutProjectPage />} />
           </Route>

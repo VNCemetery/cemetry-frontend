@@ -5,11 +5,11 @@ export const useAuthStore = create((set) => ({
   login: (username, password) => {
     // Thực hiện login API call ở đây
     // Tạm thời mock response
-    if (username === 'admin' && password === 'admin') {
-      set({ token: 'fake-token' });
+    if (username === "admin" && password === "admin") {
+      set({ token: "fake-token" });
       return Promise.resolve();
     }
-    return Promise.reject('Invalid credentials');
+    return Promise.reject("Invalid credentials");
   },
   logout: () => set({ token: null }),
 }));

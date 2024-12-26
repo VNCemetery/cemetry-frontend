@@ -1,11 +1,36 @@
 import HeaderWrapper from "../ui/HeaderWrapper";
-import { Input, Tabs } from "@mantine/core";
-import { BiSearch } from "react-icons/bi";
+import {
+  ActionIcon,
+  Badge,
+  Card,
+  CloseIcon,
+  Group,
+  Image,
+  Input,
+  Modal,
+  Tabs,
+  Text,
+} from "@mantine/core";
+import MapView from "../ui/MapView";
+import {
+  BiArrowToLeft,
+  BiChevronLeft,
+  BiMenu,
+  BiMicrophone,
+  BiSearch,
+} from "react-icons/bi";
 import ReactMapGL, { Layer, Marker, Source } from "@goongmaps/goong-map-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SVGOverlay } from "@goongmaps/goong-map-react";
 import SearchForm from "../ui/SearchForm";
 import LocationSearchForm from "../ui/LocationSearchForm";
+import { useDisclosure } from "@mantine/hooks";
+import { Drawer, Button } from "@mantine/core";
+import { FiArrowLeft } from "react-icons/fi";
+import { FaArrowLeft } from "react-icons/fa";
+import { BsArrowLeft, BsRecord } from "react-icons/bs";
+import { IoRecording } from "react-icons/io5";
+import MatyrSearch from "../ui/MatyrSearch";
 
 export default function RoutingPage() {
   const [viewport, setViewport] = useState({
@@ -19,6 +44,7 @@ export default function RoutingPage() {
     latitude: 10.461780290048,
     longitude: 105.645622290328,
   });
+
   function redraw({ project }) {
     const [cx, cy] = project([
       currentLocation.longitude,
@@ -40,69 +66,11 @@ export default function RoutingPage() {
     );
   }, []);
 
-  const layerStyle = {
-    id: "point",
-    type: "circle",
-    paint: {
-      "circle-radius": 4,
-      "circle-color": "#007cbf",
-    },
-  };
-  const [geojson, setGeojson] = useState(null);
-
-  useEffect(() => {
-    (async () => {
-      const res = await fetch("../src/path.geojson");
-      const data = await res.json();
-      setGeojson(data);
-    })();
-  }, []);
-
-  const handleSearch = (searchData) => {
-    try {
-      console.log('Thông tin:', searchData);
-    } catch (error) {
-      console.error('Lỗi khi tìm kiếm:', error);
-    } 
-  };
-
-  const handleLocationSearch = (locationData) => {
-    try {
-      console.log('Vị trí:', locationData);
-    } catch (error) {
-      console.error('Lỗi khi tìm kiếm vị trí:', error);
-    }
-  };
-
   return (
-    <div className="h-full relative">
-      <HeaderWrapper>
-        <Tabs defaultValue="info">
-          <Tabs.List style={{ backgroundColor: '#F2E7ED' }}>
-            <Tabs.Tab value="info">Thông tin</Tabs.Tab>
-            <Tabs.Tab value="location">Vị trí</Tabs.Tab>
-          </Tabs.List>
-
-          <Tabs.Panel value="info">
-            <SearchForm onSearch={handleSearch} />
-          </Tabs.Panel>
-
-          <Tabs.Panel value="location">
-            <LocationSearchForm onSearch={handleLocationSearch} />
-          </Tabs.Panel>
-        </Tabs>
-      </HeaderWrapper>
-
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
-        <ReactMapGL
-          width="100%"
-          height="100%"
-          goongApiAccessToken={import.meta.env.VITE_GOONG_MAPTILES_KEY}
-          {...viewport}
-          onViewportChange={(nextViewport) => setViewport(nextViewport)}
-        >
-          <SVGOverlay redraw={redraw} />
-        </ReactMapGL>
+    <div className="h-full relative ">
+      <MatyrSearch />
+      <div className="h-full w-full top-0 absolute">
+        <MapView />
       </div>
     </div>
   );
