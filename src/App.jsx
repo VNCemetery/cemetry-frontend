@@ -8,7 +8,7 @@ import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
 
 // Layouts
-import AdminLayout from "./components/admin/layout/AdminLayout";
+import AdminLayout from "./components/layout/admin/AdminLayout";
 import ClientAppLayout from "./components/layout/ClientAppLayout";
 import AdminProtectedRoute from "./components/layout/AdminProtectedRoute";
 
@@ -20,11 +20,11 @@ import MapPage from "./components/page/MapPage";
 import AdminLogin from "./components/page/AdminLogin";
 
 // Admin Pages
-import Dashboard from "./components/admin/pages/Dashboard";
-import MartyrsManage from "./components/admin/pages/MartyrsManage";
-import Settings from "./components/admin/pages/Settings";
-import ContributorsManage from "./components/admin/pages/ContributorsManage";
-import MartyrDetail from "./components/admin/pages/MartyrDetail";
+import Dashboard from "./components/page/admin/Dashboard";
+import MartyrsManage from "./components/page/admin/MartyrsManage";
+import Settings from "./components/page/admin/Settings";
+import ContributorsManage from "./components/page/admin/ContributorsManage";
+import MartyrDetail from "./components/page/admin/MartyrDetail";
 
 export default function App() {
   return (
