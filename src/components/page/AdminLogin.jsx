@@ -30,10 +30,14 @@ export default function AdminLogin() {
       const username = formData.get('username');
       const password = formData.get('password');
 
+      console.log('Attempting login...');
       await login(username, password);
-      navigate('/admin');
+      console.log('Login successful, attempting navigation...');
+      navigate('/admin/dashboard', { replace: true });
+      console.log('Navigation completed');
     } catch (error) {
-      setError('Tên đăng nhập hoặc mật khẩu không đúng');
+      console.error('Login error:', error);
+      setError(error.message || 'Đăng nhập thất bại. Vui lòng thử lại.');
     } finally {
       setLoading(false);
     }

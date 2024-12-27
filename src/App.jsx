@@ -52,7 +52,7 @@ export default function App() {
               </AdminProtectedRoute>
             }
           >
-            <Route index element={<Navigate to="dashboard" />} />
+            <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="martyrs" element={<MartyrsManage />} />
             <Route path="martyrs/:id" element={<MartyrDetail />} />
