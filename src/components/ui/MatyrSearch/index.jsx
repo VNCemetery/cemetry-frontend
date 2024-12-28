@@ -39,9 +39,10 @@ import { FaArrowLeft, FaMagic } from "react-icons/fa";
 import { BsArrowLeft, BsRecord, BsSourceforge } from "react-icons/bs";
 import { IoRecording } from "react-icons/io5";
 
-import { getAutoComplete } from "../../../services/martyrManagementService";
+import { getMatyrs } from "../../../services/martyrManagementService";
 import { GrConfigure } from "react-icons/gr";
 import { HiAdjustments, HiCheck } from "react-icons/hi";
+import SearchResultEntry from "./SearchResultEntry";
 
 const MatyrSearch = () => {
   const headerWrapperRef = useRef(null);
@@ -57,6 +58,7 @@ const MatyrSearch = () => {
 
   const [searchResults, setSearchResults] = useState([]);
   const [showAutoSuggestions, setShowAutoSuggestions] = useState(false);
+  const [showSearchResults, setShowSearchResults] = useState(false);
   const [isLoadingSearchResults, setIsLoadingSearchResults] = useState(false);
 
   const [searchSession, setSearchSession] = useState("");
@@ -68,16 +70,24 @@ const MatyrSearch = () => {
       setIsLoadingSearchResults(true);
       // Clear search results
       setSearchResults([]);
-      console.log("Thông tin:", searchData);
-      const results = await getAutoComplete(searchData);
+      const results = await getMatyrs(searchKey, 0, 10);
+      const content = results.content;
+      // If content is null
+      if (!content) {
+        setSearchResults([]);
+        // Throw error
+        throw new Error("No result found");
+      }
       console.log("Kết quả tìm kiếm:", results);
-      setSearchResults([...results, ...results, ...results]);
+      setShowSearchResults(true);
+      setSearchResults(content);
       // Set uuid to search session
       setSearchSession(Math.random().toString(36).substring(7));
       setIsLoadingSearchResults(false);
     } catch (error) {
       console.error("Lỗi khi tìm kiếm:", error);
       setSearchResults([]);
+      setShowSearchResults(false);
       setIsLoadingSearchResults(false);
     }
   };
@@ -154,10 +164,17 @@ const MatyrSearch = () => {
   const handleAutoSuggest = async (searchKey) => {
     try {
       setIsLoadingAutoSuggestions(true);
-      const results = await getAutoComplete(searchKey);
+      const results = await getMatyrs(searchKey, 0, 8);
+      const content = results.content;
+      // If content is null
+      if (!content) {
+        setAutoSuggestions([]);
+        // Throw error
+        throw new Error("No content found");
+      }
       setShowAutoSuggestions(true);
       setIsLoadingAutoSuggestions(false);
-      setAutoSuggestions(results);
+      setAutoSuggestions(content);
     } catch (error) {
       console.error("Lỗi khi tìm kiếm:", error);
       setAutoSuggestions([]);
@@ -345,10 +362,11 @@ const MatyrSearch = () => {
             ></div>
 
             <div className="h-full bg-white">
-              <div className="px-2 flex flex-col gap-2">
+              <div className="px-2 flex flex-col  gap-2">
+                {/* Search recommendations */}
                 {/* Search recommendations */}
                 {showAutoSuggestions && (
-                  <div className="min-h-screen">
+                  <div className="min-h-screen bg-white  absolute z-[9999] w-full">
                     <div
                       className="border-[1px] mb-1 border-gray-200 rounded-2xl p-2 hover:bg-gray-100 cursor-pointer"
                       onClick={() => {
@@ -598,46 +616,14 @@ const MatyrSearch = () => {
                                 {searchResults.length} kết quả
                               </Text>
                             </Flex>
-                            {[...searchResults].map((item) => (
-                              <>
-                                <div
-                                  key={item.id}
-                                  className="mb-2 border-[1px] border-gray-200 rounded-2xl p-2 hover:bg-gray-100 cursor-pointer"
-                                >
-                                  <Group gap="sm">
-                                    <Avatar
-                                      size={50}
-                                      src={VIETNAM_LOGO}
-                                      radius={50}
-                                    />
-                                    <div>
-                                      <Text fz="sm" fw={500}>
-                                        {item.fullName}
-                                      </Text>
-                                      <Text c="dimmed" fz="xs">
-                                        {item.rankPositionUnit}
-                                      </Text>
-                                      <Text c="dimmed" fz="xs">
-                                        {item.province &&
-                                          "Quê quán: " + item.province}
-                                        {item.yearOfBirth && "-"}{" "}
-                                        {item.yearOfBirth}
-                                      </Text>
-                                    </div>
-                                  </Group>
-                                </div>
-                              </>
+                            {searchResults.map((item) => (
+                              <SearchResultEntry item={item} />
                             ))}
-                            <div className="flex justify-center pb-2">
-                              <Pagination total={10} size="sm" radius="lg" />
-                            </div>
+                            <div className="flex justify-center h-[4rem]"></div>
                           </>
                         )}
                       </>
                     )
-                  }
-                  {
-                    // Search results
                   }
                 </div>
               </div>
