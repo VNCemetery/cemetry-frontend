@@ -34,9 +34,27 @@ export const refreshToken = async (refreshToken) => {
     const response = await apiClient.post("/auth/refresh-token", {
       refreshToken
     });
+    
+    if (!response.data.access_token || !response.data.refresh_token) {
+      throw new Error("Invalid response from refresh token endpoint");
+    }
+    
     return response.data;
   } catch (error) {
     console.error("Refresh token error:", error);
+    if (error.response?.status === 400) {
+      throw new Error("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại");
+    }
     throw error;
+  }
+};
+
+export const logout = async (refreshToken) => {
+  try {
+    await apiClient.post("/auth/logout", {
+      refreshToken
+    });
+  } catch (error) {
+    console.error("Logout error:", error);
   }
 };

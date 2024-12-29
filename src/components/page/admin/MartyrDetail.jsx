@@ -1,132 +1,126 @@
 import { 
-    Container,
     Paper,
     Title,
-    Group,
-    Button,
-    Stack,
     TextInput,
     NumberInput,
+  Button, 
+  Group, 
+  Stack,
+  FileInput,
     Image,
-    FileInput,
-    Center,
     Text,
-    Divider,
-    ActionIcon,
-    Tooltip
+  LoadingOverlay,
+  Switch
   } from '@mantine/core';
   import { DateInput } from '@mantine/dates';
-  import { IconArrowLeft, IconPhoto, IconDeviceFloppy, IconTrash } from '@tabler/icons-react';
-  import { useState } from 'react';
+import { useForm } from '@mantine/form';
+import { notifications } from '@mantine/notifications';
   import { useNavigate, useParams } from 'react-router-dom';
-  import { notifications } from '@mantine/notifications';
+import { useState, useEffect } from 'react';
+import { IconPhoto, IconUpload } from '@tabler/icons-react';
+import { getMartyrById, upsertMartyr } from '../../../services/martyrService';
   
   export default function MartyrDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
-    
-    // Giả lập lấy data từ API
-    const [martyr, setMartyr] = useState(() => {
-      // Tìm liệt sĩ theo id từ MOCK_DATA
-      return {
-        id: "LS001",
-        createdAt: "2024-02-20T10:00:00",
-        updatedAt: "2024-02-20T10:00:00",
-        codeName: "LS_A123",
-        commune: "Xã A",
-        dateOfDeath: "1968-02-20",
-        district: "Huyện X",
-        fullName: "Nguyễn Văn A",   
-        hometown: "An Giang",
-        name: "Văn A",
-        placeOfExhumation: "Địa điểm A",
-        rankPositionUnit: "Chiến sĩ",
-        rhyme: "Nguyễn",
-        yearOfBirth: 1940,
-        yearOfEnlistment: 1965,
-        deleted: false,
-        hidden: false,
-        graveRow: "A12",
+  const [imagePreview, setImagePreview] = useState(null);
+  const isNew = !id || id === 'new';
+
+  const form = useForm({
+    initialValues: {
+      id: '',
         image: null,
-      };
-    });
-  
-    const [dateOfDeath, setDateOfDeath] = useState(
-      martyr?.dateOfDeath ? new Date(martyr.dateOfDeath) : null
-    );
-    const [image, setImage] = useState(martyr?.image || null);
-    const [error, setError] = useState(null);
-  
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-      setError(null);
+      fullName: '',
+      name: '',
+      codeName: '',
+      yearOfBirth: '',
+      dateOfEnlistment: null,
+      dateOfDeath: null,
+      rankPositionUnit: '',
+      homeTown: '',
+      placeOfExhumation: '',
+      note: '',
+      commune: '',
+      district: '',
+      graveRowId: '',
+      isHidden: false
+    },
+
+    validate: {
+      fullName: (value) => (!value ? 'Vui lòng nhập họ tên đầy đủ' : null),
+      name: (value) => (!value ? 'Vui lòng nhập tên' : null),
+      codeName: (value) => (!value ? 'Vui lòng nhập mã liệt sĩ' : null),
+      yearOfBirth: (value) => {
+        if (!value) return 'Vui lòng nhập năm sinh';
+        if (value < 1900 || value > 2000) return 'Năm sinh không hợp lệ';
+        return null;
+      },
+      dateOfDeath: (value) => {
+        if (!value) return 'Vui lòng nhập ngày hy sinh';
+        if (value > new Date()) return 'Ngày hy sinh không thể lớn hơn ngày hiện tại';
+        return null;
+      },
+      homeTown: (value) => (!value ? 'Vui lòng nhập quê quán' : null),
+    },
+
+    transformValues: (values) => ({
+      ...values,
+      dateOfEnlistment: values.dateOfEnlistment ? values.dateOfEnlistment.toISOString() : null,
+      dateOfDeath: values.dateOfDeath ? values.dateOfDeath.toISOString() : null,
+      yearOfBirth: values.yearOfBirth ? parseInt(values.yearOfBirth) : null,
+      graveRowId: values.graveRowId ? parseInt(values.graveRowId) : null
+    })
+  });
+
+  useEffect(() => {
+    if (!isNew) {
+      loadMartyrData();
+    }
+  }, [id]);
+
+  const loadMartyrData = async () => {
+    try {
       setLoading(true);
-  
-      try {
-        const formData = new FormData(e.target);
-        
-        // Validate năm
-        const yearOfBirth = parseInt(formData.get('yearOfBirth'));
-        const yearOfEnlistment = parseInt(formData.get('yearOfEnlistment'));
-        
-        if (yearOfEnlistment < yearOfBirth) {
-          setError('Năm nhập ngũ không thể nhỏ hơn năm sinh');
-          return;
-        }
-  
-        if (!dateOfDeath) {
-          setError('Vui lòng chọn ngày hy sinh');
-          return;
-        }
-  
-        const deathYear = dateOfDeath.getFullYear();
-        if (deathYear < yearOfEnlistment) {
-          setError('Ngày hy sinh không thể trước năm nhập ngũ');
-          return;
-        }
-  
-        // Validate image size (2MB)
-        if (image && image.size > 2 * 1024 * 1024) {
-          setError('Kích thước ảnh không được vượt quá 2MB');
-          return;
-        }
-  
-        // Tạo object data mới
-        const updatedMartyr = {
-          ...martyr,
-          codeName: formData.get('codeName'),
-          commune: formData.get('commune'),
-          dateOfDeath: dateOfDeath?.toISOString().split('T')[0],
-          district: formData.get('district'),
-          fullName: formData.get('fullName'),
-          hometown: formData.get('hometown'),
-          name: formData.get('name'),
-          placeOfExhumation: formData.get('placeOfExhumation'),
-          rankPositionUnit: formData.get('rankPositionUnit'),
-          rhyme: formData.get('rhyme'),
-          yearOfBirth: yearOfBirth,
-          yearOfEnlistment: yearOfEnlistment,
-          graveRow: formData.get('graveRow'),
-          image: image,
-          updatedAt: new Date().toISOString()
-        };
-  
-        // Call API update
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Mock API call
-        setMartyr(updatedMartyr);
-        
+      const data = await getMartyrById(id);
+      if (!data) {
+        throw new Error('Không tìm thấy thông tin liệt sĩ');
+      }
+      const formattedData = {
+        ...data,
+        dateOfEnlistment: data.dateOfEnlistment ? new Date(data.dateOfEnlistment) : null,
+        dateOfDeath: data.dateOfDeath ? new Date(data.dateOfDeath) : null
+      };
+      form.setValues(formattedData);
+      if (data.image) {
+        setImagePreview(data.image);
+      }
+    } catch (error) {
+      notifications.show({
+        title: 'Lỗi',
+        message: error.message || 'Không thể tải thông tin liệt sĩ',
+        color: 'red'
+      });
+      navigate('/admin/martyrs');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (values) => {
+    try {
+      setLoading(true);
+      await upsertMartyr(values);
         notifications.show({
           title: 'Thành công',
-          message: 'Đã cập nhật thông tin liệt sĩ',
+        message: id === 'new' ? 'Đã thêm liệt sĩ mới' : 'Đã cập nhật thông tin liệt sĩ',
           color: 'green'
         });
-  
-      } catch (err) {
-        setError('Có lỗi xảy ra, vui lòng thử lại');
+      navigate('/admin/martyrs');
+    } catch (error) {
         notifications.show({
           title: 'Lỗi',
-          message: 'Không thể cập nhật thông tin',
+        message: error.message || 'Có lỗi xảy ra, vui lòng thử lại',
           color: 'red'
         });
       } finally {
@@ -135,200 +129,143 @@ import {
     };
   
     return (
-      <Container size="xl">
-        <Paper shadow="xs" p="md">
-          <Group justify="space-between" mb="lg">
-            <Group>
-              <Tooltip label="Quay lại">
-                <ActionIcon 
-                  variant="subtle" 
-                  onClick={() => navigate('/admin/martyrs')}
-                >
-                  <IconArrowLeft />
-                </ActionIcon>
-              </Tooltip>
-              <Title order={2}>
-                {id ? 'Chỉnh sửa thông tin liệt sĩ' : 'Thêm liệt sĩ mới'}
+    <Paper p="md" pos="relative">
+      <LoadingOverlay visible={loading} />
+      
+      <Title order={2} mb="lg">
+        {isNew ? 'Thêm liệt sĩ mới' : 'Cập nhật thông tin liệt sĩ'}
               </Title>
-            </Group>
-            <Group>
-              <Button
-                variant="light"
-                color="red"
-                leftSection={<IconTrash size={16} />}
-                onClick={() => {
-                  if (window.confirm('Bạn có chắc muốn xóa liệt sĩ này?')) {
-                    // Xử lý xóa
-                    navigate('/admin/martyrs');
-                  }
-                }}
-              >
-                Xóa
-              </Button>
-              <Button
-                type="submit"
-                form="martyr-form"
-                loading={loading}
-                leftSection={<IconDeviceFloppy size={16} />}
-              >
-                Lưu thay đổi
-              </Button>
-            </Group>
-          </Group>
-  
-          <Divider mb="lg" />
-  
-          <form id="martyr-form" onSubmit={handleSubmit}>
-            <Stack>
-              {error && (
-                <Text color="red" size="sm">
-                  {error}
-                </Text>
-              )}
-  
-              <Group align="flex-start">
-                {/* Cột trái - Ảnh */}
-                <Stack style={{ width: 200 }}>
-                  {image ? (
+
+      <form onSubmit={form.onSubmit(handleSubmit)}>
+        <Stack spacing="md">
+          {imagePreview && (
                     <Image
-                      src={image}
+              src={imagePreview}
                       alt="Preview"
+              width={200}
+              height={200}
                       radius="md"
-                      h={250}
-                      fit="cover"
+              mx="auto"
                     />
-                  ) : (
-                    <Center h={250} bg="gray.1" style={{ border: '1px dashed gray' }}>
-                      <IconPhoto size={32} color="gray" />
-                    </Center>
                   )}
+
                   <FileInput
                     label="Ảnh liệt sĩ"
-                    description="Chọn ảnh JPG, PNG (tối đa 2MB)"
-                    accept="image/png,image/jpeg"
-                    leftSection={<IconPhoto size={14} />}
+            accept="image/*"
                     placeholder="Chọn ảnh..."
-                    value={image}
+            icon={<IconUpload size={14} />}
+            {...form.getInputProps('image')}
                     onChange={(file) => {
+              form.setFieldValue('image', file);
                       if (file) {
                         const reader = new FileReader();
                         reader.onloadend = () => {
-                          setImage(reader.result);
+                  setImagePreview(reader.result);
                         };
                         reader.readAsDataURL(file);
                       } else {
-                        setImage(null);
+                setImagePreview(null);
                       }
                     }}
                   />
-                </Stack>
-  
-                {/* Cột phải - Form thông tin */}
-                <Stack style={{ flex: 1 }}>
-                  <TextInput
-                    label="Mã liệt sĩ"
-                    name="codeName"
-                    required
-                    defaultValue={martyr?.codeName}
-                  />
                   
                   <Group grow>
                     <TextInput
-                      label="Họ và tên đệm"
-                      name="rhyme"
+              label="Họ và tên đầy đủ"
                       required
-                      defaultValue={martyr?.rhyme}
+              {...form.getInputProps('fullName')}
                     />
                     <TextInput
                       label="Tên"
-                      name="name"
                       required
-                      defaultValue={martyr?.name}
+              {...form.getInputProps('name')}
                     />
                   </Group>
                   
+          <Group grow>
                   <TextInput
-                    label="Họ và tên đầy đủ"
-                    name="fullName"
+              label="Mã liệt sĩ"
                     required
-                    defaultValue={martyr?.fullName}
+              {...form.getInputProps('codeName')}
                   />
-                  
-                  <Group grow>
                     <NumberInput
                       label="Năm sinh"
-                      name="yearOfBirth"
                       required
-                      defaultValue={martyr?.yearOfBirth}
                       min={1900}
                       max={2000}
-                    />
-                    <NumberInput
-                      label="Năm nhập ngũ"
-                      name="yearOfEnlistment"
-                      required
-                      defaultValue={martyr?.yearOfEnlistment}
-                      min={1900}
-                      max={2000}
+              {...form.getInputProps('yearOfBirth')}
                     />
                   </Group>
                   
+          <Group grow>
+            <DateInput
+              label="Ngày nhập ngũ"
+              placeholder="Chọn ngày"
+              valueFormat="DD/MM/YYYY"
+              {...form.getInputProps('dateOfEnlistment')}
+            />
                   <DateInput
                     label="Ngày hy sinh"
-                    value={dateOfDeath}
-                    onChange={setDateOfDeath}
+              placeholder="Chọn ngày"
                     required
-                    locale="vi"
-                    maxDate={new Date()}
                     valueFormat="DD/MM/YYYY"
+              {...form.getInputProps('dateOfDeath')}
                   />
+          </Group>
                   
                   <TextInput
                     label="Cấp bậc/Chức vụ/Đơn vị"
-                    name="rankPositionUnit"
-                    required
-                    defaultValue={martyr?.rankPositionUnit}
+            {...form.getInputProps('rankPositionUnit')}
                   />
                   
                   <Group grow>
                     <TextInput
                       label="Quê quán"
-                      name="hometown"
                       required
-                      defaultValue={martyr?.hometown}
+              {...form.getInputProps('homeTown')}
                     />
                     <TextInput
                       label="Xã/Phường"
-                      name="commune"
-                      required
-                      defaultValue={martyr?.commune}
+              {...form.getInputProps('commune')}
                     />
                     <TextInput
                       label="Quận/Huyện"
-                      name="district"
-                      required
-                      defaultValue={martyr?.district}
+              {...form.getInputProps('district')}
                     />
                   </Group>
                   
                   <TextInput
                     label="Nơi quy tập"
-                    name="placeOfExhumation"
-                    required
-                    defaultValue={martyr?.placeOfExhumation}
+            {...form.getInputProps('placeOfExhumation')}
                   />
                   
                   <TextInput
-                    label="Hàng mộ"
-                    name="graveRow"
-                    required
-                    defaultValue={martyr?.graveRow}
-                  />
-                </Stack>
-              </Group>
-            </Stack>
-          </form>
-        </Paper>
-      </Container>
+            label="Ghi chú"
+            {...form.getInputProps('note')}
+          />
+
+          <Group grow>
+            <TextInput
+              label="Hàng mộ"
+              type="number"
+              {...form.getInputProps('graveRowId')}
+            />
+            <Switch
+              label="Ẩn thông tin liệt sĩ"
+              {...form.getInputProps('isHidden', { type: 'checkbox' })}
+            />
+          </Group>
+
+          <Group justify="flex-end" mt="xl">
+            <Button variant="light" onClick={() => navigate('/admin/martyrs')}>
+              Hủy
+            </Button>
+            <Button type="submit" loading={loading}>
+              {isNew ? 'Thêm mới' : 'Cập nhật'}
+            </Button>
+          </Group>
+        </Stack>
+      </form>
+    </Paper>
     );
   } 

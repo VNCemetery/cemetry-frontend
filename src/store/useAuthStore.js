@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from 'zustand/middleware';
-import { login as loginApi, refreshToken as refreshTokenApi } from "../services/authService";
+import { login as loginApi, refreshToken as refreshTokenApi, logout as logoutApi } from "../services/authService";
 
 export const useAuthStore = create(
   persist(
@@ -23,12 +23,23 @@ export const useAuthStore = create(
           throw error;
         }
       },
-      logout: () => set({ 
-        accessToken: null, 
-        refreshToken: null, 
-        expiresIn: null,
-        user: null 
-      }),
+      logout: async () => {
+        try {
+          const currentState = useAuthStore.getState();
+          // Gọi API logout để vô hiệu hóa refresh token
+          if (currentState.refreshToken) {
+            await logoutApi(currentState.refreshToken);
+          }
+        } finally {
+          // Xóa toàn bộ thông tin đăng nhập
+          set({ 
+            accessToken: null, 
+            refreshToken: null, 
+            expiresIn: null,
+            user: null 
+          });
+        }
+      },
       setTokens: (access_token, refresh_token, expires_in) => set({
         accessToken: access_token,
         refreshToken: refresh_token,

@@ -24,6 +24,20 @@ apiClient.interceptors.request.use(
   }
 );
 
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
 // Interceptor để refresh token
 apiClient.interceptors.response.use(
   (response) => response,
@@ -31,24 +45,42 @@ apiClient.interceptors.response.use(
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        // Nếu đang refresh token, thêm request vào hàng đợi
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then(token => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return axios(originalRequest);
+          })
+          .catch(err => Promise.reject(err));
+      }
+
       originalRequest._retry = true;
+      isRefreshing = true;
 
       try {
         const state = useAuthStore.getState();
-        // Sử dụng service để refresh token
         const response = await refreshTokenApi(state.refreshToken);
         const { access_token, refresh_token, expires_in } = response;
         
         // Cập nhật tokens mới vào store
         state.setTokens(access_token, refresh_token, expires_in);
-
-        // Thử lại request ban đầu với access token mới
+        
+        // Xử lý hàng đợi các request bị fail
+        processQueue(null, access_token);
+        
+        // Thử lại request ban đầu với token mới
         originalRequest.headers.Authorization = `Bearer ${access_token}`;
         return axios(originalRequest);
       } catch (refreshError) {
+        processQueue(refreshError, null);
         useAuthStore.getState().logout();
         window.location.href = '/admin/login';
         return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
     return Promise.reject(error);

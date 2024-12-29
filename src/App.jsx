@@ -2,8 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { MantineProvider } from "@mantine/core";
 import { Box, Button, Pagination, ScrollArea } from "@mantine/core";
 
-// Import styles of packages that you've installed.
-// All packages except `@mantine/hooks` require styles imports
+// Import styles
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
 
@@ -25,6 +24,7 @@ import MartyrsManage from "./components/page/admin/MartyrsManage";
 import Settings from "./components/page/admin/Settings";
 import ContributorsManage from "./components/page/admin/ContributorsManage";
 import MartyrDetail from "./components/page/admin/MartyrDetail";
+import DeleteHistory from './components/page/admin/DeleteHistory';
 
 export default function App() {
   return (
@@ -44,19 +44,13 @@ export default function App() {
 
           {/* Admin Routes */}
           <Route path="/admin/login" element={<AdminLogin />} />
-          <Route
-            path="/admin"
-            element={
-              <AdminProtectedRoute>
-                <AdminLayout />
-              </AdminProtectedRoute>
-            }
-          >
+          <Route path="/admin" element={<AdminProtectedRoute><AdminLayout /></AdminProtectedRoute>}>
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="martyrs" element={<MartyrsManage />} />
-            <Route path="martyrs/:id" element={<MartyrDetail />} />
+            <Route path="martyrs/delete-history" element={<DeleteHistory />} />
             <Route path="martyrs/new" element={<MartyrDetail />} />
+            <Route path="martyrs/:id" element={<MartyrDetail />} />
             <Route path="contributors" element={<ContributorsManage />} />
             <Route path="settings" element={<Settings />} />
           </Route>

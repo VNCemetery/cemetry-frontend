@@ -1,26 +1,30 @@
-import { Burger, Group, Title, Button } from '@mantine/core';
-import { useAuthStore } from '../../../store/useAuthStore';
+import { Group, Burger, Button } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../../../store/useAuthStore';
 
 export default function AdminHeader({ opened, toggle }) {
-  const logout = useAuthStore((state) => state.logout);
   const navigate = useNavigate();
+  const logout = useAuthStore((state) => state.logout);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/admin/login');
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/admin/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Vẫn chuyển về trang login ngay cả khi có lỗi
+      navigate('/admin/login');
+    }
   };
 
   return (
     <Group h="100%" px="md" justify="space-between">
+      <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
       <Group>
-        <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-        <Title order={3}>HeroVN Admin</Title>
+        <Button onClick={handleLogout} variant="light" color="red">
+          Đăng xuất
+        </Button>
       </Group>
-
-      <Button variant="subtle" onClick={handleLogout}>
-        Đăng xuất
-      </Button>
     </Group>
   );
 } 
