@@ -12,9 +12,9 @@ const apiClient = axios.create({
 export const createApiClient = (token = null, custom_path = "") => {
   return axios.create({
     baseURL: `${import.meta.env.VITE_APP_API_BASE_URL}/api/v1${custom_path}`, // Replace with your actual base URL
-    withCredentials: true, // Ensures cookies are sent with each request
     headers: {
       "Content-Type": "application/json",
+
       // If a token is passed, set the Authorization header
       ...(token && { Authorization: `Bearer ${token}` }),
     },
