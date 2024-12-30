@@ -1,5 +1,5 @@
 import { Grid, Paper, Text, Title, Group, Stack, RingProgress } from '@mantine/core';
-import { IconUsers, IconUserCheck, IconMap, IconHistory } from '@tabler/icons-react';
+import { lazy, Suspense } from 'react';
 import { Line, Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -13,6 +13,19 @@ import {
   Legend
 } from 'chart.js';
 import StatsCard from '../../ui/admin/StatsCard';
+
+// Lazy load các icons
+const IconUsers = lazy(() => import('@tabler/icons-react').then(module => ({ default: module.IconUsers })));
+const IconUserCheck = lazy(() => import('@tabler/icons-react').then(module => ({ default: module.IconUserCheck })));
+const IconMap = lazy(() => import('@tabler/icons-react').then(module => ({ default: module.IconMap })));
+const IconHistory = lazy(() => import('@tabler/icons-react').then(module => ({ default: module.IconHistory })));
+
+// Icon wrapper component
+const IconWrapper = ({ icon: Icon, ...props }) => (
+  <Suspense fallback={<span style={{ width: props.size, height: props.size }} />}>
+    <Icon {...props} />
+  </Suspense>
+);
 
 // Đăng ký các components cần thiết cho Chart.js
 ChartJS.register(
@@ -155,7 +168,7 @@ export default function Dashboard() {
             title="Tổng số liệt sĩ"
             value={STATS.totalMartyrs.toLocaleString()}
             description="Tổng số liệt sĩ đã ghi nhận"
-            icon={<IconUsers size={32} stroke={1.5} />}
+            icon={<IconWrapper icon={IconUsers} size={32} stroke={1.5} />}
             color="blue"
           />
         </Grid.Col>
@@ -165,7 +178,7 @@ export default function Dashboard() {
             title="Người đóng góp"
             value={STATS.totalContributors.toLocaleString()}
             description={`${STATS.pendingContributors} chờ duyệt`}
-            icon={<IconUserCheck size={32} stroke={1.5} />}
+            icon={<IconWrapper icon={IconUserCheck} size={32} stroke={1.5} />}
             color="green"
           />
         </Grid.Col>
@@ -175,7 +188,7 @@ export default function Dashboard() {
             title="Khu vực"
             value={STATS.totalAreas}
             description="Tổng số khu vực quản lý"
-            icon={<IconMap size={32} stroke={1.5} />}
+            icon={<IconWrapper icon={IconMap} size={32} stroke={1.5} />}
             color="violet"
           />
         </Grid.Col>
@@ -185,7 +198,7 @@ export default function Dashboard() {
             title="Hoạt động"
             value={STATS.recentActivities.length}
             description="Hoạt động trong ngày"
-            icon={<IconHistory size={32} stroke={1.5} />}
+            icon={<IconWrapper icon={IconHistory} size={32} stroke={1.5} />}
             color="orange"
           />
         </Grid.Col>

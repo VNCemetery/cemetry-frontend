@@ -17,10 +17,25 @@ import {
   } from '@mantine/core';
   import { DateInput } from '@mantine/dates';
   import { useDisclosure } from '@mantine/hooks';
-  import { IconPlus, IconDots, IconEdit, IconTrash, IconSearch, IconEyeCheck, IconEyeOff, IconUpload, IconPhoto } from '@tabler/icons-react';
-  import { useState } from 'react';
-  import { notifications } from '@mantine/notifications';
+  import { lazy, Suspense } from 'react';
   import { useNavigate } from 'react-router-dom';
+  
+  // Lazy load icons
+  const IconPlus = lazy(() => import('@tabler/icons-react').then(module => ({ default: module.IconPlus })));
+  const IconDots = lazy(() => import('@tabler/icons-react').then(module => ({ default: module.IconDots })));
+  const IconEdit = lazy(() => import('@tabler/icons-react').then(module => ({ default: module.IconEdit })));
+  const IconTrash = lazy(() => import('@tabler/icons-react').then(module => ({ default: module.IconTrash })));
+  const IconSearch = lazy(() => import('@tabler/icons-react').then(module => ({ default: module.IconSearch })));
+  const IconPhoto = lazy(() => import('@tabler/icons-react').then(module => ({ default: module.IconPhoto })));
+  const IconEyeCheck = lazy(() => import('@tabler/icons-react').then(module => ({ default: module.IconEyeCheck })));
+  const IconEyeOff = lazy(() => import('@tabler/icons-react').then(module => ({ default: module.IconEyeOff })));
+  
+  // Icon wrapper
+  const IconWrapper = ({ icon: Icon, ...props }) => (
+    <Suspense fallback={<span style={{ width: props.size, height: props.size }} />}>
+      <Icon {...props} />
+    </Suspense>
+  );
   
   // Mock data - sau này sẽ thay bằng API call
   const MOCK_DATA = [
@@ -110,7 +125,7 @@ import {
         <Group justify="space-between" mb="lg">
           <Title order={2}>Quản lý liệt sĩ</Title>
           <Button 
-            leftSection={<IconPlus size={14} />}
+            leftSection={<IconWrapper icon={IconPlus} size={14} />}
             onClick={() => navigate('new')}
           >
             Thêm liệt sĩ
@@ -120,7 +135,7 @@ import {
         <TextInput
           placeholder="Tìm kiếm theo tên hoặc quê quán..."
           mb="md"
-          leftSection={<IconSearch size={16} />}
+          leftSection={<IconWrapper icon={IconSearch} size={16} />}
           value={search}
           onChange={(e) => setSearch(e.currentTarget.value)}
         />
@@ -158,7 +173,7 @@ import {
                     />
                   ) : (
                     <Center>
-                      <IconPhoto size={20} color="gray" />
+                      <IconWrapper icon={IconPhoto} size={20} color="gray" />
                     </Center>
                   )}
                 </Table.Td>
@@ -185,26 +200,31 @@ import {
                   <Menu shadow="md" width={200}>
                     <Menu.Target>
                       <ActionIcon variant="subtle" color="gray">
-                        <IconDots size={16} />
+                        <IconWrapper icon={IconDots} size={16} />
                       </ActionIcon>
                     </Menu.Target>
   
                     <Menu.Dropdown>
                       <Menu.Item
-                        leftSection={<IconEdit size={14} />}
+                        leftSection={<IconWrapper icon={IconEdit} size={14} />}
                         onClick={() => navigate(`${martyr.id}`)}
                       >
                         Chỉnh sửa
                       </Menu.Item>
                       <Menu.Item
                         color="red"
-                        leftSection={<IconTrash size={14} />}
+                        leftSection={<IconWrapper icon={IconTrash} size={14} />}
                         onClick={() => handleDelete(martyr.id)}
                       >
                         Xóa
                       </Menu.Item>
                       <Menu.Item
-                        leftSection={martyr.hidden ? <IconEyeCheck size={14} /> : <IconEyeOff size={14} />}
+                        leftSection={
+                          <IconWrapper 
+                            icon={martyr.hidden ? IconEyeCheck : IconEyeOff} 
+                            size={14} 
+                          />
+                        }
                         onClick={() => {
                           setMartyrs(martyrs.map(m => 
                             m.id === martyr.id ? { ...m, hidden: !m.hidden } : m
@@ -331,7 +351,7 @@ import {
             label="Ảnh liệt sĩ"
             description="Chọn ảnh định dạng JPG, PNG (tối đa 2MB)"
             accept="image/png,image/jpeg"
-            leftSection={<IconPhoto size={16} />}
+            leftSection={<IconWrapper icon={IconPhoto} size={16} />}
             placeholder="Chọn ảnh..."
             value={image}
             onChange={(file) => {
