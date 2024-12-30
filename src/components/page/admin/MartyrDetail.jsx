@@ -16,10 +16,23 @@ import {
     Tooltip
   } from '@mantine/core';
   import { DateInput } from '@mantine/dates';
-  import { IconArrowLeft, IconPhoto, IconDeviceFloppy, IconTrash } from '@tabler/icons-react';
-  import { useState } from 'react';
+  import { lazy, Suspense } from 'react';
   import { useNavigate, useParams } from 'react-router-dom';
   import { notifications } from '@mantine/notifications';
+  import { useState } from 'react';
+  
+  // Lazy load icons
+  const IconArrowLeft = lazy(() => import('@tabler/icons-react').then(module => ({ default: module.IconArrowLeft })));
+  const IconPhoto = lazy(() => import('@tabler/icons-react').then(module => ({ default: module.IconPhoto })));
+  const IconDeviceFloppy = lazy(() => import('@tabler/icons-react').then(module => ({ default: module.IconDeviceFloppy })));
+  const IconTrash = lazy(() => import('@tabler/icons-react').then(module => ({ default: module.IconTrash })));
+  
+  // Icon wrapper
+  const IconWrapper = ({ icon: Icon, ...props }) => (
+    <Suspense fallback={<span style={{ width: props.size, height: props.size }} />}>
+      <Icon {...props} />
+    </Suspense>
+  );
   
   export default function MartyrDetail() {
     const { id } = useParams();
@@ -144,7 +157,7 @@ import {
                   variant="subtle" 
                   onClick={() => navigate('/admin/martyrs')}
                 >
-                  <IconArrowLeft />
+                  <IconWrapper icon={IconArrowLeft} />
                 </ActionIcon>
               </Tooltip>
               <Title order={2}>
@@ -155,7 +168,7 @@ import {
               <Button
                 variant="light"
                 color="red"
-                leftSection={<IconTrash size={16} />}
+                leftSection={<IconWrapper icon={IconTrash} size={16} />}
                 onClick={() => {
                   if (window.confirm('Bạn có chắc muốn xóa liệt sĩ này?')) {
                     // Xử lý xóa
@@ -169,7 +182,7 @@ import {
                 type="submit"
                 form="martyr-form"
                 loading={loading}
-                leftSection={<IconDeviceFloppy size={16} />}
+                leftSection={<IconWrapper icon={IconDeviceFloppy} size={16} />}
               >
                 Lưu thay đổi
               </Button>
@@ -199,14 +212,14 @@ import {
                     />
                   ) : (
                     <Center h={250} bg="gray.1" style={{ border: '1px dashed gray' }}>
-                      <IconPhoto size={32} color="gray" />
+                      <IconWrapper icon={IconPhoto} size={32} color="gray" />
                     </Center>
                   )}
                   <FileInput
                     label="Ảnh liệt sĩ"
                     description="Chọn ảnh JPG, PNG (tối đa 2MB)"
                     accept="image/png,image/jpeg"
-                    leftSection={<IconPhoto size={14} />}
+                    leftSection={<IconWrapper icon={IconPhoto} size={14} />}
                     placeholder="Chọn ảnh..."
                     value={image}
                     onChange={(file) => {

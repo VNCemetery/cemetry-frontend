@@ -1,27 +1,40 @@
 import { NavLink, Stack, Button } from '@mantine/core';
-import { IconDashboard, IconUsers, IconSettings, IconUserPlus } from '@tabler/icons-react';
+import { lazy, Suspense } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../../store/useAuthStore';
+
+// Lazy load các icons
+const IconDashboard = lazy(() => import('@tabler/icons-react').then(module => ({ default: module.IconDashboard })));
+const IconUsers = lazy(() => import('@tabler/icons-react').then(module => ({ default: module.IconUsers })));
+const IconSettings = lazy(() => import('@tabler/icons-react').then(module => ({ default: module.IconSettings })));
+const IconUserPlus = lazy(() => import('@tabler/icons-react').then(module => ({ default: module.IconUserPlus })));
+
+// Icon wrapper component
+const IconWrapper = ({ icon: Icon, ...props }) => (
+  <Suspense fallback={<span style={{ width: props.size, height: props.size }} />}>
+    <Icon {...props} />
+  </Suspense>
+);
 
 const menuItems = [
   {
     label: 'Tổng quan',
-    icon: IconDashboard,
+    icon: (props) => <IconWrapper icon={IconDashboard} {...props} />,
     path: '/admin/dashboard'
   },
   {
     label: 'Quản lý liệt sĩ',
-    icon: IconUsers,
+    icon: (props) => <IconWrapper icon={IconUsers} {...props} />,
     path: '/admin/martyrs'
   },
   {
     label: 'Người đóng góp',
-    icon: IconUserPlus,
+    icon: (props) => <IconWrapper icon={IconUserPlus} {...props} />,
     path: '/admin/contributors'
   },
   {
     label: 'Cài đặt',
-    icon: IconSettings,
+    icon: (props) => <IconWrapper icon={IconSettings} {...props} />,
     path: '/admin/settings'
   }
 ];
