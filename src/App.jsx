@@ -40,6 +40,21 @@ export default function App() {
   useEffect(() => {
     loadInfo();
   }, []);
+
+  useEffect(() => {
+    // Preload important icons
+    const importantIcons = [
+      'IconDashboard',
+      'IconUsers',
+      'IconSettings',
+      // ... các icons khác thường xuyên được sử dụng
+    ];
+
+    importantIcons.forEach(iconName => {
+      import(`@tabler/icons-react`).then(module => module[iconName]);
+    });
+  }, []);
+
   return (
     <MantineProvider>
       <Notifications />

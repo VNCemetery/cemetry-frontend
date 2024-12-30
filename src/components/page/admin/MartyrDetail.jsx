@@ -19,6 +19,7 @@ import {
   import { lazy, Suspense } from 'react';
   import { useNavigate, useParams } from 'react-router-dom';
   import { notifications } from '@mantine/notifications';
+  import { useState } from 'react';
   
   // Lazy load icons
   const IconArrowLeft = lazy(() => import('@tabler/icons-react').then(module => ({ default: module.IconArrowLeft })));

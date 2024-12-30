@@ -19,6 +19,8 @@ import {
   import { useDisclosure } from '@mantine/hooks';
   import { lazy, Suspense } from 'react';
   import { useNavigate } from 'react-router-dom';
+  import { useState } from 'react';
+  import { notifications } from '@mantine/notifications';
   
   // Lazy load icons
   const IconPlus = lazy(() => import('@tabler/icons-react').then(module => ({ default: module.IconPlus })));
