@@ -1,4 +1,5 @@
 import axios from "axios";
+import { useAuthStore } from "../store/useAuthStore";
 
 // Create an Axios instance
 const apiClient = axios.create({
@@ -10,46 +11,69 @@ const apiClient = axios.create({
 });
 
 export const createApiClient = (token = null, custom_path = "") => {
-  return axios.create({
-    baseURL: `${import.meta.env.VITE_APP_API_BASE_URL}/api/v1${custom_path}`, // Replace with your actual base URL
+  const instance = axios.create({
+    baseURL: `${import.meta.env.VITE_APP_API_BASE_URL}/api/v1${custom_path}`,
     headers: {
       "Content-Type": "application/json",
-
-      // If a token is passed, set the Authorization header
       ...(token && { Authorization: `Bearer ${token}` }),
     },
   });
+
+  // Add request interceptor to log requests
+  instance.interceptors.request.use(
+    (config) => {
+      const currentToken = useAuthStore.getState().accessToken;
+      if (currentToken) {
+        config.headers.Authorization = `Bearer ${currentToken}`;
+      }
+      console.log('API Request:', config);
+      return config;
+    },
+    (error) => {
+      return Promise.reject(error);
+    }
+  );
+
+  return instance;
 };
 
-// // Add a response interceptor
-// apiClient.interceptors.response.use(
-//   (response) => response,
-//   async (error) => {
-//     const originalRequest = error.config;
-//     const authStore = useAuthStore.getState();
-//     if (
-//       (error.response.status === 401 || error.response.status === 403) &&
-//       !originalRequest._retry
-//     ) {
-//       originalRequest._retry = true;
-//       alert("Token expired. Refreshing token...");
-//       try {
-//         const response = await axios.post(
-//           `${process.env.REACT_APP_API_BASE_URL}/token/refresh-token`,
-//           {},
-//           { withCredentials: true }
-//         );
-//         if (response.status === 200) {
-//           return apiClient(originalRequest);
-//         }
-//       } catch (refreshError) {
-//         authStore.logout();
-//       }
-//     }
-//     // Include response details in the thrown error
-//     return Promise.reject(error.response ? error.response.data : error);
-//   }
-// );
+// Add a response interceptor
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+    
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      
+      try {
+        const response = await axios.post(
+          `${import.meta.env.VITE_APP_API_BASE_URL}/api/v1/auth/refresh-token`,
+          {},
+          { 
+            withCredentials: true,
+            headers: {
+              'Authorization': `Bearer ${useAuthStore.getState().refreshToken}`
+            }
+          }
+        );
+        
+        if (response.status === 200) {
+          const { access_token } = response.data;
+          useAuthStore.getState().setAccessToken(access_token);
+          
+          originalRequest.headers['Authorization'] = `Bearer ${access_token}`;
+          return axios(originalRequest);
+        }
+      } catch (refreshError) {
+        useAuthStore.getState().logout();
+        return Promise.reject(refreshError);
+      }
+    }
+    
+    return Promise.reject(error);
+  }
+);
 
 // // Add this method to verify the token
 // export const verifyToken = (token) => {

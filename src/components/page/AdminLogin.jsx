@@ -9,33 +9,36 @@ import {
   Text,
   Box,
   BackgroundImage,
+  Group,
 } from '@mantine/core';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useForm } from '@mantine/form';
 
 export default function AdminLogin() {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const navigate = useNavigate();
-  const login = useAuthStore((state) => state.login);
+  const { login, isLoading, error } = useAuthStore();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+  const form = useForm({
+    initialValues: {
+      username: '',
+      password: '',
+    },
+    validate: {
+      username: (value) => (value.length < 1 ? 'Vui lòng nhập tên đăng nhập' : null),
+      password: (value) => (value.length < 1 ? 'Vui lòng nhập mật khẩu' : null),
+    },
+  });
 
+  const handleSubmit = async (values) => {
     try {
-      const formData = new FormData(e.target);
-      const username = formData.get('username');
-      const password = formData.get('password');
-
-      await login(username, password);
-      navigate('/admin');
+      console.log('Đang đăng nhập với:', values);
+      const response = await login(values.username, values.password);
+      console.log('Đăng nhập thành công:', response);
+      navigate('/admin/dashboard');
     } catch (error) {
-      setError('Tên đăng nhập hoặc mật khẩu không đúng');
-    } finally {
-      setLoading(false);
+      console.error('Đăng nhập thất bại:', error);
     }
   };
 
@@ -70,41 +73,38 @@ export default function AdminLogin() {
               </Text>
             </Box>
 
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={form.onSubmit(handleSubmit)}>
               <TextInput
                 label="Tên đăng nhập"
-                name="username"
-                placeholder="admin"
+                placeholder="Nhập tên đăng nhập"
                 required
-                mb="md"
-                size="md"
+                {...form.getInputProps('username')}
               />
               <PasswordInput
                 label="Mật khẩu"
-                name="password"
-                placeholder="Nhập mật khẩu của bạn"
+                placeholder="Nhập mật khẩu"
                 required
-                mb="md"
-                size="md"
+                mt="md"
+                {...form.getInputProps('password')}
               />
 
               {error && (
-                <Text c="red" size="sm" mb="sm">
+                <Text c="red" size="sm" mt="sm">
                   {error}
                 </Text>
               )}
 
+              <Group position="apart" mt="md">
+                <Link to="/admin/forgot-password" style={{ textDecoration: 'none' }}>
+                  <Text size="sm">Quên mật khẩu?</Text>
+                </Link>
+              </Group>
+
               <Button 
-                type="submit" 
                 fullWidth 
-                loading={loading}
-                size="md"
-                style={{
-                  backgroundColor: '#228be6',
-                  '&:hover': {
-                    backgroundColor: '#1c7ed6'
-                  }
-                }}
+                mt="xl" 
+                type="submit"
+                loading={isLoading}
               >
                 Đăng nhập
               </Button>
