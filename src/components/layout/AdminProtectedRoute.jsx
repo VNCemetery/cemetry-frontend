@@ -1,13 +1,17 @@
-import { Navigate, useLocation } from "react-router-dom";
-import { useAuthStore } from "../../store/useAuthStore";
+import { Navigate } from 'react-router-dom';
+import { useAuthStore } from '../../store/useAuthStore';
 
-export default function AdminProtectedRoute({ children }) {
-  const token = useAuthStore((state) => state.token);
-  const location = useLocation();
+const AdminProtectedRoute = ({ children }) => {
+  const { isAuthenticated, accessToken } = useAuthStore();
   
-  if (!token) {
-    return <Navigate to="/admin/login" state={{ from: location }} replace />;
+  console.log('Protected Route State:', { isAuthenticated, accessToken }); // Debug log
+
+  if (!isAuthenticated || !accessToken) {
+    console.log('Chuyển hướng đến trang login vì chưa xác thực'); // Debug log
+    return <Navigate to="/admin/login" replace />;
   }
 
   return children;
-}
+};
+
+export default AdminProtectedRoute;
