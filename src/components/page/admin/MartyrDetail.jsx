@@ -16,10 +16,10 @@ import {
     Tooltip
   } from '@mantine/core';
   import { DateInput } from '@mantine/dates';
-  import { lazy, Suspense } from 'react';
+  import { lazy, Suspense, useEffect, useState } from 'react';
   import { useNavigate, useParams } from 'react-router-dom';
   import { notifications } from '@mantine/notifications';
-  import { useState } from 'react';
+  import { getMartyrById, updateMartyr } from '../../../services/martyrManagementService';
   
   // Lazy load icons
   const IconArrowLeft = lazy(() => import('@tabler/icons-react').then(module => ({ default: module.IconArrowLeft })));
@@ -38,38 +38,34 @@ import {
     const { id } = useParams();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
-    
-    // Giả lập lấy data từ API
-    const [martyr, setMartyr] = useState(() => {
-      // Tìm liệt sĩ theo id từ MOCK_DATA
-      return {
-        id: "LS001",
-        createdAt: "2024-02-20T10:00:00",
-        updatedAt: "2024-02-20T10:00:00",
-        codeName: "LS_A123",
-        commune: "Xã A",
-        dateOfDeath: "1968-02-20",
-        district: "Huyện X",
-        fullName: "Nguyễn Văn A",   
-        hometown: "An Giang",
-        name: "Văn A",
-        placeOfExhumation: "Địa điểm A",
-        rankPositionUnit: "Chiến sĩ",
-        rhyme: "Nguyễn",
-        yearOfBirth: 1940,
-        yearOfEnlistment: 1965,
-        deleted: false,
-        hidden: false,
-        graveRow: "A12",
-        image: null,
-      };
-    });
-  
-    const [dateOfDeath, setDateOfDeath] = useState(
-      martyr?.dateOfDeath ? new Date(martyr.dateOfDeath) : null
-    );
-    const [image, setImage] = useState(martyr?.image || null);
+    const [martyr, setMartyr] = useState(null);
+    const [dateOfDeath, setDateOfDeath] = useState(null);
+    const [image, setImage] = useState(null);
     const [error, setError] = useState(null);
+  
+    // Load data khi component mount
+    useEffect(() => {
+      const loadMartyr = async () => {
+        if (!id) return;
+        try {
+          setLoading(true);
+          const data = await getMartyrById(id);
+          setMartyr(data);
+          setDateOfDeath(data.dateOfDeath ? new Date(data.dateOfDeath) : null);
+          setImage(data.image);
+        } catch (error) {
+          notifications.show({
+            title: 'Lỗi',
+            message: 'Không thể tải thông tin liệt sĩ',
+            color: 'red'
+          });
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      loadMartyr();
+    }, [id]);
   
     const handleSubmit = async (e) => {
       e.preventDefault();
@@ -79,67 +75,73 @@ import {
       try {
         const formData = new FormData(e.target);
         
-        // Validate năm
-        const yearOfBirth = parseInt(formData.get('yearOfBirth'));
-        const yearOfEnlistment = parseInt(formData.get('yearOfEnlistment'));
+        // Validate các trường bắt buộc
+        const requiredFields = ['codeName', 'fullName'];
+        const missingFields = requiredFields.filter(field => !formData.get(field));
         
-        if (yearOfEnlistment < yearOfBirth) {
+        if (missingFields.length > 0) {
+          setError('Vui lòng điền đầy đủ các trường bắt buộc');
+          setLoading(false);
+          return;
+        }
+  
+        // Validate năm nếu có nhập
+        const yearOfBirth = formData.get('yearOfBirth') ? parseInt(formData.get('yearOfBirth')) : null;
+        const yearOfEnlistment = formData.get('yearOfEnlistment') ? parseInt(formData.get('yearOfEnlistment')) : null;
+        
+        if (yearOfBirth && yearOfEnlistment && yearOfEnlistment < yearOfBirth) {
           setError('Năm nhập ngũ không thể nhỏ hơn năm sinh');
+          setLoading(false);
           return;
         }
   
-        if (!dateOfDeath) {
-          setError('Vui lòng chọn ngày hy sinh');
-          return;
-        }
-  
-        const deathYear = dateOfDeath.getFullYear();
-        if (deathYear < yearOfEnlistment) {
+        if (dateOfDeath && yearOfEnlistment && dateOfDeath.getFullYear() < yearOfEnlistment) {
           setError('Ngày hy sinh không thể trước năm nhập ngũ');
+          setLoading(false);
           return;
         }
   
-        // Validate image size (2MB)
-        if (image && image.size > 2 * 1024 * 1024) {
-          setError('Kích thước ảnh không được vượt quá 2MB');
-          return;
-        }
-  
-        // Tạo object data mới
-        const updatedMartyr = {
-          ...martyr,
-          codeName: formData.get('codeName'),
-          commune: formData.get('commune'),
-          dateOfDeath: dateOfDeath?.toISOString().split('T')[0],
-          district: formData.get('district'),
-          fullName: formData.get('fullName'),
-          hometown: formData.get('hometown'),
-          name: formData.get('name'),
-          placeOfExhumation: formData.get('placeOfExhumation'),
-          rankPositionUnit: formData.get('rankPositionUnit'),
-          rhyme: formData.get('rhyme'),
+        // Tạo object data
+        const data = {
+          codeName: formData.get('codeName'), // Bắt buộc
+          fullName: formData.get('fullName'), // Bắt buộc
+          name: formData.get('name') || null,
+          rhyme: formData.get('rhyme') || null,
           yearOfBirth: yearOfBirth,
           yearOfEnlistment: yearOfEnlistment,
-          graveRow: formData.get('graveRow'),
-          image: image,
-          updatedAt: new Date().toISOString()
+          dateOfDeath: dateOfDeath,
+          rankPositionUnit: formData.get('rankPositionUnit') || null,
+          hometown: formData.get('hometown') || null,
+          commune: formData.get('commune') || null,
+          district: formData.get('district') || null,
+          placeOfExhumation: formData.get('placeOfExhumation') || null,
+          graveRow: formData.get('graveRow') || null,
         };
   
-        // Call API update
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Mock API call
-        setMartyr(updatedMartyr);
+        // Chỉ thêm id nếu đang trong chế độ edit
+        if (id) {
+          data.id = id;
+        }
+  
+        // Thêm ảnh nếu có
+        if (image instanceof File) {
+          data.image = image;
+        }
+  
+        await updateMartyr(id, data);
         
         notifications.show({
           title: 'Thành công',
-          message: 'Đã cập nhật thông tin liệt sĩ',
+          message: id ? 'Đã cập nhật thông tin liệt sĩ' : 'Đã thêm liệt sĩ mới',
           color: 'green'
         });
   
-      } catch (err) {
-        setError('Có lỗi xảy ra, vui lòng thử lại');
+        navigate('/admin/martyrs');
+      } catch (error) {
+        console.error('Error:', error); // Thêm log để debug
         notifications.show({
           title: 'Lỗi',
-          message: 'Không thể cập nhật thông tin',
+          message: error.response?.data?.message || 'Có lỗi xảy ra. Vui lòng thử lại.',
           color: 'red'
         });
       } finally {
@@ -239,39 +241,36 @@ import {
                 {/* Cột phải - Form thông tin */}
                 <Stack style={{ flex: 1 }}>
                   <TextInput
-                    label="Mã liệt sĩ"
+                    label="Mã liệt sĩ *"
                     name="codeName"
                     required
                     defaultValue={martyr?.codeName}
                   />
                   
-                  <Group grow>
-                    <TextInput
-                      label="Họ và tên đệm"
-                      name="rhyme"
-                      required
-                      defaultValue={martyr?.rhyme}
-                    />
-                    <TextInput
-                      label="Tên"
-                      name="name"
-                      required
-                      defaultValue={martyr?.name}
-                    />
-                  </Group>
-                  
                   <TextInput
-                    label="Họ và tên đầy đủ"
+                    label="Họ và tên đầy đủ *"
                     name="fullName"
                     required
                     defaultValue={martyr?.fullName}
                   />
                   
                   <Group grow>
+                    <TextInput
+                      label="Họ và tên đệm"
+                      name="rhyme"
+                      defaultValue={martyr?.rhyme}
+                    />
+                    <TextInput
+                      label="Tên"
+                      name="name"
+                      defaultValue={martyr?.name}
+                    />
+                  </Group>
+                  
+                  <Group grow>
                     <NumberInput
                       label="Năm sinh"
                       name="yearOfBirth"
-                      required
                       defaultValue={martyr?.yearOfBirth}
                       min={1900}
                       max={2000}
@@ -279,7 +278,6 @@ import {
                     <NumberInput
                       label="Năm nhập ngũ"
                       name="yearOfEnlistment"
-                      required
                       defaultValue={martyr?.yearOfEnlistment}
                       min={1900}
                       max={2000}
@@ -290,7 +288,6 @@ import {
                     label="Ngày hy sinh"
                     value={dateOfDeath}
                     onChange={setDateOfDeath}
-                    required
                     locale="vi"
                     maxDate={new Date()}
                     valueFormat="DD/MM/YYYY"
@@ -299,7 +296,6 @@ import {
                   <TextInput
                     label="Cấp bậc/Chức vụ/Đơn vị"
                     name="rankPositionUnit"
-                    required
                     defaultValue={martyr?.rankPositionUnit}
                   />
                   
@@ -307,19 +303,16 @@ import {
                     <TextInput
                       label="Quê quán"
                       name="hometown"
-                      required
                       defaultValue={martyr?.hometown}
                     />
                     <TextInput
                       label="Xã/Phường"
                       name="commune"
-                      required
                       defaultValue={martyr?.commune}
                     />
                     <TextInput
                       label="Quận/Huyện"
                       name="district"
-                      required
                       defaultValue={martyr?.district}
                     />
                   </Group>
@@ -327,14 +320,12 @@ import {
                   <TextInput
                     label="Nơi quy tập"
                     name="placeOfExhumation"
-                    required
                     defaultValue={martyr?.placeOfExhumation}
                   />
                   
                   <TextInput
                     label="Hàng mộ"
                     name="graveRow"
-                    required
                     defaultValue={martyr?.graveRow}
                   />
                 </Stack>
