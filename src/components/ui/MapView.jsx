@@ -58,7 +58,7 @@ export default function NewsPage() {
   return (
     <>
       <button
-        className="bg-red-200 z-[10000] absolute hidden"
+        className="bg-red-200 z-[0] absolute hidden"
         onClick={async () => {
           // Paris [lng, lat]
           const start = [105.644921898426, 10.46170169];
@@ -230,7 +230,7 @@ export default function NewsPage() {
       >
         New marker
       </button>
-      <div ref={mapContainer} className="absolute w-full h-screen" />
+      <div ref={mapContainer} className="absolute z-[0] w-full h-screen" />
     </>
   );
 }

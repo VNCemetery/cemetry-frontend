@@ -15,16 +15,19 @@ import {
   BiArrowFromRight,
   BiArrowToRight,
   BiDirections,
+  BiInfoCircle,
   BiLineChartDown,
 } from "react-icons/bi";
 import { useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
+import { BsArrowRight } from "react-icons/bs";
 
-export default function UserInfoIcons({ item }) {
-  const [opened, { close, open }] = useDisclosure(false);
-
+export default function UserInfoIcons({ item, selectItem }) {
   return (
-    <div className="mb-2 w-full mt-2 border-[1px] rounded-xl p-1">
+    <div
+      onClick={selectItem}
+      className="hover:bg-gray-100 cursor-pointer hover:border-blue-400 mb-2 w-full mt-2 border-[1px] rounded-xl p-1"
+    >
       <Group wrap="wrap">
         <Flex gap={1} align={"center"} direction={"column"} className="w-full">
           <div className="flex justify-between gap-2 w-full p-2">
@@ -41,20 +44,11 @@ export default function UserInfoIcons({ item }) {
               <Text fw={400} size="md" lineClamp={1}>
                 {item.rankPositionUnit}
               </Text>
-            </div>
-            <div className="flex justify-end items-center">
-              <ActionIcon
-                variant="filled"
-                color="yellow"
-                radius={"xl"}
-                aria-label="Settings"
-                size="xl"
-              >
-                <BiDirections
-                  style={{ width: "70%", height: "70%" }}
-                  stroke={1.5}
-                />
-              </ActionIcon>
+              {item.homeTown && (
+                <Text fw={400} size="md" lineClamp={1}>
+                  Quê quán: {item.homeTown}
+                </Text>
+              )}
             </div>
           </div>
           <div className="flex justify-start p-2 w-full gap-2 items-center ">

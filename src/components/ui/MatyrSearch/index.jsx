@@ -1,8 +1,10 @@
 import FloatingSelector from "../FloatingSelector";
+import MartyrDetail from "./MartyrDetail";
 import {
   DEFAULT_AUTO_SUGGEST_SIZE,
   DEFAULT_SEARCH_SIZE,
 } from "../../../utils/constants";
+import { flattenObject } from "../../../utils/objectUtil";
 import { SelectDropdownSearch } from "../SelectDropdownSearch";
 import {
   ActionIcon,
@@ -11,6 +13,7 @@ import {
   Badge,
   Card,
   CloseIcon,
+  Drawer,
   Flex,
   Group,
   Image,
@@ -24,22 +27,35 @@ import {
   Skeleton,
   Tabs,
   Text,
+  TextInput,
+  Popover,
+  Stack,
+  Button,
 } from "@mantine/core";
 import VIETNAM_LOGO from "../../../assets/VIETNAM_FLAG_LOGO.png";
-import { BiMicrophone, BiSearch } from "react-icons/bi";
+import {
+  BiMicrophone,
+  BiSearch,
+  BiDotsVerticalRounded,
+  BiSolidInfoCircle,
+} from "react-icons/bi";
+import { MdDirections, MdShare } from "react-icons/md";
 import { useEffect, useRef, useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
-import { Button } from "@mantine/core";
 import { FaMagic } from "react-icons/fa";
 import { BsArrowLeft, BsQuestion } from "react-icons/bs";
+import { HiOutlineDotsCircleHorizontal } from "react-icons/hi";
 
 import { getMatyrs } from "../../../services/martyrManagementService";
 import { HiAdjustments, HiCheck } from "react-icons/hi";
 import SearchResultEntry from "./SearchResultEntry";
 import { useInfoStore } from "../../../store/useInfoStore";
 import { useMatyrStore } from "../../../store/useMatyrStore";
+import { useForm } from "@mantine/form";
+import { buildFilterFormQuery } from "../../../utils/queryBuilder";
+import { FiMoreHorizontal } from "react-icons/fi";
 
-const MatyrSearch = () => {
+const MatyrSearch = ({}) => {
   const headerWrapperRef = useRef(null);
   const searchInputRef = useRef(null);
 
@@ -67,6 +83,7 @@ const MatyrSearch = () => {
     name = "",
     page = 0,
     size = DEFAULT_SEARCH_SIZE,
+    filters = [],
   }) => {
     try {
       // Hide auto suggestions
@@ -75,7 +92,8 @@ const MatyrSearch = () => {
       setIsLoadingSearchResults(true);
       // Clear search results
       setSearchResults(null);
-      const results = await loadMatyrs(name, page, size);
+      alert("GIVE: " + JSON.stringify(filters));
+      const results = await loadMatyrs(name, page, size, filters);
       // If content is null
 
       if (!results) {
@@ -104,6 +122,11 @@ const MatyrSearch = () => {
     { open: openFilterSetting, close: closeFilterSetting },
   ] = useDisclosure(false);
 
+  const [
+    showMartyrDetail,
+    { open: openMartyrDetail, close: closeMartyrDetail },
+  ] = useDisclosure(false);
+
   const [autoSuggestions, setAutoSuggestions] = useState([]);
   const [isLoadingAutoSuggestions, setIsLoadingAutoSuggestions] =
     useState(false);
@@ -129,6 +152,8 @@ const MatyrSearch = () => {
     }
   };
 
+  const [activeTab, setActiveTab] = useState("info");
+
   useEffect(() => {
     if (searchKey.length > 0) {
       handleAutoSuggest(searchKey);
@@ -139,16 +164,37 @@ const MatyrSearch = () => {
 
   // Filters
   const [filters, setFilters] = useState({
-    area: "",
-    row: "",
+    graveRow: {
+      areaName: "",
+      rowName: "",
+    },
   });
 
-  const rowInputRef = useRef(null);
+  const { selectedMartyr, selectMartyr } = useMatyrStore();
+
+  const filterForm = useForm({
+    mode: "uncontrolled",
+  });
+
+  // Add closePopover to useDisclosure hooks
+  const [popoverOpened, { close: closePopover, open: openPopover }] =
+    useDisclosure();
 
   return (
     <>
       <div className="">
         {" "}
+        <Modal
+          offset={8}
+          radius="md"
+          fullScreen={true}
+          opened={showMartyrDetail}
+          onClose={closeMartyrDetail}
+          title="Thông tin liệt sĩ"
+        >
+          <MartyrDetail martyr={selectedMartyr} />
+          {/* Drawer content */}
+        </Modal>{" "}
         <Modal
           style={{
             zIndex: 99999999,
@@ -161,129 +207,219 @@ const MatyrSearch = () => {
           Tôi vẫn đang nghe
           {/* Modal content */}
         </Modal>
-        <div className="z-[4]">
+        <div className="z-[4] ">
           <div
             ref={headerWrapperRef}
-            className={`fixed top-0 left-0 ${
+            className={`fixed top-0  left-0 ${
               !opened ? "transparent" : "bg-white"
             } right-0 z-[4]`}
           >
-            <div
-              className="
-            items-center
-           flex gap-1 bg-white rounded-full m-2 "
-            >
-              <div className="flex items-center w-full text-gray-600   w-full p-1 gap-1">
-                {!opened ? (
-                  <ActionIcon
-                    variant="transparent"
-                    color="gray"
-                    aria-label="Settings"
-                    onClick={() => {
-                      open();
-                      // Change focus to input
-                      searchInputRef.current.focus();
-                    }}
-                  >
-                    <BiSearch
-                      style={{ width: "70%", height: "70%" }}
-                      stroke={1.5}
-                    />
-                  </ActionIcon>
-                ) : (
-                  <ActionIcon
-                    variant="transparent"
-                    color="blue"
-                    aria-label="Settings"
-                    onClick={() => {
-                      // Check if auto suggestions is shown
-                      if (showAutoSuggestions) {
-                        setShowAutoSuggestions(false);
-                        return;
-                      }
-                      close();
-
-                      close_record_modal();
-
-                      // stop focus to input
-                      searchInputRef.current.blur();
-                    }}
-                  >
-                    <BsArrowLeft
-                      style={{ width: "70%", height: "70%" }}
-                      stroke={1.5}
-                    />
-                  </ActionIcon>
-                )}
-                <Input
-                  ref={searchInputRef}
+            {selectedMartyr ? (
+              <div className="flex items-center bg-white rounded-full m-2 p-2">
+                <ActionIcon
+                  variant="transparent"
+                  color="blue"
                   onClick={() => {
-                    if (!opened) {
-                      open();
-                      // Change focus to input
-                      searchInputRef.current.focus();
-                    }
+                    selectMartyr(null);
+                    setSearchKey("");
                   }}
-                  value={searchKey}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      alert("Tìm kiếm");
-                    }
-                  }}
-                  rightSectionPointerEvents="all"
-                  onChange={(e) => {
-                    setSearchKey(e.target.value);
-                  }}
-                  radius="xl"
-                  style={{
-                    border: "none",
-                    outline: "none",
-                    boxShadow: "none",
-                  }}
-                  className="w-full  border-none"
-                  placeholder="Nhập tên liệt sĩ"
-                  rightSection={
-                    searchKey.length > 0 ? (
-                      <CloseIcon
-                        aria-label="Clear input"
-                        className="mr-2"
+                >
+                  <BsArrowLeft
+                    style={{ width: "70%", height: "70%" }}
+                    stroke={1.5}
+                  />
+                </ActionIcon>
+                <div className="flex-1 ml-2">
+                  <Text fw={500}>
+                    <span className="text-gray-400">Liệt sĩ </span>
+                    {selectedMartyr.fullName}
+                  </Text>
+                  <Text c="dimmed" fz="xs">
+                    {selectedMartyr.homeTown || "Chưa có thông tin quê quán"}
+                  </Text>
+                </div>
+                <Popover
+                  position="bottom-end"
+                  shadow="md"
+                  opened={popoverOpened}
+                  onChange={closePopover}
+                >
+                  <Popover.Target>
+                    <ActionIcon
+                      variant="filled"
+                      color="blue"
+                      radius="xl"
+                      size="lg"
+                      className="hover:scale-110 transition-transform"
+                      onClick={openPopover}
+                    >
+                      <FiMoreHorizontal size={24} className="text-white" />
+                    </ActionIcon>
+                  </Popover.Target>
+                  <Popover.Dropdown>
+                    <Stack gap="xs">
+                      <Text size="sm" fw={500} c="dimmed">
+                        Tùy chọn
+                      </Text>
+                      <Button
+                        variant="filled"
+                        color="blue"
+                        fullWidth
+                        leftSection={<BiSolidInfoCircle size={16} />}
                         onClick={() => {
-                          setSearchKey("");
-                          searchInputRef.current.focus();
-                        }}
-                        style={{ display: searchKey ? undefined : "none" }}
-                      />
-                    ) : (
-                      <ActionIcon
-                        variant="transparent"
-                        color="gray"
-                        aria-label="Settings"
-                        onClick={() => {
-                          // Clear search input
-
-                          open();
-
-                          // Change focus to input
-                          searchInputRef.current.focus();
-
-                          // Open record modal
-                          open_record_modal();
-
-                          // Focus again
+                          openMartyrDetail();
+                          closePopover();
                         }}
                       >
-                        <BiMicrophone
-                          style={{ width: "70%", height: "70%" }}
-                          stroke={1.5}
-                        />
-                      </ActionIcon>
-                    )
-                  }
-                />
+                        Xem chi tiết
+                      </Button>
+                      <Button
+                        variant="filled"
+                        color="green"
+                        fullWidth
+                        leftSection={<MdDirections size={16} />}
+                        onClick={() => {
+                          alert(
+                            "Chỉ đường đến mộ liệt sĩ " +
+                              selectedMartyr.fullName
+                          );
+                          closePopover();
+                        }}
+                      >
+                        Chỉ đường đến mộ
+                      </Button>
+                      <Text size="sm" fw={500} c="dimmed">
+                        Thao tác khác
+                      </Text>
+                      <Button
+                        variant="light"
+                        color="gray"
+                        fullWidth
+                        leftSection={<MdShare size={16} />}
+                        onClick={() => {
+                          closePopover();
+                        }}
+                      >
+                        Chia sẻ thông tin
+                      </Button>
+                    </Stack>
+                  </Popover.Dropdown>
+                </Popover>
               </div>
-            </div>
+            ) : (
+              <div className="items-center flex gap-1 bg-white rounded-full m-2">
+                <div className="flex items-center w-full text-gray-600   w-full p-1 gap-1">
+                  {!opened ? (
+                    <ActionIcon
+                      variant="transparent"
+                      color="gray"
+                      aria-label="Settings"
+                      onClick={() => {
+                        open();
+                        // Change focus to input
+                        searchInputRef.current.focus();
+                      }}
+                    >
+                      <BiSearch
+                        style={{ width: "70%", height: "70%" }}
+                        stroke={1.5}
+                      />
+                    </ActionIcon>
+                  ) : (
+                    <ActionIcon
+                      variant="transparent"
+                      color="blue"
+                      aria-label="Settings"
+                      onClick={() => {
+                        // Check if auto suggestions is shown
+                        if (showAutoSuggestions) {
+                          setShowAutoSuggestions(false);
+                          return;
+                        }
+                        close();
+
+                        close_record_modal();
+
+                        // stop focus to input
+                        searchInputRef.current.blur();
+                      }}
+                    >
+                      <BsArrowLeft
+                        style={{ width: "70%", height: "70%" }}
+                        stroke={1.5}
+                      />
+                    </ActionIcon>
+                  )}
+                  <Input
+                    ref={searchInputRef}
+                    onClick={() => {
+                      if (!opened) {
+                        open();
+                        // Change focus to input
+                        searchInputRef.current.focus();
+                      }
+                    }}
+                    value={searchKey}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        alert("Tìm kiếm");
+                      }
+                    }}
+                    rightSectionPointerEvents="all"
+                    onChange={(e) => {
+                      setSearchKey(e.target.value);
+                    }}
+                    radius="xl"
+                    style={{
+                      border: "none",
+                      outline: "none",
+                      boxShadow: "none",
+                    }}
+                    className="w-full  border-none"
+                    placeholder="Nhập tên liệt sĩ"
+                    rightSection={
+                      searchKey.length > 0 ? (
+                        <CloseIcon
+                          aria-label="Clear input"
+                          className="mr-2"
+                          onClick={() => {
+                            setSearchKey("");
+                            searchInputRef.current.focus();
+                          }}
+                          style={{ display: searchKey ? undefined : "none" }}
+                        />
+                      ) : (
+                        <ActionIcon
+                          variant="transparent"
+                          color="gray"
+                          aria-label="Settings"
+                          onClick={() => {
+                            // Clear search input
+
+                            open();
+
+                            // Change focus to input
+                            searchInputRef.current.focus();
+
+                            // Open record modal
+                            open_record_modal();
+
+                            // Focus again
+                          }}
+                        >
+                          <BiMicrophone
+                            style={{ width: "70%", height: "70%" }}
+                            stroke={1.5}
+                          />
+                        </ActionIcon>
+                      )
+                    }
+                  />
+                </div>
+              </div>
+            )}
           </div>
-        </div>{" "}
+        </div>
       </div>
       {opened && (
         <div className="bg-white h-screen  z-[3] absolute top-0 w-full">
@@ -299,7 +435,6 @@ const MatyrSearch = () => {
             <div className="h-full bg-white">
               <div className="px-2 flex flex-col  gap-2">
                 {/* Search recommendations */}
-                {/* Search recommendations */}
                 {showAutoSuggestions && (
                   <div className="overflow-auto fixed bg-white h-screen pb-24  fixed z-[9999] w-full">
                     <div
@@ -308,6 +443,13 @@ const MatyrSearch = () => {
                         // Clear cache
                         clearMartrys();
                         setCurrentPage(1);
+
+                        filterForm.initialize({
+                          fullName: searchKey,
+                          yearOfBirth: "",
+                          dateOfDeath: "",
+                          homeTown: "",
+                        });
                         handleSearch({ name: searchKey });
                       }}
                     >
@@ -384,92 +526,156 @@ const MatyrSearch = () => {
                   radius={0}
                   transitionProps={{ transition: "fade", duration: 200 }}
                 >
-                  <div className="min-h-[80vh] overflow-auto">
-                    <Tabs defaultValue="info">
-                      <Tabs.List>
-                        <Tabs.Tab value="info">Thông tin</Tabs.Tab>
-                        <Tabs.Tab value="position">Vị trí</Tabs.Tab>
-                      </Tabs.List>
+                  <form
+                    onSubmit={filterForm.onSubmit((values) => {
+                      // transform values with filters
+                      let flattenFilters = flattenObject(filters);
+                      const queryData = {
+                        ...values,
+                        ...flattenFilters,
+                      };
 
-                      <Tabs.Panel value="info">
-                        <div className="flex flex-col gap-2 py-2">
-                          <Text>Họ và tên</Text>
-                          <Input
-                            radius={"lg"}
-                            placeholder="Nguyễn Văn A"
-                            defaultValue={searchKey}
-                          />
-                        </div>
-                        <div className="flex flex-col gap-2 py-2">
-                          <Text>Năm sinh - năm mất</Text>
-                          <Flex gap={4}>
-                            <NumberInput
-                              min={1800}
-                              max={2024}
-                              radius="lg"
-                              placeholder="Năm sinh"
-                            />
-                            <NumberInput
-                              min={1800}
-                              max={2024}
-                              radius="lg"
-                              placeholder="Năm mất "
-                            />
-                          </Flex>
-                        </div>
-                        <div className="flex flex-col gap-2 py-2">
-                          <Text>Quê quán</Text>
-                          <Input radius={"lg"} placeholder="Ví dụ: Đồng Tháp" />
-                        </div>
-                      </Tabs.Panel>
-                      <Tabs.Panel value="position">
-                        <div className="flex flex-col gap-2 py-2">
-                          <Text>Khu</Text>
-                          <SelectDropdownSearch
-                            placeholder="Tìm khu"
-                            description="Chọn khu"
-                            value={filters.area}
-                            setValue={(value) => {
-                              setFilters({ ...filters, area: value, row: "" });
-                            }}
-                            data={grave_rows ? Object.keys(grave_rows) : []}
-                          />
-                        </div>{" "}
-                        <div className="flex flex-col gap-2 py-2">
-                          <Text>Hàng</Text>
-                          <SelectDropdownSearch
-                            description={"Chọn hàng"}
-                            placeholder="Tìm hàng"
-                            setValue={(value) => {
-                              setFilters({ ...filters, row: value });
-                            }}
-                            data={
-                              grave_rows && grave_rows[filters.area]
-                                ? grave_rows[filters.area].map(
-                                    (item) => item.rowName
-                                  )
-                                : []
-                            }
-                            value={filters.row}
-                          />
-                        </div>{" "}
-                      </Tabs.Panel>
-                    </Tabs>
-                  </div>
+                      // Build API query
+                      const filters_query = buildFilterFormQuery(queryData);
+                      alert("FILTERS: " + JSON.stringify(filters_query));
+                      // Clear cache
+                      clearMartrys();
+                      setCurrentPage(1);
+                      handleSearch({
+                        name: searchKey,
+                        page: 0,
+                        size: DEFAULT_SEARCH_SIZE,
+                        filters: filters_query,
+                      });
+                      closeFilterSetting();
+                    })}
+                  >
+                    <div className="min-h-[80vh] overflow-auto">
+                      <Tabs value={activeTab} onChange={setActiveTab}>
+                        <Tabs.List>
+                          <Tabs.Tab value="info">Thông tin</Tabs.Tab>
+                          <Tabs.Tab value="position">Vị trí</Tabs.Tab>
+                        </Tabs.List>
 
-                  <div className="border-b-0 border-l-0 border-r-0 border-[1px] flex gap-2 justify-end px-4 absolute bottom-0  py-4 z-[999] w-full left-0">
-                    <Button
-                      variant="light"
-                      size="md"
-                      radius={"xl"}
-                      fullWidth={true}
-                    >
-                      Xóa
-                    </Button>
-                    <Button size="md" radius={"xl"} fullWidth={true}>
-                      Áp dụng
-                    </Button>
-                  </div>
+                        <Tabs.Panel value="info">
+                          <div className="flex flex-col gap-2 py-2">
+                            <Text>Năm sinh - năm mất</Text>
+                            <Flex gap={4}>
+                              <NumberInput
+                                key={filterForm.key("yearOfBirth")}
+                                {...filterForm.getInputProps("yearOfBirth")}
+                                min={1800}
+                                max={2024}
+                                radius="lg"
+                                placeholder="Năm sinh"
+                              />
+                              <NumberInput
+                                min={1800}
+                                max={2024}
+                                key={filterForm.key("dateOfDeath")}
+                                {...filterForm.getInputProps("dateOfDeath")}
+                                radius="lg"
+                                placeholder="Năm mất "
+                              />
+                            </Flex>
+                          </div>
+                          <div className="flex flex-col gap-2 py-2">
+                            <Text>Quê quán</Text>
+                            <Input
+                              radius={"lg"}
+                              key={filterForm.key("homeTown")}
+                              {...filterForm.getInputProps("homeTown")}
+                              placeholder="Ví dụ: Đồng Tháp"
+                            />
+                          </div>
+                        </Tabs.Panel>
+                        <Tabs.Panel value="position">
+                          <div className="flex flex-col gap-2 py-2">
+                            <Text>Khu</Text>
+                            <SelectDropdownSearch
+                              placeholder="Tìm khu"
+                              description="Chọn khu"
+                              value={filters.graveRow.areaName}
+                              setValue={(value) => {
+                                setFilters({
+                                  ...filters,
+                                  graveRow: {
+                                    areaName: value,
+                                    rowName: "",
+                                  },
+                                });
+                              }}
+                              data={grave_rows ? Object.keys(grave_rows) : []}
+                            />
+                          </div>{" "}
+                          <div className="flex flex-col gap-2 py-2">
+                            <Text>Hàng</Text>
+                            <SelectDropdownSearch
+                              description={"Chọn hàng"}
+                              placeholder="Tìm hàng"
+                              setValue={(value) => {
+                                setFilters({
+                                  ...filters,
+                                  graveRow: {
+                                    ...filters.graveRow,
+                                    rowName: value,
+                                  },
+                                });
+                              }}
+                              data={
+                                grave_rows &&
+                                grave_rows[filters.graveRow.areaName]
+                                  ? grave_rows[filters.graveRow.areaName].map(
+                                      (item) => item.rowName
+                                    )
+                                  : []
+                              }
+                              value={filters.graveRow.rowName}
+                            />
+                          </div>{" "}
+                        </Tabs.Panel>
+                      </Tabs>
+                    </div>
+
+                    <div className="border-b-0 border-l-0 border-r-0 border-[1px] flex gap-2 justify-end px-4 absolute bottom-0  py-4 z-[999] w-full left-0">
+                      <Button
+                        onClick={() => {
+                          // Reset filterForm
+                          filterForm.reset();
+                          // Clear cache
+                          clearMartrys();
+                          setCurrentPage(1);
+                          handleSearch({
+                            name: searchKey,
+                            page: 0,
+                            size: DEFAULT_SEARCH_SIZE,
+                          });
+
+                          // Reset local filters
+                          setFilters({
+                            graveRow: {
+                              areaName: "",
+                              rowName: "",
+                            },
+                          });
+                        }}
+                        variant="light"
+                        size="md"
+                        radius={"xl"}
+                        fullWidth={true}
+                      >
+                        Xóa
+                      </Button>
+                      <Button
+                        size="md"
+                        type="submit"
+                        radius={"xl"}
+                        fullWidth={true}
+                      >
+                        Áp dụng
+                      </Button>
+                    </div>
+                  </form>
                 </Modal>
                 <div className="bg-white  bg-red-400">
                   {/* {searchSession} */}
@@ -485,47 +691,29 @@ const MatyrSearch = () => {
                     ) : (
                       <>
                         {/* Filters */}
+                        <div class="flex flex-row gap-4 overflow-y-auto pb-2">
+                          <div>
+                            <Button
+                              onClick={() => {
+                                setActiveTab("info");
+                                openFilterSetting();
+                              }}
+                              radius={"xl"}
+                              variant="filled"
+                            >
+                              <Flex gap={2} justify={"center"} align={"center"}>
+                                <Text c="white">Bộ lọc</Text>
+                                <Text c="white">
+                                  <HiAdjustments />
+                                </Text>
+                              </Flex>
+                            </Button>
+                          </div>
+                        </div>
                         {searchResults ? (
                           <>
                             {searchResults?.content?.length > 0 ? (
                               <>
-                                <div class="flex flex-row gap-4 overflow-y-auto pb-2">
-                                  <div>
-                                    <Button
-                                      onClick={() => {
-                                        openFilterSetting();
-                                      }}
-                                      radius={"xl"}
-                                      variant="filled"
-                                    >
-                                      <Flex
-                                        gap={2}
-                                        justify={"center"}
-                                        align={"center"}
-                                      >
-                                        <Text c="white">Bộ lọc</Text>
-                                        <Text c="white">
-                                          <HiAdjustments />
-                                        </Text>
-                                      </Flex>
-                                    </Button>
-                                  </div>
-                                  <div className="w-full">
-                                    <Select
-                                      className="min-w-[8rem]"
-                                      radius={"xl"}
-                                      placeholder="Pick value"
-                                      data={[
-                                        "React",
-                                        "Angular",
-                                        "Vue",
-                                        "Svelte",
-                                      ]}
-                                      defaultValue="React"
-                                      allowDeselect={false}
-                                    />
-                                  </div>
-                                </div>
                                 <Flex gap={4} m={4} align="center">
                                   <Text c="gray">Tìm thấy </Text>
                                   <Text c="blue" fw={700}>
@@ -533,7 +721,14 @@ const MatyrSearch = () => {
                                   </Text>
                                 </Flex>
                                 {searchResults?.content.map((item) => (
-                                  <SearchResultEntry item={item} />
+                                  <SearchResultEntry
+                                    item={item}
+                                    selectItem={() => {
+                                      close();
+                                      selectMartyr(item);
+                                      openMartyrDetail();
+                                    }}
+                                  />
                                 ))}{" "}
                                 <div className="flex justify-center w-full pb-4 px-8">
                                   <Pagination
@@ -556,18 +751,55 @@ const MatyrSearch = () => {
                               </>
                             ) : (
                               <>
-                                <div className="flex gap-2 pt-24 px-2 items-center justify-center">
+                                <div className="flex flex-col gap-2 pt-24 px-2 items-center justify-center">
                                   <Text size="xl" c="gray">
                                     Không tìm thấy kết quả phù hợp
                                   </Text>
+                                  <>
+                                    <div className="flex gap-2 py-4 px-2 flex-col gap-2 items-center justify-center">
+                                      <Text>
+                                        Bạn có thể thử các thao tác nhanh
+                                      </Text>
+                                      <div className="flex flex-col gap-2">
+                                        <Button
+                                          color="orange"
+                                          radius={"xl"}
+                                          size="xl"
+                                        >
+                                          Thử tìm theo khu
+                                        </Button>
+                                        <Button
+                                          color="green"
+                                          radius={"xl"}
+                                          size="xl"
+                                        >
+                                          Hiển thị toàn bộ danh sách
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  </>
                                 </div>
                               </>
                             )}
                           </>
                         ) : (
                           <>
-                            <div className="flex gap-2 py-4 px-2 items-center justify-center">
-                              <Text c="gray">Thử tìm kiếm 1 liệt sĩ</Text>
+                            <div className="flex gap-2 py-4 px-2 flex-col gap-2 items-center justify-center">
+                              <Text>Bạn có thể thử các thao tách nhanh</Text>
+                              <div className="flex flex-col gap-2">
+                                <Button
+                                  onClick={() => {
+                                    setActiveTab("position");
+
+                                    openFilterSetting();
+                                  }}
+                                  color="orange"
+                                  radius={"xl"}
+                                  size="xl"
+                                >
+                                  Thử tìm theo khu
+                                </Button>{" "}
+                              </div>
                             </div>
                           </>
                         )}

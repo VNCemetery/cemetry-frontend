@@ -6,6 +6,7 @@ export const getMatyrs = async (name, page, size, filters) => {
     name,
     page,
     size,
+    filters,
   });
   return response.data;
 };
