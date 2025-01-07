@@ -1,10 +1,23 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import maplibregl, { Marker } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { useMapStore } from "../../store/useMapStore";
+
+const navigationArrowSvg = `
+  <svg class="navigation-arrow" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="16" cy="16" r="6" fill="#4285F4" stroke="white" stroke-width="0.5"/>
+    <path d="M16 0 L22 10 L16 7 L10 10 Z" fill="#4285F4" stroke="white" stroke-width="0.5"/>
+  </svg>
+`;
 
 export default function NewsPage() {
   const mapContainer = useRef(null);
   const map = useRef(null);
+  const marker = useRef(null);
+  const [heading, setHeading] = useState(0);
+  const [accuracy, setAccuracy] = useState(null);
+  const [previousHeading, setPreviousHeading] = useState(0);
+  const [rotationCount, setRotationCount] = useState(0);
   const lng = 105.644921898426;
   const lat = 10.461701682269;
   const zoom = 17.3;
@@ -55,10 +68,130 @@ export default function NewsPage() {
     });
   }
 
+  useEffect(() => {
+    if (!map.current) return;
+
+    function createNavigationMarker(lat, lng) {
+      const markerEl = document.createElement("div");
+      markerEl.innerHTML = navigationArrowSvg;
+      markerEl.className = "heading-marker";
+      return new maplibregl.Marker({
+        element: markerEl,
+        scale: 1.0,
+        rotationAlignment: "map",
+        pitchAlignment: "map",
+      })
+        .setLngLat([lng, lat])
+        .addTo(map.current);
+    }
+
+    function normalizeRotation(currentHeading) {
+      const diff = currentHeading - previousHeading;
+      let newRotationCount = rotationCount;
+
+      if (diff > 180) newRotationCount--;
+      else if (diff < -180) newRotationCount++;
+
+      setRotationCount(newRotationCount);
+      setPreviousHeading(currentHeading);
+      return currentHeading + newRotationCount * 360;
+    }
+
+    function updateCompassArrow(heading) {
+      if (marker.current) {
+        const arrow = marker.current
+          .getElement()
+          .querySelector(".navigation-arrow");
+        if (arrow) {
+          const normalizedHeading = normalizeRotation(heading);
+          arrow.style.transform = `rotate(${normalizedHeading}deg)`;
+        }
+      }
+    }
+
+    // Device orientation handling
+    if (window.DeviceOrientationEvent) {
+      window.addEventListener("deviceorientation", (event) => {
+        let newHeading = 0;
+        if (event.webkitCompassHeading) {
+          newHeading = event.webkitCompassHeading;
+        } else if (event.alpha) {
+          newHeading = 360 - event.alpha;
+        }
+        newHeading = ((newHeading % 360) + 360) % 360;
+        setHeading(newHeading);
+        updateCompassArrow(newHeading);
+      });
+    }
+
+    // Location tracking
+    navigator.geolocation.watchPosition(
+      (pos) => {
+        const {
+          latitude,
+          longitude,
+          accuracy: locationAccuracy,
+          heading: gpsHeading,
+        } = pos.coords;
+        setAccuracy(locationAccuracy);
+
+        const finalHeading = gpsHeading || heading;
+        setHeading(finalHeading);
+
+        map.current.setCenter([longitude, latitude]);
+
+        if (!marker.current) {
+          marker.current = createNavigationMarker(latitude, longitude);
+        } else {
+          marker.current.setLngLat([longitude, latitude]);
+        }
+
+        updateCompassArrow(finalHeading);
+      },
+      (error) => console.warn(`ERROR(${error.code}): ${error.message}`),
+      {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 0,
+      }
+    );
+  }, [heading, previousHeading, rotationCount]);
+
   return (
     <>
+      <style>
+        {`
+          .heading-marker {
+            background: none !important;
+            width: 32px !important;
+            height: 32px !important;
+          }
+          .navigation-arrow {
+            width: 32px;
+            height: 32px;
+            transform-origin: center;
+            transition: transform 0.3s ease;
+            will-change: transform;
+            filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
+          }
+          .compass-display {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.9);
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+          }
+        `}
+      </style>
+      <div className="compass-display">
+        <div>Heading: {Math.round(heading)}°</div>
+        <div>Accuracy: {accuracy ? `±${Math.round(accuracy)}m` : "-"}</div>
+      </div>
       <button
-        className="bg-red-200 z-[10000] absolute hidden"
+        className="bg-red-200 z-[0] absolute hidden"
         onClick={async () => {
           // Paris [lng, lat]
           const start = [105.644921898426, 10.46170169];
@@ -230,7 +363,7 @@ export default function NewsPage() {
       >
         New marker
       </button>
-      <div ref={mapContainer} className="absolute w-full h-screen" />
+      <div ref={mapContainer} className="absolute z-[0] w-full h-screen" />
     </>
   );
 }
