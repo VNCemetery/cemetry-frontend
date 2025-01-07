@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { MantineProvider } from "@mantine/core";
 import { Loader, Center } from "@mantine/core";
-import { Notifications } from '@mantine/notifications';
+import { Notifications } from "@mantine/notifications";
 
 // Import styles of packages that you've installed.
 // All packages except `@mantine/hooks` require styles imports
@@ -30,8 +30,8 @@ import MartyrDetail from "./components/page/admin/MartyrDetail";
 import { useEffect, useState } from "react";
 
 import { useInfoStore } from "./store/useInfoStore";
-import ForgotPasswordPage from './components/page/ForgotPasswordPage';
-import ResetPasswordPage from './components/page/ResetPasswordPage';
+import ForgotPasswordPage from "./components/page/ForgotPasswordPage";
+import ResetPasswordPage from "./components/page/ResetPasswordPage";
 
 export default function App() {
   // make state is loading
@@ -39,20 +39,6 @@ export default function App() {
   const { isLoadingInfo: isLoading, loadInfo } = useInfoStore((state) => state);
   useEffect(() => {
     loadInfo();
-  }, []);
-
-  useEffect(() => {
-    // Preload important icons
-    const importantIcons = [
-      'IconDashboard',
-      'IconUsers',
-      'IconSettings',
-      // ... các icons khác thường xuyên được sử dụng
-    ];
-
-    importantIcons.forEach(iconName => {
-      import(`@tabler/icons-react`).then(module => module[iconName]);
-    });
   }, []);
 
   return (
@@ -96,8 +82,14 @@ export default function App() {
             </Route>
 
             {/* Auth Routes */}
-            <Route path="/admin/forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="/admin/reset-password" element={<ResetPasswordPage />} />
+            <Route
+              path="/admin/forgot-password"
+              element={<ForgotPasswordPage />}
+            />
+            <Route
+              path="/admin/reset-password"
+              element={<ResetPasswordPage />}
+            />
           </Routes>
         </BrowserRouter>
       )}
