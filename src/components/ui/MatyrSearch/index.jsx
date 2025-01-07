@@ -31,6 +31,7 @@ import {
   Popover,
   Stack,
   Button,
+  Collapse,
 } from "@mantine/core";
 import VIETNAM_LOGO from "../../../assets/VIETNAM_FLAG_LOGO.png";
 import {
@@ -44,7 +45,10 @@ import { useEffect, useRef, useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import { FaMagic } from "react-icons/fa";
 import { BsArrowLeft, BsQuestion } from "react-icons/bs";
-import { HiOutlineDotsCircleHorizontal } from "react-icons/hi";
+import {
+  HiOutlineDotsCircleHorizontal,
+  HiLocationMarker,
+} from "react-icons/hi";
 
 import { getMatyrs } from "../../../services/martyrManagementService";
 import { HiAdjustments, HiCheck } from "react-icons/hi";
@@ -54,6 +58,7 @@ import { useMatyrStore } from "../../../store/useMatyrStore";
 import { useForm } from "@mantine/form";
 import { buildFilterFormQuery } from "../../../utils/queryBuilder";
 import { FiMoreHorizontal } from "react-icons/fi";
+import { MdMyLocation } from "react-icons/md";
 
 const MatyrSearch = ({}) => {
   const headerWrapperRef = useRef(null);
@@ -180,6 +185,9 @@ const MatyrSearch = ({}) => {
   const [popoverOpened, { close: closePopover, open: openPopover }] =
     useDisclosure();
 
+  // Add new state for routing options
+  const [showRoutingOptions, setShowRoutingOptions] = useState(false);
+
   return (
     <>
       <div className="">
@@ -215,96 +223,132 @@ const MatyrSearch = ({}) => {
             } right-0 z-[4]`}
           >
             {selectedMartyr ? (
-              <div className="flex items-center bg-white rounded-full m-2 p-2">
-                <ActionIcon
-                  variant="transparent"
-                  color="blue"
-                  onClick={() => {
-                    selectMartyr(null);
-                    setSearchKey("");
-                  }}
-                >
-                  <BsArrowLeft
-                    style={{ width: "70%", height: "70%" }}
-                    stroke={1.5}
-                  />
-                </ActionIcon>
-                <div className="flex-1 ml-2">
-                  <Text fw={500}>
-                    <span className="text-gray-400">Liệt sĩ </span>
-                    {selectedMartyr.fullName}
-                  </Text>
-                  <Text c="dimmed" fz="xs">
-                    {selectedMartyr.homeTown || "Chưa có thông tin quê quán"}
-                  </Text>
-                </div>
-                <Popover
-                  position="bottom-end"
-                  shadow="md"
-                  opened={popoverOpened}
-                  onChange={closePopover}
-                >
-                  <Popover.Target>
+              <div className="flex flex-col w-full">
+                <div className="flex items-center bg-white rounded-full m-2 p-2">
+                  <ActionIcon
+                    variant="transparent"
+                    color="blue"
+                    onClick={() => {
+                      selectMartyr(null);
+                      setSearchKey("");
+                      setShowRoutingOptions(false);
+                    }}
+                  >
+                    <BsArrowLeft
+                      style={{ width: "70%", height: "70%" }}
+                      stroke={1.5}
+                    />
+                  </ActionIcon>
+                  <div className="flex-1 ml-2">
+                    <Text fw={500}>
+                      <span className="text-gray-400">Liệt sĩ </span>
+                      {selectedMartyr.fullName}
+                    </Text>
+                    <Text c="dimmed" fz="xs">
+                      {selectedMartyr.homeTown || "Chưa có thông tin quê quán"}
+                    </Text>
+                  </div>
+                  <div className="flex gap-2 items-center">
                     <ActionIcon
                       variant="filled"
-                      color="blue"
+                      color="green"
                       radius="xl"
                       size="lg"
-                      className="hover:scale-110 transition-transform"
-                      onClick={openPopover}
+                      className={`hover:scale-110 transition-transform ${
+                        showRoutingOptions ? "rotate-180" : ""
+                      }`}
+                      onClick={() => setShowRoutingOptions(!showRoutingOptions)}
                     >
-                      <FiMoreHorizontal size={24} className="text-white" />
+                      <MdDirections size={24} className="text-white" />
                     </ActionIcon>
-                  </Popover.Target>
-                  <Popover.Dropdown>
-                    <Stack gap="xs">
-                      <Text size="sm" fw={500} c="dimmed">
-                        Tùy chọn
-                      </Text>
-                      <Button
-                        variant="filled"
-                        color="blue"
-                        fullWidth
-                        leftSection={<BiSolidInfoCircle size={16} />}
-                        onClick={() => {
-                          openMartyrDetail();
-                          closePopover();
-                        }}
-                      >
-                        Xem chi tiết
-                      </Button>
-                      <Button
-                        variant="filled"
-                        color="green"
-                        fullWidth
-                        leftSection={<MdDirections size={16} />}
-                        onClick={() => {
-                          alert(
-                            "Chỉ đường đến mộ liệt sĩ " +
-                              selectedMartyr.fullName
-                          );
-                          closePopover();
-                        }}
-                      >
-                        Chỉ đường đến mộ
-                      </Button>
-                      <Text size="sm" fw={500} c="dimmed">
-                        Thao tác khác
-                      </Text>
-                      <Button
-                        variant="light"
-                        color="gray"
-                        fullWidth
-                        leftSection={<MdShare size={16} />}
-                        onClick={() => {
-                          closePopover();
-                        }}
-                      >
-                        Chia sẻ thông tin
-                      </Button>
-                    </Stack>
-                  </Popover.Dropdown>
-                </Popover>
+
+                    <Popover
+                      position="bottom-end"
+                      shadow="md"
+                      opened={popoverOpened}
+                      onChange={closePopover}
+                    >
+                      <Popover.Target>
+                        <ActionIcon
+                          variant="filled"
+                          color="blue"
+                          radius="xl"
+                          size="lg"
+                          className="hover:scale-110 transition-transform"
+                          onClick={openPopover}
+                        >
+                          <FiMoreHorizontal size={24} className="text-white" />
+                        </ActionIcon>
+                      </Popover.Target>
+                      <Popover.Dropdown>
+                        <Stack gap="xs">
+                          <Text size="sm" fw={500} c="dimmed">
+                            Tùy chọn
+                          </Text>
+                          <Button
+                            variant="filled"
+                            color="blue"
+                            fullWidth
+                            leftSection={<BiSolidInfoCircle size={16} />}
+                            onClick={() => {
+                              openMartyrDetail();
+                              closePopover();
+                            }}
+                          >
+                            Xem chi tiết
+                          </Button>
+                          <Text size="sm" fw={500} c="dimmed">
+                            Thao tác khác
+                          </Text>
+                          <Button
+                            variant="light"
+                            color="gray"
+                            fullWidth
+                            leftSection={<MdShare size={16} />}
+                            onClick={() => {
+                              closePopover();
+                            }}
+                          >
+                            Chia sẻ thông tin
+                          </Button>
+                        </Stack>
+                      </Popover.Dropdown>
+                    </Popover>
+                  </div>
+                </div>
+
+                <Collapse in={showRoutingOptions}>
+                  <div className="px-4 pb-2 flex flex-col gap-2">
+                    <Button
+                      fullWidth
+                      variant="white"
+                      color="blue"
+                      radius="xl"
+                      leftSection={
+                        <MdMyLocation size={20} className="text-blue-500" />
+                      }
+                      onClick={() => {
+                        alert("Chỉ đường từ vị trí hiện tại");
+                        setShowRoutingOptions(false);
+                      }}
+                    >
+                      Từ vị trí hiện tại
+                    </Button>
+                    <Button
+                      variant="white"
+                      radius="xl"
+                      fullWidth
+                      color="gray"
+                      leftSection={<HiLocationMarker size={20} />}
+                      onClick={() => {
+                        alert("Chọn điểm trên bản đồ");
+                        setShowRoutingOptions(false);
+                      }}
+                    >
+                      Chọn điểm trên bản đồ
+                    </Button>
+                  </div>
+                </Collapse>
               </div>
             ) : (
               <div className="items-center flex gap-1 bg-white rounded-full m-2">
@@ -421,6 +465,7 @@ const MatyrSearch = ({}) => {
           </div>
         </div>
       </div>
+
       {opened && (
         <div className="bg-white h-screen  z-[3] absolute top-0 w-full">
           <div>
