@@ -1,26 +1,5 @@
-import { IconAt, IconPhoneCall } from "@tabler/icons-react";
-import {
-  ActionIcon,
-  Avatar,
-  Badge,
-  Button,
-  Flex,
-  Group,
-  Popover,
-  Text,
-  TypographyStylesProvider,
-} from "@mantine/core";
+import { Avatar, Badge, Flex, Group, Text } from "@mantine/core";
 import classes from "./UserInfoIcons.module.css";
-import {
-  BiArrowFromRight,
-  BiArrowToRight,
-  BiDirections,
-  BiInfoCircle,
-  BiLineChartDown,
-} from "react-icons/bi";
-import { useState } from "react";
-import { useDisclosure } from "@mantine/hooks";
-import { BsArrowRight } from "react-icons/bs";
 
 export default function UserInfoIcons({ item, selectItem }) {
   return (
