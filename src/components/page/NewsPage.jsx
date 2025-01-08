@@ -1,26 +1,50 @@
-export default function NewsPage() {
-  return (
-    <div>
-      <h1 className="text-2xl font-bold text-center">News</h1>
-      <p>
-        This project uses React Query for fetching data. The news data is
-        fetched from the <a href="https://newsapi.org/">News API</a> using the{" "}
-        <a
-          href="
+import {
+  Anchor,
+  Card,
+  Group,
+  SimpleGrid,
+  Text,
+  UnstyledButton,
+  useMantineTheme,
+} from "@mantine/core";
+import classes from "./ActionsGrid.module.css";
+import { FiLink } from "react-icons/fi";
 
-            https://newsapi.org/docs/endpoints/everything"
-        >
-          /everything
-        </a>{" "}
-        endpoint.
-      </p>
-      <h2 className="text-xl font-bold">Features</h2>
-      <ul>
-        <li>Fetching data with React Query</li>
-        <li>Displaying data with Mantine</li>
-        <li>Responsive design with Tailwind CSS</li>
-        <li>Dark mode with Mantine</li>
-      </ul>
-    </div>
+const mockdata = [
+  { title: "Credit cards", icon: <FiLink />, color: "violet" },
+  { title: "Banks nearby", icon: <FiLink />, color: "indigo" },
+  { title: "Transfers", icon: <FiLink />, color: "blue" },
+  { title: "Refunds", icon: <FiLink />, color: "green" },
+  { title: "Receipts", icon: <FiLink />, color: "teal" },
+  { title: "Taxes", icon: <FiLink />, color: "cyan" },
+  { title: "Reports", icon: <FiLink />, color: "pink" },
+  { title: "Payments", icon: <FiLink />, color: "red" },
+  { title: "Cashback", icon: <FiLink />, color: "orange" },
+];
+
+export default function ActionsGrid() {
+  const theme = useMantineTheme();
+
+  const items = mockdata.map((item) => (
+    <UnstyledButton key={item.title} className={classes.item}>
+      {item.icon}
+      <Text size="xs" mt={7}>
+        {item.title}
+      </Text>
+    </UnstyledButton>
+  ));
+
+  return (
+    <Card withBorder radius="md" className={classes.card}>
+      <Group justify="space-between">
+        <Text className={classes.title}>Services</Text>
+        <Anchor size="xs" c="dimmed" style={{ lineHeight: 1 }}>
+          + 21 other services
+        </Anchor>
+      </Group>
+      <SimpleGrid cols={3} mt="md">
+        {items}
+      </SimpleGrid>
+    </Card>
   );
 }

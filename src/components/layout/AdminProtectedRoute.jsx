@@ -1,17 +1,17 @@
-import { Outlet } from "react-router";
-import { useAuthStore } from "../../store/useAuthStore";
+import { Navigate } from 'react-router-dom';
+import { useAuthStore } from '../../store/useAuthStore';
 
-export default function AdminProtectedRoute() {
-  // add logic to check role & auth
-  const token = useAuthStore((state) => state.token);
-  if (!token) {
-    return <Navigate to="/admin/login" />;
+const AdminProtectedRoute = ({ children }) => {
+  const { isAuthenticated, accessToken } = useAuthStore();
+  
+  console.log('Protected Route State:', { isAuthenticated, accessToken }); // Debug log
+
+  if (!isAuthenticated || !accessToken) {
+    console.log('Chuyển hướng đến trang login vì chưa xác thực'); // Debug log
+    return <Navigate to="/admin/login" replace />;
   }
 
-  return (
-    <div>
-      Admin dashboard
-      <Outlet />
-    </div>
-  );
-}
+  return children;
+};
+
+export default AdminProtectedRoute;

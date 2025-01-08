@@ -1,0 +1,2 @@
+export const DEFAULT_SEARCH_SIZE = 10;
+export const DEFAULT_AUTO_SUGGEST_SIZE = 8;
