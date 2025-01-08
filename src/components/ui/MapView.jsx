@@ -91,11 +91,10 @@ export default function MapViewPage({
   useEffect(() => {
     const handleOrientation = (event) => {
       let heading = event.webkitCompassHeading || Math.abs(event.alpha - 360);
-
       // Calculate continuous rotation
       const previousRotation = previousRotationRef.current;
       let deltaRotation = heading - (previousRotation % 360);
-
+      alert(JSON.stringify(event));
       // Adjust for crossing 0/360 boundary
       if (deltaRotation > 180) {
         deltaRotation -= 360;

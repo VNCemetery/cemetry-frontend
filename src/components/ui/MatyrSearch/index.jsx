@@ -5,7 +5,7 @@ import {
   DEFAULT_SEARCH_SIZE,
 } from "../../../utils/constants";
 import { flattenObject } from "../../../utils/objectUtil";
-import { SelectDropdownSearch } from "../SelectDropdownSearch";
+import { SelectDropdownSearch } from "../SelectDropDownSearch";
 import {
   ActionIcon,
   AppShell,
@@ -194,7 +194,6 @@ const MatyrSearch = ({ onRouteFromCurrentLocation, onSelectLocationOnMap }) => {
               closeMartyrDetail();
               setShowRoutingOptions(true);
             }}
-            
           />
           {/* Drawer content */}
         </Modal>{" "}
