@@ -14,7 +14,7 @@
     "@mantine/dates": "^7.15.1",
     "@mantine/form": "^7.15.1",
     "@mantine/hooks": "^7.15.1",
-    "@mantine/notifications": "^7.15.2",
+    "@mantine/notifications": "^7.15.1",
     "@tabler/icons-react": "^3.26.0",
     "axios": "^1.7.9",
     "chart.js": "^4.4.7",
