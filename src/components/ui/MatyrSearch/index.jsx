@@ -5,7 +5,7 @@ import {
   DEFAULT_SEARCH_SIZE,
 } from "../../../utils/constants";
 import { flattenObject } from "../../../utils/objectUtil";
-import { SelectDropdownSearch } from "../SelectDropDownSearch";
+import { SelectDropdownSearch } from "../SelectDropdownSearch";
 import {
   ActionIcon,
   AppShell,
