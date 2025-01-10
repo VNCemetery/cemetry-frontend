@@ -29,7 +29,8 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 WORKDIR /usr/share/nginx/html
 
-EXPOSE 80
+# Expose both HTTP and HTTPS ports
+EXPOSE 80 443
 
 # Start nginx with env variable injection
 CMD ["nginx", "-g", "daemon off;"]
