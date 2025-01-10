@@ -21,8 +21,9 @@ import {
   Image,
   Text,
 } from "@mantine/core";
+import { MdDirections } from "react-icons/md";
 
-export default function MartyrDetail({ martyr }) {
+const MartyrDetail = ({ martyr, onRoute }) => {
   const PRIMARY_COL_HEIGHT = "300px";
   const SECONDARY_COL_HEIGHT = `calc(${PRIMARY_COL_HEIGHT} / 2 - var(--mantine-spacing-md) / 2)`;
 
@@ -60,6 +61,7 @@ export default function MartyrDetail({ martyr }) {
                   radius="md"
                   style={{ flex: 1 }}
                   color="blue"
+                  onClick={onRoute}
                   className="flex items-center justify-center"
                   fullWidth
                   size="md"
@@ -284,4 +286,6 @@ export default function MartyrDetail({ martyr }) {
       </SimpleGrid>
     </Container>
   );
-}
+};
+
+export default MartyrDetail;
