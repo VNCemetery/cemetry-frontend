@@ -29,3 +29,5 @@ dist-ssr
 
 .cert
 fly.toml
+
+.github/fly-deploy.yml
