@@ -5,7 +5,7 @@ import {
   DEFAULT_SEARCH_SIZE,
 } from "../../../utils/constants";
 import { flattenObject } from "../../../utils/objectUtil";
-import { SelectDropdownSearch } from "../SelectDropdownSearch";
+import { SelectDropdownSearch } from "../SelectDropDownSearch";
 import {
   ActionIcon,
   AppShell,
@@ -16,39 +16,26 @@ import {
   Drawer,
   Flex,
   Group,
-  Image,
   Input,
   Loader,
   Modal,
-  MultiSelect,
   NumberInput,
   Pagination,
-  Select,
-  Skeleton,
   Tabs,
   Text,
-  TextInput,
   Popover,
   Stack,
   Button,
   Collapse,
 } from "@mantine/core";
 import VIETNAM_LOGO from "../../../assets/VIETNAM_FLAG_LOGO.png";
-import {
-  BiMicrophone,
-  BiSearch,
-  BiDotsVerticalRounded,
-  BiSolidInfoCircle,
-} from "react-icons/bi";
+import { BiMicrophone, BiSearch, BiSolidInfoCircle } from "react-icons/bi";
 import { MdDirections, MdShare } from "react-icons/md";
 import { useEffect, useRef, useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import { FaMagic } from "react-icons/fa";
-import { BsArrowLeft, BsQuestion } from "react-icons/bs";
-import {
-  HiOutlineDotsCircleHorizontal,
-  HiLocationMarker,
-} from "react-icons/hi";
+import { BsArrowLeft } from "react-icons/bs";
+import { HiLocationMarker } from "react-icons/hi";
 
 import { getMatyrs } from "../../../services/martyrManagementService";
 import { HiAdjustments, HiCheck } from "react-icons/hi";
@@ -59,8 +46,9 @@ import { useForm } from "@mantine/form";
 import { buildFilterFormQuery } from "../../../utils/queryBuilder";
 import { FiMoreHorizontal } from "react-icons/fi";
 import { MdMyLocation } from "react-icons/md";
+import { FiMap } from "react-icons/fi"; // Add this import
 
-const MatyrSearch = ({}) => {
+const MatyrSearch = ({ onRouteFromCurrentLocation, onSelectLocationOnMap }) => {
   const headerWrapperRef = useRef(null);
   const searchInputRef = useRef(null);
 
@@ -200,7 +188,13 @@ const MatyrSearch = ({}) => {
           onClose={closeMartyrDetail}
           title="Thông tin liệt sĩ"
         >
-          <MartyrDetail martyr={selectedMartyr} />
+          <MartyrDetail
+            martyr={selectedMartyr}
+            onRoute={() => {
+              closeMartyrDetail();
+              setShowRoutingOptions(true);
+            }}
+          />
           {/* Drawer content */}
         </Modal>{" "}
         <Modal
@@ -325,14 +319,14 @@ const MatyrSearch = ({}) => {
                       color="blue"
                       radius="xl"
                       leftSection={
-                        <MdMyLocation size={20} className="text-blue-500" />
+                        <FiMap size={20} className="text-blue-500" />
                       }
                       onClick={() => {
-                        alert("Chỉ đường từ vị trí hiện tại");
                         setShowRoutingOptions(false);
+                        onRouteFromCurrentLocation();
                       }}
                     >
-                      Từ vị trí hiện tại
+                      Tìm đường
                     </Button>
                     <Button
                       variant="white"
@@ -341,11 +335,11 @@ const MatyrSearch = ({}) => {
                       color="gray"
                       leftSection={<HiLocationMarker size={20} />}
                       onClick={() => {
-                        alert("Chọn điểm trên bản đồ");
+                        onSelectLocationOnMap();
                         setShowRoutingOptions(false);
                       }}
                     >
-                      Chọn điểm trên bản đồ
+                      Chọn vị trí
                     </Button>
                   </div>
                 </Collapse>
