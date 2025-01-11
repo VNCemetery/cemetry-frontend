@@ -18,6 +18,13 @@ RUN npm run build
 # Stage 2: Serve the application
 FROM nginx:alpine
 
+# Create directory for SSL certificates
+RUN mkdir -p /etc/nginx/ssl
+
+# Copy SSL certificates
+COPY ssl/ssl.crt /etc/nginx/ssl/
+COPY ssl/ssl.key /etc/nginx/ssl/
+
 # Copy the built assets from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
 
