@@ -1,11 +1,13 @@
-import { Navigate } from "react-router";
+import { Navigate, Outlet } from "react-router";
 import { useAuthStore } from "../../store/useAuthStore";
 
 export default function AdminLayout() {
-  const token = useAuthStore((state) => state.token);
-  if (!token) {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  
+  if (!isAuthenticated) {
     return <Navigate to="/admin/login" />;
   }
+
   return (
     <div>
       <div>Admin layout</div>
