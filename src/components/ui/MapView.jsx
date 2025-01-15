@@ -91,10 +91,10 @@ export default function MapViewPage({
   useEffect(() => {
     const handleOrientation = (event) => {
       let heading = event.webkitCompassHeading || Math.abs(event.alpha - 360);
+
       // Calculate continuous rotation
       const previousRotation = previousRotationRef.current;
       let deltaRotation = heading - (previousRotation % 360);
-      alert(JSON.stringify(event));
       // Adjust for crossing 0/360 boundary
       if (deltaRotation > 180) {
         deltaRotation -= 360;
@@ -118,18 +118,35 @@ export default function MapViewPage({
       }
     };
 
-    window.addEventListener(
-      "deviceorientationabsolute",
-      handleOrientation,
-      true
-    );
-    return () => {
-      window.removeEventListener(
+    const isIOS =
+      navigator.userAgent.match(/(iPod|iPhone|iPad)/) &&
+      navigator.userAgent.match(/AppleWebKit/);
+
+    if (isIOS) {
+      let isSupported =
+        typeof window.DeviceOrientationEvent.requestPermission != "undefined";
+      if (isSupported) {
+        DeviceOrientationEvent.requestPermission()
+          .then((response) => {
+            if (response === "granted") {
+              window.addEventListener(
+                "deviceorientation",
+                handleOrientation,
+                true
+              );
+            } else {
+            }
+          })
+          .catch(() => alert("not supported"));
+      } else {
+      }
+    } else {
+      window.addEventListener(
         "deviceorientationabsolute",
         handleOrientation,
         true
       );
-    };
+    }
   }, []);
 
   // Handle position updates
@@ -229,7 +246,7 @@ export default function MapViewPage({
 
       <button
         onClick={centerOnLocation}
-        className="fixed bottom-20 right-5 bg-white/90 p-3 rounded-full shadow-md z-[3] hover:bg-white/100 center-location-button"
+        className="fixed bottom-20 right-5 bg-white/90 p-3 rounded-full shadow-md z-[2] hover:bg-white/100 center-location-button"
         aria-label="Center on current location"
       >
         <svg

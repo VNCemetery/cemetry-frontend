@@ -4,9 +4,12 @@ import { getGraveRows } from "../services/graveRowService";
 export const useInfoStore = create((set, get) => ({
   grave_rows: [],
   grave_rows_entries: [],
-  findGraveRowIdByName: (name) => {
+  findGraveRowIdByName: (rowName, areaName) => {
     let grave_rows = get().grave_rows_entries;
-    let entry = grave_rows.find((row) => row.rowName === name);
+    console.log(grave_rows, rowName);
+    let entry = grave_rows.find(
+      (row) => row.rowName === rowName && row.areaName === areaName
+    );
     let grave_row_id = entry ? entry.id : null;
     return grave_row_id;
   },
