@@ -47,6 +47,7 @@ import { buildFilterFormQuery } from "../../../utils/queryBuilder";
 import { FiMoreHorizontal } from "react-icons/fi";
 import { MdMyLocation } from "react-icons/md";
 import { FiMap } from "react-icons/fi"; // Add this import
+import { color } from "chart.js/helpers";
 
 const MatyrSearch = ({ onRouteFromCurrentLocation, onSelectLocationOnMap }) => {
   const headerWrapperRef = useRef(null);
@@ -79,13 +80,13 @@ const MatyrSearch = ({ onRouteFromCurrentLocation, onSelectLocationOnMap }) => {
     filters = [],
   }) => {
     try {
+      setFilterQuery(filters);
       // Hide auto suggestions
       setShowAutoSuggestions(false);
       // Set loading
       setIsLoadingSearchResults(true);
       // Clear search results
       setSearchResults(null);
-      alert("GIVE: " + JSON.stringify(filters));
       const results = await loadMatyrs(name, page, size, filters);
       // If content is null
 
@@ -110,6 +111,7 @@ const MatyrSearch = ({ onRouteFromCurrentLocation, onSelectLocationOnMap }) => {
 
   const { grave_rows } = useInfoStore();
 
+  const [filterQuery, setFilterQuery] = useState({});
   const [
     showFilterSetting,
     { open: openFilterSetting, close: closeFilterSetting },
@@ -400,7 +402,7 @@ const MatyrSearch = ({ onRouteFromCurrentLocation, onSelectLocationOnMap }) => {
                     value={searchKey}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
-                        alert("Tìm kiếm");
+                        handleSearch({ name: searchKey });
                       }
                     }}
                     rightSectionPointerEvents="all"
@@ -497,9 +499,11 @@ const MatyrSearch = ({ onRouteFromCurrentLocation, onSelectLocationOnMap }) => {
                         <Text c="blue">
                           <BiSearch />
                         </Text>
-                        <Text>Tìm</Text>
+                        <Text fw={"bold"} fz="lg" c="gray">
+                          Tìm liệt sĩ có tên
+                        </Text>
                         <div>
-                          <Text fz="lg" fw={500} color="blue">
+                          <Text fw={"bolder"} fz="lg" c="blue">
                             {searchKey}
                           </Text>
                         </div>
@@ -526,31 +530,14 @@ const MatyrSearch = ({ onRouteFromCurrentLocation, onSelectLocationOnMap }) => {
                         )}
 
                         {autoSuggestions.map((item) => (
-                          <div
-                            key={item.id}
-                            className="border-[1px] border-gray-200 rounded-2xl p-2 hover:bg-gray-100 cursor-pointer"
-                          >
-                            <Group gap="sm">
-                              <Avatar
-                                size={50}
-                                src={VIETNAM_LOGO}
-                                radius={50}
-                              />
-                              <div>
-                                <Text fz="sm" fw={500}>
-                                  {item.fullName}
-                                </Text>
-                                <Text c="dimmed" fz="xs">
-                                  {item.rankPositionUnit}
-                                </Text>
-                                <Text c="dimmed" fz="xs">
-                                  {item.province &&
-                                    "Quê quán: " + item.province}
-                                  {item.yearOfBirth && "-"} {item.yearOfBirth}
-                                </Text>
-                              </div>
-                            </Group>
-                          </div>
+                          <SearchResultEntry
+                            item={item}
+                            selectItem={() => {
+                              close();
+                              selectMartyr(item);
+                              openMartyrDetail();
+                            }}
+                          />
                         ))}
                       </div>
                     )}
@@ -576,7 +563,6 @@ const MatyrSearch = ({ onRouteFromCurrentLocation, onSelectLocationOnMap }) => {
 
                       // Build API query
                       const filters_query = buildFilterFormQuery(queryData);
-                      alert("FILTERS: " + JSON.stringify(filters_query));
                       // Clear cache
                       clearMartrys();
                       setCurrentPage(1);
@@ -778,6 +764,7 @@ const MatyrSearch = ({ onRouteFromCurrentLocation, onSelectLocationOnMap }) => {
                                         name: searchKey,
                                         page: value - 1,
                                         size: DEFAULT_SEARCH_SIZE,
+                                        filters: filterQuery,
                                       });
                                     }}
                                     total={searchResults?.totalPages}

@@ -43,7 +43,10 @@ export default function RoutingPage() {
 
     try {
       const start = [location.longitude, location.latitude];
-      let graveRowId = findGraveRowIdByName(selectedMartyr.rowName);
+      let graveRowId = findGraveRowIdByName(
+        selectedMartyr.rowName,
+        selectedMartyr.areaName
+      );
 
       let data = await findPath(location, graveRowId);
       let coordinates = data?.features[0].geometry.coordinates;
@@ -71,6 +74,7 @@ export default function RoutingPage() {
 
   const showRoute = (start, end, coordinates = [], data = null) => {
     // Define all route-related layers
+
     const routeLayers = ["route", "route-case", "route-start", "route-end"];
     if (data?.features[0].properties.pathId) {
       // Set showFeedback to true if pathId is available
@@ -250,7 +254,7 @@ export default function RoutingPage() {
     let data = await findPath(currentLocation, graveRowId);
     let coordinates = data?.features[0].geometry.coordinates;
     let end = coordinates[coordinates.length - 1];
-    showRoute(start, end, coordinates, data);
+    showRoute(start, end, [start, start, start, ...coordinates], data);
     // After drawing route, show feedback UI
   };
 

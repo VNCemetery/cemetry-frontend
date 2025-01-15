@@ -1,19 +1,34 @@
-import { Grid, Paper, Text, Title, Group, Stack, RingProgress } from '@mantine/core';
-import { lazy, Suspense } from 'react';
-import { Line, Bar } from 'react-chartjs-2';
-import { useEffect, useState } from 'react';
-import { useMatyrStore } from '../../../store/useMatyrStore';
-import { getStats } from '../../../services/martyrManagementService';
+import { Grid, Paper, Text, Title, Group, Stack } from "@mantine/core";
+import { lazy, Suspense } from "react";
+import { useEffect, useState } from "react";
+import { useMatyrStore } from "../../../store/useMatyrStore";
+import { getStats } from "../../../services/martyrManagementService";
 
 // Lazy load icons
-const IconUsers = lazy(() => import('@tabler/icons-react').then(module => ({ default: module.IconUsers })));
-const IconUserCheck = lazy(() => import('@tabler/icons-react').then(module => ({ default: module.IconUserCheck })));
-const IconMap = lazy(() => import('@tabler/icons-react').then(module => ({ default: module.IconMap })));
-const IconHistory = lazy(() => import('@tabler/icons-react').then(module => ({ default: module.IconHistory })));
+const IconUsers = lazy(() =>
+  import("@tabler/icons-react").then((module) => ({
+    default: module.IconUsers,
+  }))
+);
+const IconUserCheck = lazy(() =>
+  import("@tabler/icons-react").then((module) => ({
+    default: module.IconUserCheck,
+  }))
+);
+const IconMap = lazy(() =>
+  import("@tabler/icons-react").then((module) => ({ default: module.IconMap }))
+);
+const IconHistory = lazy(() =>
+  import("@tabler/icons-react").then((module) => ({
+    default: module.IconHistory,
+  }))
+);
 
 // Icon wrapper
 const IconWrapper = ({ icon: Icon, ...props }) => (
-  <Suspense fallback={<span style={{ width: props.size, height: props.size }} />}>
+  <Suspense
+    fallback={<span style={{ width: props.size, height: props.size }} />}
+  >
     <Icon {...props} />
   </Suspense>
 );
@@ -21,24 +36,24 @@ const IconWrapper = ({ icon: Icon, ...props }) => (
 export default function Dashboard() {
   const { loadAdminMartyrs } = useMatyrStore();
   const [stats, setStats] = useState({
-    totalMartyrs: 0
+    totalMartyrs: 0,
   });
 
   useEffect(() => {
     const loadStats = async () => {
       try {
         const response = await getStats();
-        console.log('Stats response:', response);
-        
-        setStats(prev => ({
+        console.log("Stats response:", response);
+
+        setStats((prev) => ({
           ...prev,
-          totalMartyrs: response.totalMartyrs
+          totalMartyrs: response.totalMartyrs,
         }));
       } catch (error) {
-        console.error('Error loading stats:', error);
-        setStats(prev => ({
+        console.error("Error loading stats:", error);
+        setStats((prev) => ({
           ...prev,
-          totalMartyrs: 0
+          totalMartyrs: 0,
         }));
       }
     };
@@ -48,7 +63,9 @@ export default function Dashboard() {
 
   return (
     <>
-      <Title order={2} mb="lg">Tổng quan</Title>
+      <Title order={2} mb="lg">
+        Tổng quan
+      </Title>
 
       <Grid>
         <Grid.Col span={{ base: 12, md: 6, lg: 3 }}>
@@ -89,4 +106,4 @@ function StatsCard({ title, value, description, icon, color }) {
       </Group>
     </Paper>
   );
-} 
+}
