@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cemetery-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./ssl:/etc/nginx/ssl:ro
+      - ./.env:/usr/share/nginx/html/.env:ro
+    networks:
+      - cemetery-network
+    environment:
+      - NODE_ENV=production
+
+networks:
+  cemetery-network:
+    driver: bridge
