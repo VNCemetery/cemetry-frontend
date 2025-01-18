@@ -4,16 +4,21 @@ import { useAuthStore } from "../store/useAuthStore";
 class ApiClient {
   #publicInstance = null;
   #protectedInstance = null;
+  #baseURL = "";
 
   constructor(customPath = "") {
-    this.baseURL = `${
+    this.#baseURL = `${
       import.meta.env.VITE_APP_API_BASE_URL
     }/api/v1${customPath}`;
   }
 
+  get baseURL() {
+    return this.#baseURL;
+  }
+
   #createPublicInstance() {
     return axios.create({
-      baseURL: this.baseURL,
+      baseURL: this.#baseURL,
       headers: {
         "Content-Type": "application/json",
       },
@@ -22,7 +27,7 @@ class ApiClient {
 
   #createProtectedInstance() {
     const instance = axios.create({
-      baseURL: this.baseURL,
+      baseURL: this.#baseURL,
       headers: {
         "Content-Type": "application/json",
       },

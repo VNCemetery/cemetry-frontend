@@ -125,8 +125,8 @@ export default function MartyrsManage() {
             <Table.Thead>
               <Table.Tr>
                 <Table.Th>Ảnh</Table.Th>
-                <Table.Th>Mã liệt sĩ</Table.Th>
                 <Table.Th>Họ và tên</Table.Th>
+                <Table.Th>Bí danh</Table.Th>
                 <Table.Th>Năm sinh</Table.Th>
                 <Table.Th>Ngày hy sinh</Table.Th>
                 <Table.Th>Quê quán</Table.Th>
@@ -158,21 +158,10 @@ export default function MartyrsManage() {
                       </Center>
                     )}
                   </Table.Td>
-                  <Table.Td>{martyr.codeName}</Table.Td>
                   <Table.Td>{martyr.fullName}</Table.Td>
+                  <Table.Td>{martyr.codeName}</Table.Td>
                   <Table.Td>{martyr.yearOfBirth}</Table.Td>
-                  <Table.Td>
-                    {martyr.dateOfDeath
-                      ? new Date(martyr.dateOfDeath).toLocaleDateString(
-                          "vi-VN",
-                          {
-                            day: "2-digit",
-                            month: "2-digit",
-                            year: "numeric",
-                          }
-                        )
-                      : ""}
-                  </Table.Td>
+                  <Table.Td>{martyr.dateOfDeath || ""}</Table.Td>
                   <Table.Td>
                     {(() => {
                       const location = [];
