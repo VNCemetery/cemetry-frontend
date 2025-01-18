@@ -226,7 +226,6 @@ const MatyrSearch = ({ onRouteFromCurrentLocation, onSelectLocationOnMap }) => {
                     color="blue"
                     onClick={() => {
                       selectMartyr(null);
-                      setSearchKey("");
                       setShowRoutingOptions(false);
                     }}
                   >

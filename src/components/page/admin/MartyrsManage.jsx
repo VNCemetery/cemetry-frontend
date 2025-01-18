@@ -13,56 +13,21 @@ import {
   Pagination,
   Loader,
 } from "@mantine/core";
-import { lazy, Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { notifications } from "@mantine/notifications";
 import { deleteMartyr } from "../../../services/martyrManagementService";
 import { useMatyrStore } from "../../../store/useMatyrStore";
-
-// Lazy load icons
-const IconPlus = lazy(() =>
-  import("@tabler/icons-react").then((module) => ({ default: module.IconPlus }))
-);
-const IconDots = lazy(() =>
-  import("@tabler/icons-react").then((module) => ({ default: module.IconDots }))
-);
-const IconEdit = lazy(() =>
-  import("@tabler/icons-react").then((module) => ({ default: module.IconEdit }))
-);
-const IconTrash = lazy(() =>
-  import("@tabler/icons-react").then((module) => ({
-    default: module.IconTrash,
-  }))
-);
-const IconSearch = lazy(() =>
-  import("@tabler/icons-react").then((module) => ({
-    default: module.IconSearch,
-  }))
-);
-const IconPhoto = lazy(() =>
-  import("@tabler/icons-react").then((module) => ({
-    default: module.IconPhoto,
-  }))
-);
-const IconEyeCheck = lazy(() =>
-  import("@tabler/icons-react").then((module) => ({
-    default: module.IconEyeCheck,
-  }))
-);
-const IconEyeOff = lazy(() =>
-  import("@tabler/icons-react").then((module) => ({
-    default: module.IconEyeOff,
-  }))
-);
-
-// Icon wrapper
-const IconWrapper = ({ icon: Icon, ...props }) => (
-  <Suspense
-    fallback={<span style={{ width: props.size, height: props.size }} />}
-  >
-    <Icon {...props} />
-  </Suspense>
-);
+import {
+  FiPlus,
+  FiMoreVertical,
+  FiEdit,
+  FiTrash2,
+  FiSearch,
+  FiImage,
+  FiEye,
+  FiEyeOff,
+} from "react-icons/fi";
 
 export default function MartyrsManage() {
   const navigate = useNavigate();
@@ -131,7 +96,7 @@ export default function MartyrsManage() {
       <Group justify="space-between" mb="lg">
         <Title order={2}>Quản lý liệt sĩ</Title>
         <Button
-          leftSection={<IconWrapper icon={IconPlus} size={14} />}
+          leftSection={<FiPlus size={14} />}
           onClick={() => navigate("new")}
         >
           Thêm liệt sĩ
@@ -141,7 +106,7 @@ export default function MartyrsManage() {
       <TextInput
         placeholder="Tìm kiếm theo tên..."
         mb="md"
-        leftSection={<IconWrapper icon={IconSearch} size={16} />}
+        leftSection={<FiSearch size={16} />}
         value={search}
         onChange={(e) => setSearch(e.currentTarget.value)}
       />
@@ -165,7 +130,7 @@ export default function MartyrsManage() {
                 <Table.Th>Năm sinh</Table.Th>
                 <Table.Th>Ngày hy sinh</Table.Th>
                 <Table.Th>Quê quán</Table.Th>
-                <Table.Th>Hàng mộ</Table.Th>
+                <Table.Th className="text-center">Hàng mộ</Table.Th>
                 <Table.Th>Trạng thái</Table.Th>
                 <Table.Th style={{ width: 80 }}>Thao tác</Table.Th>
               </Table.Tr>
@@ -189,7 +154,7 @@ export default function MartyrsManage() {
                       />
                     ) : (
                       <Center>
-                        <IconWrapper icon={IconPhoto} size={20} color="gray" />
+                        <FiImage size={20} color="gray" />
                       </Center>
                     )}
                   </Table.Td>
@@ -224,7 +189,16 @@ export default function MartyrsManage() {
                       );
                     })()}
                   </Table.Td>
-                  <Table.Td>{martyr.graveRow}</Table.Td>
+                  <Table.Td>
+                    <Group>
+                      {martyr && martyr.rowName && martyr.areaName && (
+                        <>
+                          <Badge color="blue">{martyr.rowName}</Badge>
+                          <Badge color="blue">{martyr.areaName}</Badge>
+                        </>
+                      )}
+                    </Group>
+                  </Table.Td>
                   <Table.Td>
                     {martyr.hidden ? (
                       <Badge color="red">Đã ẩn</Badge>
@@ -236,34 +210,31 @@ export default function MartyrsManage() {
                     <Menu shadow="md" width={200}>
                       <Menu.Target>
                         <ActionIcon variant="subtle" color="gray">
-                          <IconWrapper icon={IconDots} size={16} />
+                          <FiMoreVertical size={16} />
                         </ActionIcon>
                       </Menu.Target>
 
                       <Menu.Dropdown>
                         <Menu.Item
-                          leftSection={
-                            <IconWrapper icon={IconEdit} size={14} />
-                          }
+                          leftSection={<FiEdit size={14} />}
                           onClick={() => navigate(`${martyr.id}`)}
                         >
                           Chỉnh sửa
                         </Menu.Item>
                         <Menu.Item
                           color="red"
-                          leftSection={
-                            <IconWrapper icon={IconTrash} size={14} />
-                          }
+                          leftSection={<FiTrash2 size={14} />}
                           onClick={() => handleDelete(martyr.id)}
                         >
                           Xóa
                         </Menu.Item>
                         <Menu.Item
                           leftSection={
-                            <IconWrapper
-                              icon={martyr.hidden ? IconEyeCheck : IconEyeOff}
-                              size={14}
-                            />
+                            martyr.hidden ? (
+                              <FiEye size={14} />
+                            ) : (
+                              <FiEyeOff size={14} />
+                            )
                           }
                           onClick={() => {
                             setMartyrs(

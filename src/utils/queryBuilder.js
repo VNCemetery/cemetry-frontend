@@ -17,7 +17,7 @@ export const buildFilterFormQuery = (formData) => {
   if (formData.dateOfDeath) {
     filters.push({
       key: "dateOfDeath",
-      operator: "EQUAL",
+      operator: "BETWEEN",
       fieldType: "INTEGER",
       value: formData.dateOfDeath,
     });
