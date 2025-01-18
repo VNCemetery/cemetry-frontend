@@ -63,7 +63,7 @@ export default function AboutProjectPage() {
   return (
     <div className="pb-24 px-8 gap-4 overflow-auto min-h-screen">
       <Title order={2} ta="center" mt="xl" size={"lg"}>
-        Phần mềm nguồn mở HeroVN ❤️
+        Dự án số hóa nghĩa trang liệt sĩ
       </Title>
       <InfoCard
         avatar_image_url={

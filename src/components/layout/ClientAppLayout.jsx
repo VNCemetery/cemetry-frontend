@@ -42,6 +42,7 @@ function ClientAppLayout() {
       </AppShell.Main>
       <AppShell.Footer
         style={{
+          fontSize: rem(20),
           zIndex: 1,
         }}
       >
@@ -55,7 +56,7 @@ function ClientAppLayout() {
             },
             {
               icon: <FaMap />,
-              label: "Sơ đồ",
+              label: "Giới thiệu",
               to: "/map",
             },
             {
