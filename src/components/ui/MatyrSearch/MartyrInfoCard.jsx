@@ -3,7 +3,14 @@ import { FaDirections, FaInfo, FaPrint, FaStar } from "react-icons/fa";
 
 export default function MartyrInfoCard({ fullName }) {
   return (
-    <Card withBorder padding="xl" radius="md">
+    <Card
+      padding="xl"
+      withBorder
+      radius="md"
+      p="xl"
+      mb={15}
+      sx={{ borderColor: "#228be6" }}
+    >
       <Avatar
         src=""
         className="bg-white"
@@ -20,7 +27,7 @@ export default function MartyrInfoCard({ fullName }) {
       </div>
       <Text ta="center" fz="sm" c="dimmed"></Text>
 
-      <div className="flex  mt-4 gap-2">
+      <div className="flex mt-2 gap-1">
         <Button
           color="green"
           className="flex items-center justify-center "

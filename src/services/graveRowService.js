@@ -1,11 +1,8 @@
-import { createApiClient } from "../api/apiClient";
-const api = createApiClient(null, "/grave-row");
+import ApiClient from "../api/apiClient";
+
+const graveRowApi = new ApiClient("/grave-row");
 
 export const getGraveRows = async () => {
-  const response = await api.get("", {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+  const response = await graveRowApi.public().get("");
   return response.data;
 };

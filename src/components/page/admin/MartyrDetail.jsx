@@ -15,45 +15,14 @@ import {
   ActionIcon,
   Tooltip,
 } from "@mantine/core";
-import { formatDate } from "../../../utils/dateUtil";
-import { lazy, Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { notifications } from "@mantine/notifications";
 import {
   getMartyrById,
   updateMartyr,
 } from "../../../services/martyrManagementService";
-
-// Lazy load icons
-const IconArrowLeft = lazy(() =>
-  import("@tabler/icons-react").then((module) => ({
-    default: module.IconArrowLeft,
-  }))
-);
-const IconPhoto = lazy(() =>
-  import("@tabler/icons-react").then((module) => ({
-    default: module.IconPhoto,
-  }))
-);
-const IconDeviceFloppy = lazy(() =>
-  import("@tabler/icons-react").then((module) => ({
-    default: module.IconDeviceFloppy,
-  }))
-);
-const IconTrash = lazy(() =>
-  import("@tabler/icons-react").then((module) => ({
-    default: module.IconTrash,
-  }))
-);
-
-// Icon wrapper
-const IconWrapper = ({ icon: Icon, ...props }) => (
-  <Suspense
-    fallback={<span style={{ width: props.size, height: props.size }} />}
-  >
-    <Icon {...props} />
-  </Suspense>
-);
+import { FiArrowLeft, FiImage, FiSave, FiTrash2 } from "react-icons/fi";
 
 export default function MartyrDetail() {
   const { id } = useParams();
@@ -190,7 +159,7 @@ export default function MartyrDetail() {
                 variant="subtle"
                 onClick={() => navigate("/admin/martyrs")}
               >
-                <IconWrapper icon={IconArrowLeft} />
+                <FiArrowLeft />
               </ActionIcon>
             </Tooltip>
             <Title order={2}>
@@ -201,7 +170,7 @@ export default function MartyrDetail() {
             <Button
               variant="light"
               color="red"
-              leftSection={<IconWrapper icon={IconTrash} size={16} />}
+              leftSection={<FiTrash2 size={16} />}
               onClick={() => {
                 if (window.confirm("Bạn có chắc muốn xóa liệt sĩ này?")) {
                   // Xử lý xóa
@@ -215,7 +184,7 @@ export default function MartyrDetail() {
               type="submit"
               form="martyr-form"
               loading={loading}
-              leftSection={<IconWrapper icon={IconDeviceFloppy} size={16} />}
+              leftSection={<FiSave size={16} />}
             >
               Lưu thay đổi
             </Button>
@@ -249,14 +218,14 @@ export default function MartyrDetail() {
                     bg="gray.1"
                     style={{ border: "1px dashed gray" }}
                   >
-                    <IconWrapper icon={IconPhoto} size={32} color="gray" />
+                    <FiImage size={32} color="gray" />
                   </Center>
                 )}
                 <FileInput
                   label="Ảnh liệt sĩ"
                   description="Chọn ảnh JPG, PNG (tối đa 2MB)"
                   accept="image/png,image/jpeg"
-                  leftSection={<IconWrapper icon={IconPhoto} size={14} />}
+                  leftSection={<FiImage size={14} />}
                   placeholder="Chọn ảnh..."
                   value={image}
                   onChange={(file) => {
@@ -278,14 +247,12 @@ export default function MartyrDetail() {
                 <TextInput
                   label="Mã liệt sĩ *"
                   name="codeName"
-                  required
                   defaultValue={martyr?.codeName}
                 />
 
                 <TextInput
                   label="Họ và tên đầy đủ *"
                   name="fullName"
-                  required
                   defaultValue={martyr?.fullName}
                 />
 

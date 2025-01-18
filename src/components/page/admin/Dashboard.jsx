@@ -1,37 +1,8 @@
 import { Grid, Paper, Text, Title, Group, Stack } from "@mantine/core";
-import { lazy, Suspense } from "react";
 import { useEffect, useState } from "react";
 import { useMatyrStore } from "../../../store/useMatyrStore";
 import { getStats } from "../../../services/martyrManagementService";
-
-// Lazy load icons
-const IconUsers = lazy(() =>
-  import("@tabler/icons-react").then((module) => ({
-    default: module.IconUsers,
-  }))
-);
-const IconUserCheck = lazy(() =>
-  import("@tabler/icons-react").then((module) => ({
-    default: module.IconUserCheck,
-  }))
-);
-const IconMap = lazy(() =>
-  import("@tabler/icons-react").then((module) => ({ default: module.IconMap }))
-);
-const IconHistory = lazy(() =>
-  import("@tabler/icons-react").then((module) => ({
-    default: module.IconHistory,
-  }))
-);
-
-// Icon wrapper
-const IconWrapper = ({ icon: Icon, ...props }) => (
-  <Suspense
-    fallback={<span style={{ width: props.size, height: props.size }} />}
-  >
-    <Icon {...props} />
-  </Suspense>
-);
+import { FiUsers, FiUserCheck, FiMap, FiClock } from "react-icons/fi";
 
 export default function Dashboard() {
   const { loadAdminMartyrs } = useMatyrStore();
@@ -73,7 +44,7 @@ export default function Dashboard() {
             title="Tổng số liệt sĩ"
             value={stats.totalMartyrs.toLocaleString()}
             description="Tổng số liệt sĩ đã ghi nhận"
-            icon={<IconWrapper icon={IconUsers} size={32} stroke={1.5} />}
+            icon={<FiUsers size={32} />}
             color="blue"
           />
         </Grid.Col>

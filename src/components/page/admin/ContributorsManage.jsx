@@ -12,46 +12,18 @@ import {
   Select,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { lazy, Suspense } from "react";
+import { useState } from "react";
+import {
+  FiPlus,
+  FiMoreVertical,
+  FiEdit,
+  FiTrash2,
+  FiSearch,
+  FiCheck,
+  FiX,
+} from "react-icons/fi";
 
-// Lazy load các icons
-const IconPlus = lazy(() =>
-  import("@tabler/icons-react").then((module) => ({ default: module.IconPlus }))
-);
-const IconDots = lazy(() =>
-  import("@tabler/icons-react").then((module) => ({ default: module.IconDots }))
-);
-const IconEdit = lazy(() =>
-  import("@tabler/icons-react").then((module) => ({ default: module.IconEdit }))
-);
-const IconTrash = lazy(() =>
-  import("@tabler/icons-react").then((module) => ({
-    default: module.IconTrash,
-  }))
-);
-const IconSearch = lazy(() =>
-  import("@tabler/icons-react").then((module) => ({
-    default: module.IconSearch,
-  }))
-);
-const IconCheck = lazy(() =>
-  import("@tabler/icons-react").then((module) => ({
-    default: module.IconCheck,
-  }))
-);
-const IconX = lazy(() =>
-  import("@tabler/icons-react").then((module) => ({ default: module.IconX }))
-);
-
-// Icon wrapper component
-const IconWrapper = ({ icon: Icon, ...props }) => (
-  <Suspense
-    fallback={<span style={{ width: props.size, height: props.size }} />}
-  >
-    <Icon {...props} />
-  </Suspense>
-);
-
+// Remove the lazy loading IconWrapper since react-icons are optimized
 const MOCK_DATA = [
   {
     id: 1,
@@ -121,10 +93,7 @@ export default function ContributorsManage() {
     <>
       <Group justify="space-between" mb="lg">
         <Title order={2}>Quản lý người đóng góp</Title>
-        <Button
-          leftSection={<IconWrapper icon={IconPlus} size={14} />}
-          onClick={handleAdd}
-        >
+        <Button leftSection={<FiPlus size={14} />} onClick={handleAdd}>
           Thêm người đóng góp
         </Button>
       </Group>
@@ -132,7 +101,7 @@ export default function ContributorsManage() {
       <TextInput
         placeholder="Tìm kiếm theo tên hoặc email..."
         mb="md"
-        leftSection={<IconWrapper icon={IconSearch} size={16} />}
+        leftSection={<FiSearch size={16} />}
         value={search}
         onChange={(e) => setSearch(e.currentTarget.value)}
       />
@@ -179,19 +148,19 @@ export default function ContributorsManage() {
                 <Menu shadow="md" width={200}>
                   <Menu.Target>
                     <ActionIcon variant="subtle" color="gray">
-                      <IconWrapper icon={IconDots} size={16} />
+                      <FiMoreVertical size={16} />
                     </ActionIcon>
                   </Menu.Target>
 
                   <Menu.Dropdown>
                     <Menu.Item
-                      leftSection={<IconWrapper icon={IconEdit} size={14} />}
+                      leftSection={<FiEdit size={14} />}
                       onClick={() => handleEdit(contributor)}
                     >
                       Chỉnh sửa
                     </Menu.Item>
                     <Menu.Item
-                      leftSection={<IconWrapper icon={IconCheck} size={14} />}
+                      leftSection={<FiCheck size={14} />}
                       onClick={() =>
                         handleStatusChange(contributor.id, "active")
                       }
@@ -201,7 +170,7 @@ export default function ContributorsManage() {
                     </Menu.Item>
                     <Menu.Item
                       color="red"
-                      leftSection={<IconWrapper icon={IconX} size={14} />}
+                      leftSection={<FiX size={14} />}
                       onClick={() =>
                         handleStatusChange(contributor.id, "blocked")
                       }
@@ -211,7 +180,7 @@ export default function ContributorsManage() {
                     </Menu.Item>
                     <Menu.Item
                       color="red"
-                      leftSection={<IconWrapper icon={IconTrash} size={14} />}
+                      leftSection={<FiTrash2 size={14} />}
                       onClick={() => handleDelete(contributor.id)}
                     >
                       Xóa

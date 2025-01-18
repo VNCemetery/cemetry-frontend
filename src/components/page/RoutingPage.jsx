@@ -6,7 +6,7 @@ import { useInfoStore } from "../../store/useInfoStore";
 import { useMatyrStore } from "../../store/useMatyrStore";
 import { useMapStore } from "../../store/useMapStore";
 import { Paper, ActionIcon, Text } from "@mantine/core";
-import { IconThumbUp, IconThumbDown } from "@tabler/icons-react";
+import { FaThumbsUp, FaThumbsDown } from "react-icons/fa";
 import { notifications } from "@mantine/notifications";
 
 export default function RoutingPage() {
@@ -52,7 +52,8 @@ export default function RoutingPage() {
       let coordinates = data?.features[0].geometry.coordinates;
       let end = coordinates[coordinates.length - 1];
 
-      showRoute(start, end, coordinates, data);
+      //back
+      showRoute(start, end, [start, ...coordinates], data);
 
       const bounds = new maplibregl.LngLatBounds();
       coordinates.forEach((coord) => bounds.extend(coord));
@@ -254,7 +255,7 @@ export default function RoutingPage() {
     let data = await findPath(currentLocation, graveRowId);
     let coordinates = data?.features[0].geometry.coordinates;
     let end = coordinates[coordinates.length - 1];
-    showRoute(start, end, [start, start, start, ...coordinates], data);
+    showRoute(start, end, [start, ...coordinates], data);
     // After drawing route, show feedback UI
   };
 
@@ -335,7 +336,7 @@ export default function RoutingPage() {
                 onClick={() => handleFeedback(true)}
                 className="hover:scale-110 transition-transform"
               >
-                <IconThumbUp size={18} />
+                <FaThumbsUp size={18} />
               </ActionIcon>
               <ActionIcon
                 variant="light"
@@ -343,7 +344,7 @@ export default function RoutingPage() {
                 onClick={() => handleFeedback(false)}
                 className="hover:scale-110 transition-transform"
               >
-                <IconThumbDown size={18} />
+                <FaThumbsDown size={18} />
               </ActionIcon>
             </div>
           </div>
