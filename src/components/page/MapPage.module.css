@@ -1,0 +1,102 @@
+.root {
+    display: flex;
+    background-image: linear-gradient(
+      -60deg,
+      var(--mantine-color-blue-4) 0%,
+      var(--mantine-color-blue-7) 100%
+    );
+    padding: calc(var(--mantine-spacing-xl) * 1.5);
+    border-radius: var(--mantine-radius-md);
+  
+    @media (max-width: $mantine-breakpoint-sm) {
+      flex-direction: column;
+    }
+  }
+  
+  .title {
+    color: var(--mantine-color-white);
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: var(--mantine-font-size-sm);
+  }
+  
+  .count {
+    color: var(--mantine-color-white);
+    font-size: 32px;
+    line-height: 1;
+    font-weight: 700;
+    margin-bottom: var(--mantine-spacing-md);
+    font-family:
+      Greycliff CF,
+      var(--mantine-font-family);
+  }
+  
+  .description {
+    color: var(--mantine-color-blue-0);
+    font-size: var(--mantine-font-size-sm);
+    margin-top: 5px;
+  }
+  
+  .stat {
+    flex: 1;
+  
+    & + & {
+      padding-left: var(--mantine-spacing-xl);
+      margin-left: var(--mantine-spacing-xl);
+      border-left: 1px solid var(--mantine-color-blue-3);
+  
+      @media (max-width: $mantine-breakpoint-sm) {
+        padding-left: 0;
+        margin-left: 0;
+        border-left: 0;
+        padding-top: var(--mantine-spacing-xl);
+        margin-top: var(--mantine-spacing-xl);
+        border-top: 1px solid var(--mantine-color-blue-3);
+      }
+    }
+  }
+
+.wrapper {
+  padding-top: rem(40px);
+  padding-bottom: rem(80px);
+}
+
+.hero {
+  text-align: center;
+  padding: rem(60px) 0;
+  background: linear-gradient(250deg, var(--mantine-color-blue-7) 0%, var(--mantine-color-indigo-9) 100%);
+  border-radius: var(--mantine-radius-lg);
+  color: var(--mantine-color-white);
+}
+
+.heroTitle {
+  font-size: rem(44px);
+  font-weight: 900;
+  margin-bottom: rem(16px);
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    font-size: rem(32px);
+  }
+}
+
+.heroDescription {
+  max-width: rem(600px);
+  margin: 0 auto;
+  font-size: rem(20px);
+}
+
+.statCard {
+  text-align: center;
+  padding: rem(20px);
+  transition: transform 200ms ease;
+
+  &:hover {
+    transform: translateY(-5px);
+  }
+}
+
+.featureCard {
+  height: 100%;
+  padding: rem(24px);
+  background: linear-gradient(180deg, var(--mantine-color-body) 0%, var(--mantine-color-blue-0) 100%);
+}
