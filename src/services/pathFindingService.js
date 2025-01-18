@@ -1,21 +1,19 @@
-import { createApiClient } from "../api/apiClient";
-const api = createApiClient(null, "/path-finding");
+import ApiClient from "../api/apiClient";
+
+const pathFindingApi = new ApiClient("/path-finding");
 
 export const findPath = async (
-  currentLocation = {
-    latitude: 0,
-    longitude: 0,
-  },
+  currentLocation = { latitude: 0, longitude: 0 },
   graveRowId
 ) => {
   try {
-    const response = await api.post("", {
+    const response = await pathFindingApi.public().post("", {
       currentLocation,
       graveRowId,
     });
     return {
       ...response.data,
-      pathId: response.data.id, // Assuming the API returns an ID
+      pathId: response.data.id,
     };
   } catch (error) {
     throw error;
@@ -24,7 +22,7 @@ export const findPath = async (
 
 export const provideFeedback = async (pathId, isGood) => {
   try {
-    const response = await api.post("/feedback", {
+    const response = await pathFindingApi.public().post("/feedback", {
       pathId,
       isGood,
     });
