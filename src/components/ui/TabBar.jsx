@@ -9,7 +9,7 @@ export default function TabBar({ items, currentItem }) {
   const matches = useMediaQuery("(min-width: 768px)");
   const { pathname } = useLocation();
   return (
-    <div>
+    <div className="">
       <div className="gap-2 flex py-1 w-full justify-between">
         {items.map((item) => {
           return (
@@ -26,7 +26,7 @@ export default function TabBar({ items, currentItem }) {
             >
               {item.icon}
               {item.to === pathname && (
-                <span className="text-[0.65rem] font-bold">{item.label}</span>
+                <span className="text-[.9rem] font-bold">{item.label}</span>
               )}
             </button>
           );

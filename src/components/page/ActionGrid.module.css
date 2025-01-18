@@ -1,0 +1,28 @@
+.card {
+  background-color: var(--mantine-color-body);
+}
+
+.title {
+  font-weight: bold;
+  font-family: Greycliff CF, var(--mantine-font-family);
+  line-height: 1;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-radius: var(--mantine-radius-md);
+  height: 90px;
+  background-color: var(--mantine-color-white);
+  transition: box-shadow 150ms ease, transform 100ms ease;
+  text-decoration: none;
+  color: inherit;
+
+  &:hover {
+    box-shadow: var(--mantine-shadow-md);
+    transform: scale(1.05);
+  }
+}
