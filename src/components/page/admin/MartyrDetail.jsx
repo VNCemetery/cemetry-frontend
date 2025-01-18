@@ -23,6 +23,7 @@ import {
   updateMartyr,
 } from "../../../services/martyrManagementService";
 import { FiArrowLeft, FiImage, FiSave, FiTrash2 } from "react-icons/fi";
+import { uploadImage } from "../../../services/imageService";
 
 export default function MartyrDetail() {
   const { id } = useParams();
@@ -32,6 +33,7 @@ export default function MartyrDetail() {
   const [dateOfDeath, setDateOfDeath] = useState(null);
   const [image, setImage] = useState(null);
   const [error, setError] = useState(null);
+  const [imageFile, setImageFile] = useState(null); // Add this state for storing File object
 
   // Load data khi component mount
   useEffect(() => {
@@ -65,7 +67,7 @@ export default function MartyrDetail() {
       const formData = new FormData(e.target);
 
       // Validate các trường bắt buộc
-      const requiredFields = ["codeName", "fullName"];
+      const requiredFields = ["fullName"];
       const missingFields = requiredFields.filter(
         (field) => !formData.get(field)
       );
@@ -100,31 +102,35 @@ export default function MartyrDetail() {
         return;
       }
 
+      // Upload image first if exists
+      let imageUrl = image;
+      if (imageFile) {
+        const uploadResponse = await uploadImage(imageFile);
+        imageUrl = uploadResponse.url;
+      }
+      alert(imageUrl);
+
       // Tạo object data
       const data = {
-        codeName: formData.get("codeName"), // Bắt buộc
+        codeName: formData.get("codeName"),
         fullName: formData.get("fullName"), // Bắt buộc
         name: formData.get("name") || null,
         rhyme: formData.get("rhyme") || null,
         yearOfBirth: yearOfBirth,
         yearOfEnlistment: yearOfEnlistment,
-        dateOfDeath: dateOfDeath,
+        dateOfDeath: formData.get("dateOfDeath") || null,
+        graveRowId: martyr.graveRow.id,
         rankPositionUnit: formData.get("rankPositionUnit") || null,
-        hometown: formData.get("hometown") || null,
+        homeTown: formData.get("homeTown") || null,
         commune: formData.get("commune") || null,
         district: formData.get("district") || null,
         placeOfExhumation: formData.get("placeOfExhumation") || null,
-        graveRow: formData.get("graveRow") || null,
+        image: imageUrl, // Add the image URL to data
       };
 
       // Chỉ thêm id nếu đang trong chế độ edit
       if (id) {
         data.id = id;
-      }
-
-      // Thêm ảnh nếu có
-      if (image instanceof File) {
-        data.image = image;
       }
 
       await updateMartyr(id, data);
@@ -227,12 +233,13 @@ export default function MartyrDetail() {
                   accept="image/png,image/jpeg"
                   leftSection={<FiImage size={14} />}
                   placeholder="Chọn ảnh..."
-                  value={image}
+                  value={imageFile}
                   onChange={(file) => {
+                    setImageFile(file);
                     if (file) {
                       const reader = new FileReader();
                       reader.onloadend = () => {
-                        setImage(reader.result);
+                        setImage(reader.result); // For preview only
                       };
                       reader.readAsDataURL(file);
                     } else {
@@ -245,14 +252,9 @@ export default function MartyrDetail() {
               {/* Cột phải - Form thông tin */}
               <Stack style={{ flex: 1 }}>
                 <TextInput
-                  label="Mã liệt sĩ *"
-                  name="codeName"
-                  defaultValue={martyr?.codeName}
-                />
-
-                <TextInput
-                  label="Họ và tên đầy đủ *"
+                  label="Họ và tên đầy đủ"
                   name="fullName"
+                  required
                   defaultValue={martyr?.fullName}
                 />
 
@@ -268,6 +270,12 @@ export default function MartyrDetail() {
                     defaultValue={martyr?.name}
                   />
                 </Group>
+
+                <TextInput
+                  label="Bí danh"
+                  name="codeName"
+                  defaultValue={martyr?.codeName}
+                />
 
                 <Group grow>
                   <NumberInput
@@ -302,7 +310,7 @@ export default function MartyrDetail() {
                 <Group grow>
                   <TextInput
                     label="Quê quán"
-                    name="hometown"
+                    name="homeTown"
                     defaultValue={martyr?.hometown}
                   />
                   <TextInput
@@ -321,12 +329,6 @@ export default function MartyrDetail() {
                   label="Nơi quy tập"
                   name="placeOfExhumation"
                   defaultValue={martyr?.placeOfExhumation}
-                />
-
-                <TextInput
-                  label="Hàng mộ"
-                  name="graveRow"
-                  defaultValue={martyr?.graveRow}
                 />
               </Stack>
             </Group>

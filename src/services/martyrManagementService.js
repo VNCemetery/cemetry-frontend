@@ -30,17 +30,14 @@ export const updateMartyr = async (id, data) => {
     const jsonData = {};
     const formData = new FormData();
 
-    Object.keys(data).forEach((key) => {
-      if (key === "image" && data[key] instanceof File) {
-        formData.append("image", data[key]);
-      } else if (key === "dateOfDeath" && data[key]) {
-        jsonData[key] = data[key].toISOString().split("T")[0];
-      } else if (data[key] !== null && data[key] !== undefined) {
+    // Convert formData to JSON
+    for (const key in data) {
+      if (data[key] instanceof File) {
+        formData.append(key, data[key]);
+      } else {
         jsonData[key] = data[key];
       }
-    });
-
-    formData.append("data", JSON.stringify(jsonData));
+    }
 
     const response = await martyrApi.protected().post("/upsert", jsonData);
     return response.data;
