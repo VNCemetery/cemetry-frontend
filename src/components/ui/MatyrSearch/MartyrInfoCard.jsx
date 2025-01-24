@@ -16,7 +16,7 @@ export default function MartyrInfoCard({
 }) {
   return (
     <Card radius="md" className="bg-white" p="xl" shadow="lg">
-      <Card.Section h={160} />
+      {/* <Card.Section h={160} /> */}
       <Avatar
         size={120}
         radius={120}
