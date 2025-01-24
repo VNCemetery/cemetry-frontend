@@ -63,7 +63,7 @@ export default function MapViewPage({
     const markerEl = document.createElement("div");
     markerEl.className = "bg-transparent w-8 scale-300 h-8";
     markerEl.innerHTML = `
-<svg class="navigation-arrow" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+<svg className="navigation-arrow" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
   <circle cx="16.058" cy="23.799" r="7.295" fill="#4285F4" stroke="white" style="stroke-width: 0.5px;"></circle>
   <path d="M 16 0.476 L 26.818 19.272 L 16 13.633 L 5.182 19.272 L 16 0.476 Z" fill="#4285F4" stroke="white" style="stroke-width: 0.5px;"></path>
 </svg>
@@ -183,7 +183,7 @@ export default function MapViewPage({
 
     // Add popup
     const popup = new maplibregl.Popup({ offset: 25 }).setHTML(
-      '<div class="text-sm font-medium">Bạn đang ở đây</div>'
+      '<div className="text-sm font-medium">Bạn đang ở đây</div>'
     );
 
     tempMarker.setPopup(popup);
@@ -243,23 +243,6 @@ export default function MapViewPage({
           }
         `}
       </style>
-
-      <button
-        onClick={centerOnLocation}
-        className="fixed bottom-20 right-5 bg-white/90 p-3 rounded-full shadow-md z-[2] hover:bg-white/100 center-location-button"
-        aria-label="Center on current location"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          className="w-6 h-6"
-        >
-          <circle cx="12" cy="12" r="3" strokeWidth="2" />
-          <path d="M12 2v3m0 14v3M2 12h3m14 0h3" strokeWidth="2" />
-        </svg>
-      </button>
 
       {isSelectingLocation && (
         <Paper

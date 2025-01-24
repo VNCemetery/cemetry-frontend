@@ -1,286 +1,170 @@
-import { Container, Grid, SimpleGrid } from "@mantine/core";
-import MartyrInfoCard from "./MartyrInfoCard";
 import {
-  FiUser,
-  FiCalendar,
-  FiHome,
-  FiNavigation,
-  FiMap,
-  FiFileText,
-  FiFlag,
-  FiMapPin,
-  FiInfo,
-} from "react-icons/fi";
-import classes from "./BadgeCard.module.css";
-import {
-  ActionIcon,
-  Badge,
-  Button,
+  Container,
+  Grid,
+  Skeleton,
   Card,
-  Group,
   Image,
   Text,
+  Badge,
+  Button,
+  Group,
+  Table,
+  ScrollArea,
+  Stack,
 } from "@mantine/core";
-import { MdDirections } from "react-icons/md";
+import MartyrInfoCard from "./MartyrInfoCard";
+import { BiDirections, BiMap, BiNote } from "react-icons/bi";
+import { FaDirections } from "react-icons/fa";
+import { BsFillPersonFill } from "react-icons/bs";
+import { MdMilitaryTech } from "react-icons/md";
+import { IoLocation } from "react-icons/io5";
 
-const MartyrDetail = ({ martyr, onRoute }) => {
-  const PRIMARY_COL_HEIGHT = "300px";
-  const SECONDARY_COL_HEIGHT = `calc(${PRIMARY_COL_HEIGHT} / 2 - var(--mantine-spacing-md) / 2)`;
-
+export default function MartyrDetail({ martyr, onRoute }) {
   return (
-    <Container my="md">
-      <div height={PRIMARY_COL_HEIGHT}>
-        <MartyrInfoCard {...martyr} />
-      </div>
+    <div className="h-screen w-full p-4">
+      <div className="h-full w-full grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* First Column */}
+        <div className="p-4 rounded-lg border-2 border-gray-300 shadow-lg bg-white">
+          <MartyrInfoCard {...martyr} />
+        </div>
 
-      <Grid gutter="md">
-        <Grid.Col>
-          <Card
-            withBorder
-            radius="md"
-            p="md"
-            className={classes.card}
-            sx={{ borderColor: "#228be6" }}
+        {/* Second Column */}
+        <div className="flex flex-col gap-4 items-center justify-center p-6 rounded-lg border-2 border-gray-300 shadow-lg bg-white">
+          <Text className="text-3xl font-black mb-4 text-blue-900">
+            NƠI AN NGHỈ
+          </Text>
+          <Table
+            highlightOnHover
+            withColumnBorders
+            variant="vertical"
+            layout="fixed"
+            withTableBorder
+            className="text-2xl"
+            styles={{
+              th: { padding: "16px", background: "#f8f9fa", fontSize: "22px" },
+              td: { padding: "16px", fontSize: "22px" },
+            }}
           >
-            <Card.Section className={classes.section}>
-              <Text mt="md" className={classes.label} c="blue">
-                9 Vị trí an nghỉ
-              </Text>
-              <Group gap={7} mt={5}>
-                <Badge color="blue">Khu {martyr.areaName}</Badge>
-                <Badge color="blue">Hàng {martyr.rowName}</Badge>
-              </Group>
-            </Card.Section>
+            <Table.Tbody>
+              <Table.Tr>
+                <Table.Th w={160}>KHU</Table.Th>
+                <Table.Td>{martyr.graveRow.areaName}</Table.Td>
+              </Table.Tr>
 
-            <Group mt="xs">
-              <Button
-                radius="md"
-                style={{ flex: 1 }}
-                color="blue"
-                onClick={onRoute}
-                className="flex items-center justify-center"
-                fullWidth
-                size="md"
-                variant="filled"
-              >
-                <Text>Chỉ đường</Text>
-                <FiNavigation className="m-2" />
-              </Button>
-            </Group>
-          </Card>
-        </Grid.Col>
+              <Table.Tr>
+                <Table.Th>HÀNG</Table.Th>
+                <Table.Td>{martyr.graveRow.rowName}</Table.Td>
+              </Table.Tr>
 
-        <Grid.Col>
-          <Card
-            withBorder
-            radius="md"
-            p="md"
-            className={classes.card}
-            sx={{ borderColor: "#40c057" }}
+              <Table.Tr>
+                <Table.Th>MỘ</Table.Th>
+                <Table.Td>{martyr.graveCode}</Table.Td>
+              </Table.Tr>
+            </Table.Tbody>
+          </Table>
+          <Button
+            onClick={() => onRoute()}
+            rightSection={<FaDirections size={24} />}
+            size="xl"
+            className="w-full mt-4 text-2xl py-4"
+            styles={{ root: { height: "60px" } }}
           >
-            <Card.Section className={classes.section}>
-              <Text mt="md" className={classes.label} c="green">
-                Thông tin cá nhân
-              </Text>
-              <div className="space-y-4 mt-4">
-                <Grid align="center">
-                  <Grid.Col
-                    span={2}
-                    className="flex items-center justify-center"
-                  >
-                    <FiUser size={24} className="text-green-500" />
-                  </Grid.Col>
-                  <Grid.Col span={10}>
-                    <Text size="sm">
-                      <Text span fw={500}>
-                        Họ và tên:{" "}
-                      </Text>
-                      {martyr.fullName}
-                    </Text>
-                    {martyr.codeName && (
-                      <Text size="xs" c="dimmed">
-                        <Text span fw={500}>
-                          Bí danh:{" "}
-                        </Text>
-                        {martyr.codeName}
-                      </Text>
-                    )}
-                  </Grid.Col>
-                </Grid>
+            CHỈ ĐƯỜNG
+          </Button>
+        </div>
 
-                <Grid align="center">
-                  <Grid.Col
-                    span={2}
-                    className="flex items-center justify-center"
-                  >
-                    <FiCalendar size={24} className="text-green-500" />
-                  </Grid.Col>
-                  <Grid.Col span={10}>
-                    <Text size="sm">
-                      <Text span fw={500}>
-                        Năm sinh:{" "}
-                      </Text>
-                      {martyr.yearOfBirth || "Chưa có thông tin"}
-                    </Text>
-                  </Grid.Col>
-                </Grid>
-
-                <Grid align="center">
-                  <Grid.Col
-                    span={2}
-                    className="flex items-center justify-center"
-                  >
-                    <FiHome size={24} className="text-green-500" />
-                  </Grid.Col>
-                  <Grid.Col span={10}>
-                    <Text size="sm">
-                      <Text span fw={500}>
-                        Quê quán:{" "}
-                      </Text>
-                      {martyr.homeTown || "Chưa có thông tin"}
-                    </Text>
-                  </Grid.Col>
-                </Grid>
-
-                <Grid align="center">
-                  <Grid.Col
-                    span={2}
-                    className="flex items-center justify-center"
-                  >
-                    <FiMapPin size={24} className="text-green-500" />
-                  </Grid.Col>
-                  <Grid.Col span={10}>
-                    <Text size="sm">
-                      <Text span fw={500}>
-                        Địa chỉ:{" "}
-                      </Text>
-                      {martyr.commune && martyr.district
-                        ? `${martyr.commune}, ${martyr.district}`
-                        : "Chưa có thông tin"}
-                    </Text>
-                  </Grid.Col>
-                </Grid>
-              </div>
-            </Card.Section>
-          </Card>
-        </Grid.Col>
-
-        <Grid.Col>
-          <Card
-            withBorder
-            radius="md"
-            p="md"
-            className={classes.card}
-            sx={{ borderColor: "#fd7e14" }}
-          >
-            <Card.Section className={classes.section}>
-              <Text mt="md" className={classes.label} c="orange">
-                Thông tin quân ngũ
-              </Text>
-              <div className="space-y-4 mt-4">
-                <Grid align="center">
-                  <Grid.Col
-                    span={2}
-                    className="flex items-center justify-center"
-                  >
-                    <FiFlag size={24} className="text-orange-500" />
-                  </Grid.Col>
-                  <Grid.Col span={10}>
-                    <Text size="sm">
-                      <Text span fw={500}>
-                        Chức vụ - Đơn vị:{" "}
-                      </Text>
-                      {martyr.rankPositionUnit || "Chưa có thông tin"}
-                    </Text>
-                  </Grid.Col>
-                </Grid>
-
-                <Grid align="center">
-                  <Grid.Col
-                    span={2}
-                    className="flex items-center justify-center"
-                  >
-                    <FiCalendar size={24} className="text-orange-500" />
-                  </Grid.Col>
-                  <Grid.Col span={10}>
-                    <Text size="sm">
-                      <Text span fw={500}>
-                        Ngày nhập ngũ:{" "}
-                      </Text>
-                      {martyr.dateOfEnlistment || "Chưa có thông tin"}
-                    </Text>
-                  </Grid.Col>
-                </Grid>
-
-                <Grid align="center">
-                  <Grid.Col
-                    span={2}
-                    className="flex items-center justify-center"
-                  >
-                    <FiCalendar size={24} className="text-orange-500" />
-                  </Grid.Col>
-                  <Grid.Col span={10}>
-                    <Text size="sm">
-                      <Text span fw={500}>
-                        Ngày hy sinh:{" "}
-                      </Text>
-                      {martyr.dateOfDeath || "Chưa có thông tin"}
-                    </Text>
-                  </Grid.Col>
-                </Grid>
-
-                <Grid align="center">
-                  <Grid.Col
-                    span={2}
-                    className="flex items-center justify-center"
-                  >
-                    <FiMap size={24} className="text-orange-500" />
-                  </Grid.Col>
-                  <Grid.Col span={10}>
-                    <Text size="sm">
-                      <Text span fw={500}>
-                        Nơi quy tập:{" "}
-                      </Text>
-                      {martyr.placeOfExhumation || "Chưa có thông tin"}
-                    </Text>
-                  </Grid.Col>
-                </Grid>
-              </div>
-            </Card.Section>
-          </Card>
-        </Grid.Col>
-
-        {martyr.note && (
-          <Grid.Col>
+        {/* Third Column */}
+        <div className="flex flex-col gap-6">
+          {[
+            "THÔNG TIN CÁ NHÂN",
+            "THÔNG TIN QUÂN NGŨ",
+            "THÔNG TIN ĐỊA LÝ",
+            "GHI CHÚ THÊM",
+          ].map((title, index) => (
             <Card
-              withBorder
-              radius="md"
-              p="md"
-              className={classes.card}
-              sx={{ borderColor: "#868e96" }}
+              key={index}
+              className="border-2 border-gray-300 shadow-lg bg-white p-4"
             >
-              <Card.Section className={classes.section}>
-                <Text mt="md" className={classes.label} c="gray">
-                  Ghi chú
+              <Group mb="lg">
+                {index === 0 && <BsFillPersonFill size={32} />}
+                {index === 1 && <MdMilitaryTech size={32} />}
+                {index === 2 && <IoLocation size={32} />}
+                {index === 3 && <BiNote size={32} />}
+                <Text className="text-2xl font-bold text-blue-900">
+                  {title}
                 </Text>
-                <Grid align="center">
-                  <Grid.Col
-                    span={2}
-                    className="flex items-center justify-center"
-                  >
-                    <FiInfo size={24} className="text-gray-500" />
-                  </Grid.Col>
-                  <Grid.Col span={10}>
-                    <Text size="sm">{martyr.note}</Text>
-                  </Grid.Col>
-                </Grid>
-              </Card.Section>
+              </Group>
+              <Table
+                withBorder
+                withColumnBorders
+                styles={{
+                  th: {
+                    padding: "16px",
+                    background: "#f8f9fa",
+                    fontSize: "20px",
+                    whiteSpace: "nowrap",
+                  },
+                  td: { padding: "16px", fontSize: "20px" },
+                }}
+              >
+                {index === 0 && (
+                  <Table.Tbody>
+                    <Table.Tr>
+                      <Table.Th>Tên thường gọi</Table.Th>
+                      <Table.Td>{martyr.name || "Không có thông tin"}</Table.Td>
+                    </Table.Tr>
+                    <Table.Tr>
+                      <Table.Th>Bí danh</Table.Th>
+                      <Table.Td>
+                        {martyr.codeName || "Không có thông tin"}
+                      </Table.Td>
+                    </Table.Tr>
+                  </Table.Tbody>
+                )}
+                {index === 1 && (
+                  <Table.Tbody>
+                    <Table.Tr>
+                      <Table.Th>Ngày nhập ngũ</Table.Th>
+                      <Table.Td>
+                        {martyr.dateOfEnlistment || "Không có thông tin"}
+                      </Table.Td>
+                    </Table.Tr>
+                    <Table.Tr>
+                      <Table.Th>Chức vụ - Đơn vị</Table.Th>
+                      <Table.Td>
+                        {martyr.rankPositionUnit || "Không có thông tin"}
+                      </Table.Td>
+                    </Table.Tr>
+                  </Table.Tbody>
+                )}
+                {index === 2 && (
+                  <Table.Tbody>
+                    <Table.Tr>
+                      <Table.Th>Nơi quy tập</Table.Th>
+                      <Table.Td>
+                        {martyr.placeOfExhumation || "Không có thông tin"}
+                      </Table.Td>
+                    </Table.Tr>
+                    <Table.Tr>
+                      <Table.Th>Địa chỉ chi tiết</Table.Th>
+                      <Table.Td>
+                        {[martyr.commune, martyr.district]
+                          .filter(Boolean)
+                          .join(", ") || "Không có thông tin"}
+                      </Table.Td>
+                    </Table.Tr>
+                  </Table.Tbody>
+                )}
+                {index === 3 && (
+                  <Text fz="md" c={martyr.note ? "dark" : "dimmed"}>
+                    {martyr.note || "Không có ghi chú thêm"}
+                  </Text>
+                )}
+              </Table>
             </Card>
-          </Grid.Col>
-        )}
-      </Grid>
-    </Container>
+          ))}
+        </div>
+      </div>
+    </div>
   );
-};
-
-export default MartyrDetail;
+}

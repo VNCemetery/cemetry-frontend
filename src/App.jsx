@@ -52,14 +52,13 @@ export default function App() {
         <BrowserRouter>
           <Routes>
             {/* Client Routes */}
-            <Route path="/" element={<ClientAppLayout />}>
-              <Route index element={<RoutingPage />} />
+            <Route path="/*" element={<ClientAppLayout />}>
+              {/* <Route index element={<RoutingPage />} />
               <Route
                 path="map"
-                element={<MapPage center={[21.028511, 105.804817]} zoom={13} />}
+                element={}
               />
-              <Route path="news" element={<NewsPage />} />
-              <Route path="contact" element={<AboutProjectPage />} />
+              <Route path="contact" element={<AboutProjectPage />} /> */}
             </Route>
 
             {/* Admin Routes */}

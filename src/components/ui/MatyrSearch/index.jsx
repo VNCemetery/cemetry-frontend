@@ -29,7 +29,12 @@ import {
   Collapse,
 } from "@mantine/core";
 import VIETNAM_LOGO from "../../../assets/VIETNAM_FLAG_LOGO.png";
-import { BiMicrophone, BiSearch, BiSolidInfoCircle } from "react-icons/bi";
+import {
+  BiLeftArrow,
+  BiMicrophone,
+  BiSearch,
+  BiSolidInfoCircle,
+} from "react-icons/bi";
 import { MdDirections, MdShare } from "react-icons/md";
 import { useEffect, useRef, useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
@@ -45,34 +50,25 @@ import { useMatyrStore } from "../../../store/useMatyrStore";
 import { useForm } from "@mantine/form";
 import { buildFilterFormQuery } from "../../../utils/queryBuilder";
 import { FiMoreHorizontal } from "react-icons/fi";
-import { MdMyLocation } from "react-icons/md";
 import { FiMap } from "react-icons/fi"; // Add this import
-import { color } from "chart.js/helpers";
+import SearchPopupModal from "./SearchPopupModal";
+import MartyrBriefInfo from "./MartyrBriefInfo";
 
 const MatyrSearch = ({ onRouteFromCurrentLocation, onSelectLocationOnMap }) => {
-  const headerWrapperRef = useRef(null);
   const searchInputRef = useRef(null);
-
+  const headerRef = useRef(null);
   const [searchKey, setSearchKey] = useState("");
-
-  const [opened, { open, close }] = useDisclosure(false);
-  const [
-    opened_record_modal,
-    { open: open_record_modal, close: close_record_modal },
-  ] = useDisclosure(false);
-
+  const [opened, { open: openSearchPopup, close: closeSearchPopup }] =
+    useDisclosure(false);
   const [searchResults, setSearchResults] = useState(null);
-
   const [showAutoSuggestions, setShowAutoSuggestions] = useState(false);
-  const [showSearchResults, setShowSearchResults] = useState(false);
   const [isLoadingSearchResults, setIsLoadingSearchResults] = useState(false);
-
   const loadMatyrs = useMatyrStore((state) => state.loadMatyrs);
   const clearMartrys = useMatyrStore((state) => state.clearMartrys);
+  const [currentPage, setCurrentPage] = useState(0);
 
-  const [currentPage, setCurrentPage] = useState(1);
+  const [showSearchResults, setShowSearchResults] = useState(false);
 
-  const [searchSession, setSearchSession] = useState("");
   const handleSearch = async ({
     name = "",
     page = 0,
@@ -81,25 +77,17 @@ const MatyrSearch = ({ onRouteFromCurrentLocation, onSelectLocationOnMap }) => {
   }) => {
     try {
       setFilterQuery(filters);
-      // Hide auto suggestions
       setShowAutoSuggestions(false);
-      // Set loading
       setIsLoadingSearchResults(true);
-      // Clear search results
       setSearchResults(null);
       const results = await loadMatyrs(name, page, size, filters);
-      // If content is null
-
       if (!results) {
         setSearchResults(null);
-        // Throw error
         throw new Error("No result found");
       }
       setSearchResults(results);
       console.log("Kết quả tìm kiếm:", results);
       setShowSearchResults(true);
-      // Set uuid to search session
-      setSearchSession(Math.random().toString(36).substring(7));
       setIsLoadingSearchResults(false);
     } catch (error) {
       console.error("Lỗi khi tìm kiếm:", error);
@@ -110,7 +98,6 @@ const MatyrSearch = ({ onRouteFromCurrentLocation, onSelectLocationOnMap }) => {
   };
 
   const { grave_rows } = useInfoStore();
-
   const [filterQuery, setFilterQuery] = useState({});
   const [
     showFilterSetting,
@@ -134,6 +121,7 @@ const MatyrSearch = ({ onRouteFromCurrentLocation, onSelectLocationOnMap }) => {
       // If content is null
       if (!content) {
         setAutoSuggestions([]);
+        setShowAutoSuggestions(true);
         // Throw error
         throw new Error("No content found");
       }
@@ -146,8 +134,6 @@ const MatyrSearch = ({ onRouteFromCurrentLocation, onSelectLocationOnMap }) => {
       setIsLoadingAutoSuggestions(false);
     }
   };
-
-  const [activeTab, setActiveTab] = useState("info");
 
   useEffect(() => {
     if (searchKey.length > 0) {
@@ -171,80 +157,94 @@ const MatyrSearch = ({ onRouteFromCurrentLocation, onSelectLocationOnMap }) => {
     mode: "uncontrolled",
   });
 
-  // Add closePopover to useDisclosure hooks
-  const [popoverOpened, { close: closePopover, open: openPopover }] =
-    useDisclosure();
-
-  // Add new state for routing options
-  const [showRoutingOptions, setShowRoutingOptions] = useState(false);
+  const [offsetHeight, setOffsetHeight] = useState(0);
+  useEffect(() => {
+    if (headerRef?.current?.offsetHeight === 0) {
+      return;
+    }
+    setOffsetHeight(headerRef.current.offsetHeight);
+  }, []);
 
   return (
     <>
-      <div className="">
-        {" "}
-        <Modal
-          offset={8}
-          radius="md"
-          fullScreen={true}
-          opened={showMartyrDetail}
-          onClose={closeMartyrDetail}
-          title="Thông tin liệt sĩ"
-        >
-          <MartyrDetail
-            martyr={selectedMartyr}
-            onRoute={() => {
-              closeMartyrDetail();
-              setShowRoutingOptions(true);
-            }}
-          />
-          {/* Drawer content */}
-        </Modal>{" "}
-        <Modal
-          style={{
-            zIndex: 99999999,
+      <Modal
+        offset={8}
+        radius="md"
+        fullScreen={true}
+        opened={showMartyrDetail}
+        onClose={closeMartyrDetail}
+        title="Thông tin liệt sĩ"
+      >
+        <MartyrDetail
+          martyr={selectedMartyr}
+          onRoute={() => {
+            closeMartyrDetail();
+            setShowRoutingOptions(true);
           }}
-          opened={opened_record_modal}
-          onClose={close_record_modal}
-          title="Tìm kiếm bằng giọng nói"
-          centered
+        />
+      </Modal>{" "}
+      <div className="z-[4]">
+        <div
+          ref={headerRef}
+          className={`fixed top-0  left-0 ${
+            !opened ? "transparent" : "bg-white"
+          } right-0 z-[4]`}
         >
-          Tôi vẫn đang nghe
-          {/* Modal content */}
-        </Modal>
-        <div className="z-[4] ">
-          <div
-            ref={headerWrapperRef}
-            className={`fixed top-0  left-0 ${
-              !opened ? "transparent" : "bg-white"
-            } right-0 z-[4]`}
-          >
-            {selectedMartyr ? (
-              <div className="flex flex-col w-full">
-                <div className="flex items-center bg-white rounded-full m-2 p-2">
-                  <ActionIcon
-                    variant="transparent"
-                    color="blue"
-                    onClick={() => {
-                      selectMartyr(null);
-                      setShowRoutingOptions(false);
-                    }}
-                  >
-                    <BsArrowLeft
-                      style={{ width: "70%", height: "70%" }}
-                      stroke={1.5}
-                    />
-                  </ActionIcon>
-                  <div className="flex-1 ml-2">
-                    <Text fw={500}>
-                      <span className="text-gray-400">Liệt sĩ </span>
-                      {selectedMartyr.fullName}
-                    </Text>
-                    <Text c="dimmed" fz="xs">
-                      {selectedMartyr.homeTown || "Chưa có thông tin quê quán"}
-                    </Text>
+          {!opened && !(selectedMartyr === null) ? (
+            <div className="flex flex-col w-full">
+              <div className="rounded-xl m-2 p-2">
+                <Button
+                  size="lg"
+                  onClick={() => {
+                    selectMartyr(null);
+                    // setShowRoutingOptions(false);
+                    openSearchPopup();
+                    // Change focus to input
+                    searchInputRef.current.focus();
+                  }}
+                  variant="filled"
+                  leftSection={<BsArrowLeft size={24} />}
+                >
+                  Trở về
+                </Button>
+
+                {/* <div className="flex-1 ml-1">
+                    <Flex gap={2}>
+                      <Text size="xl" fw={700} className="text-gray-600">
+                        Liệt sĩ:{" "}
+                      </Text>
+                      <Text size="xl" fw={700} className="text-blue-600">
+                        {selectedMartyr.fullName}
+                      </Text>
+                    </Flex>
+                    <div className="mt-0">
+                      {selectedMartyr.rankPositionUnit && (
+                        <Text size="lg" fw={500}>
+                          {selectedMartyr.rankPositionUnit}
+                        </Text>
+                      )}
+
+                      <div className="flex flex-col mt-0">
+                        <Text size="md" c="dimmed" fw={500}>
+                          Khu {selectedMartyr.graveRow?.areaName || "---"}
+                        </Text>
+                        <Text size="md" c="dimmed" fw={500}>
+                          Hàng {selectedMartyr.graveRow?.rowName || "---"}
+                        </Text>
+                        <Text size="md" c="dimmed" fw={500}>
+                          Mộ số {selectedMartyr.graveCode || "---"}
+                        </Text>
+                      </div>
+
+                      {selectedMartyr.homeTown && (
+                        <Text size="md" c="dimmed" fw={500}>
+                          Quê quán: {selectedMartyr.homeTown}
+                        </Text>
+                      )}
+                    </div>
                   </div>
                   <div className="flex gap-2 items-center">
-                    <ActionIcon
+                    <ActionIconf
                       variant="filled"
                       color="green"
                       radius="xl"
@@ -309,9 +309,9 @@ const MatyrSearch = ({ onRouteFromCurrentLocation, onSelectLocationOnMap }) => {
                         </Stack>
                       </Popover.Dropdown>
                     </Popover>
-                  </div>
-                </div>
-
+                  </div> */}
+              </div>
+              {/* 
                 <Collapse in={showRoutingOptions}>
                   <div className="px-4 pb-2 flex flex-col gap-2">
                     <Button
@@ -343,499 +343,146 @@ const MatyrSearch = ({ onRouteFromCurrentLocation, onSelectLocationOnMap }) => {
                       Chọn vị trí
                     </Button>
                   </div>
-                </Collapse>
-              </div>
-            ) : (
-              <div className="items-center flex gap-1 bg-white rounded-full m-2">
-                <div className="flex items-center w-full text-gray-600   w-full p-1 gap-1">
-                  {!opened ? (
-                    <ActionIcon
-                      variant="transparent"
-                      color="gray"
-                      aria-label="Settings"
-                      onClick={() => {
-                        open();
-                        // Change focus to input
-                        searchInputRef.current.focus();
-                      }}
-                    >
-                      <BiSearch
-                        style={{ width: "70%", height: "70%" }}
-                        stroke={1.5}
-                      />
-                    </ActionIcon>
-                  ) : (
-                    <ActionIcon
-                      variant="transparent"
-                      color="blue"
-                      aria-label="Settings"
-                      onClick={() => {
-                        // Check if auto suggestions is shown
-                        if (showAutoSuggestions) {
-                          setShowAutoSuggestions(false);
-                          return;
-                        }
-                        close();
-
-                        close_record_modal();
-
-                        // stop focus to input
-                        searchInputRef.current.blur();
-                      }}
-                    >
-                      <BsArrowLeft
-                        style={{ width: "70%", height: "70%" }}
-                        stroke={1.5}
-                      />
-                    </ActionIcon>
-                  )}
-                  <Input
-                    ref={searchInputRef}
+                </Collapse> */}
+            </div>
+          ) : (
+            <div className="items-center flex gap-1 bg-white rounded-2xl  m-[.25rem]">
+              <div className="flex items-center w-full text-gray-600   w-full p-1 gap-1">
+                {!opened ? (
+                  <ActionIcon
+                    variant="transparent"
+                    color="gray"
+                    aria-label="Settings"
                     onClick={() => {
-                      if (!opened) {
-                        open();
-                        // Change focus to input
-                        searchInputRef.current.focus();
+                      openSearchPopup();
+                      searchInputRef.current.focus();
+                    }}
+                  >
+                    <BiSearch
+                      style={{ width: "70%", height: "70%" }}
+                      stroke={1.5}
+                    />
+                  </ActionIcon>
+                ) : (
+                  <ActionIcon
+                    variant="filled"
+                    size={"lg"}
+                    radius={"xl"}
+                    color="blue"
+                    aria-label="Settings"
+                    onClick={() => {
+                      if (
+                        showAutoSuggestions &&
+                        searchResults?.content?.length > 0
+                      ) {
+                        setAutoSuggestions([]);
+                        setShowAutoSuggestions(false);
+                      } else {
+                        // Check if auto suggestions is shown
+                        setSearchKey("");
+                        setShowAutoSuggestions(false);
+                        setSearchResults(null);
+                        closeSearchPopup();
+                        close_record_modal();
                       }
+
+                      // stop focus to input
+                      searchInputRef.current.blur();
                     }}
-                    value={searchKey}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        handleSearch({ name: searchKey });
-                      }
-                    }}
-                    rightSectionPointerEvents="all"
-                    onChange={(e) => {
-                      setSearchKey(e.target.value);
-                    }}
-                    radius="xl"
-                    style={{
-                      border: "none",
-                      outline: "none",
-                      boxShadow: "none",
-                    }}
-                    className="w-full  border-none"
-                    placeholder="Nhập tên liệt sĩ"
-                    rightSection={
-                      searchKey.length > 0 ? (
-                        <CloseIcon
-                          aria-label="Clear input"
-                          className="mr-2"
-                          onClick={() => {
-                            setSearchKey("");
-                            searchInputRef.current.focus();
-                          }}
-                          style={{ display: searchKey ? undefined : "none" }}
-                        />
-                      ) : (
-                        <ActionIcon
-                          variant="transparent"
-                          color="gray"
-                          aria-label="Settings"
-                          onClick={() => {
-                            // Clear search input
-
-                            open();
-
-                            // Change focus to input
-                            searchInputRef.current.focus();
-
-                            // Open record modal
-                            open_record_modal();
-
-                            // Focus again
-                          }}
-                        >
-                          <BiMicrophone
-                            style={{ width: "70%", height: "70%" }}
-                            stroke={1.5}
-                          />
-                        </ActionIcon>
-                      )
-                    }
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {opened && (
-        <div className="bg-white h-screen  z-[3] absolute top-0 w-full">
-          <div>
-            {/* Create virtual margin */}
-            <div
-              className="py-6 bg-white "
-              style={{
-                height: headerWrapperRef?.current?.offsetHeight || 0,
-              }}
-            ></div>
-
-            <div className="h-full bg-white">
-              <div className="px-2 flex flex-col  gap-2">
-                {/* Search recommendations */}
-                {showAutoSuggestions && (
-                  <div className="overflow-auto fixed bg-white h-screen pb-24  fixed z-[9999] w-full">
-                    <div
-                      className="border-[1px] mb-1 border-gray-200 rounded-2xl p-2 hover:bg-gray-100 cursor-pointer"
-                      onClick={() => {
-                        // Clear cache
-                        clearMartrys();
-                        setCurrentPage(1);
-
-                        filterForm.initialize({
-                          fullName: searchKey,
-                          yearOfBirth: "",
-                          dateOfDeath: "",
-                          homeTown: "",
-                        });
-                        handleSearch({ name: searchKey });
-                      }}
-                    >
-                      {" "}
-                      <Group gap="sm">
-                        <Text c="blue">
-                          <BiSearch />
-                        </Text>
-                        <Text fw={"bold"} fz="lg" c="gray">
-                          Tìm liệt sĩ có tên
-                        </Text>
-                        <div>
-                          <Text fw={"bolder"} fz="lg" c="blue">
-                            {searchKey}
-                          </Text>
-                        </div>
-                      </Group>
-                    </div>
-                    {isLoadingAutoSuggestions ? (
-                      <div className="bg-white ">
-                        <div className="flex gap-2 py-4 px-2 items-center justify-center">
-                          <Loader size={30} />
-                          <Text>Đang tải...</Text>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="bg-white flex flex-col gap-1">
-                        {autoSuggestions?.length > 0 && (
-                          <Flex gap={2} align="center">
-                            <Text fz="md" fw={500} c="gray" className="p-2">
-                              Gợi ý tìm kiếm
-                            </Text>
-                            <Text fz="sm" c="gray">
-                              <FaMagic />
-                            </Text>
-                          </Flex>
-                        )}
-
-                        {autoSuggestions.map((item) => (
-                          <SearchResultEntry
-                            item={item}
-                            selectItem={() => {
-                              close();
-                              selectMartyr(item);
-                              openMartyrDetail();
-                            }}
-                          />
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                  >
+                    <BsArrowLeft
+                      style={{ width: "70%", height: "70%" }}
+                      stroke={1.5}
+                    />
+                  </ActionIcon>
                 )}
-                {/* Show search results */}
-                <Modal
-                  opened={showFilterSetting}
-                  onClose={closeFilterSetting}
-                  title="Bộ lọc"
-                  fullScreen
-                  radius={0}
-                  transitionProps={{ transition: "fade", duration: 200 }}
-                >
-                  <form
-                    onSubmit={filterForm.onSubmit((values) => {
-                      // transform values with filters
-                      let flattenFilters = flattenObject(filters);
-                      const queryData = {
-                        ...values,
-                        ...flattenFilters,
-                      };
-
-                      // Build API query
-                      const filters_query = buildFilterFormQuery(queryData);
-                      // Clear cache
-                      clearMartrys();
-                      setCurrentPage(1);
+                <Input
+                  ref={searchInputRef}
+                  onClick={() => {
+                    if (!opened) {
+                      openSearchPopup();
+                      searchInputRef.current.focus();
+                    }
+                  }}
+                  value={searchKey}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      setCurrentPage(0);
+                      setAutoSuggestions([]);
+                      setShowAutoSuggestions(false);
                       handleSearch({
-                        name: searchKey,
+                        name: e.target.value,
                         page: 0,
                         size: DEFAULT_SEARCH_SIZE,
-                        filters: filters_query,
+                        ...filters,
                       });
-                      closeFilterSetting();
-                    })}
-                  >
-                    <div className="min-h-[80vh] overflow-auto">
-                      <Tabs value={activeTab} onChange={setActiveTab}>
-                        <Tabs.List>
-                          <Tabs.Tab value="info">Thông tin</Tabs.Tab>
-                          <Tabs.Tab value="position">Vị trí</Tabs.Tab>
-                        </Tabs.List>
-
-                        <Tabs.Panel value="info">
-                          <div className="flex flex-col gap-2 py-2">
-                            <Text>Năm sinh - năm mất</Text>
-                            <Flex gap={4}>
-                              <NumberInput
-                                key={filterForm.key("yearOfBirth")}
-                                {...filterForm.getInputProps("yearOfBirth")}
-                                min={1800}
-                                max={2024}
-                                radius="lg"
-                                placeholder="Năm sinh"
-                              />
-                              <NumberInput
-                                min={1800}
-                                max={2024}
-                                key={filterForm.key("dateOfDeath")}
-                                {...filterForm.getInputProps("dateOfDeath")}
-                                radius="lg"
-                                placeholder="Năm mất "
-                              />
-                            </Flex>
-                          </div>
-                          <div className="flex flex-col gap-2 py-2">
-                            <Text>Quê quán</Text>
-                            <Input
-                              radius={"lg"}
-                              key={filterForm.key("homeTown")}
-                              {...filterForm.getInputProps("homeTown")}
-                              placeholder="Ví dụ: Đồng Tháp"
-                            />
-                          </div>
-                        </Tabs.Panel>
-                        <Tabs.Panel value="position">
-                          <div className="flex flex-col gap-2 py-2">
-                            <Text>Khu</Text>
-                            <SelectDropdownSearch
-                              placeholder="Tìm khu"
-                              description="Chọn khu"
-                              value={filters.graveRow.areaName}
-                              setValue={(value) => {
-                                setFilters({
-                                  ...filters,
-                                  graveRow: {
-                                    areaName: value,
-                                    rowName: "",
-                                  },
-                                });
-                              }}
-                              data={grave_rows ? Object.keys(grave_rows) : []}
-                            />
-                          </div>{" "}
-                          <div className="flex flex-col gap-2 py-2">
-                            <Text>Hàng</Text>
-                            <SelectDropdownSearch
-                              description={"Chọn hàng"}
-                              placeholder="Tìm hàng"
-                              setValue={(value) => {
-                                setFilters({
-                                  ...filters,
-                                  graveRow: {
-                                    ...filters.graveRow,
-                                    rowName: value,
-                                  },
-                                });
-                              }}
-                              data={
-                                grave_rows &&
-                                grave_rows[filters.graveRow.areaName]
-                                  ? grave_rows[filters.graveRow.areaName].map(
-                                      (item) => item.rowName
-                                    )
-                                  : []
-                              }
-                              value={filters.graveRow.rowName}
-                            />
-                          </div>{" "}
-                        </Tabs.Panel>
-                      </Tabs>
-                    </div>
-
-                    <div className="border-b-0 border-l-0 border-r-0 border-[1px] flex gap-2 justify-end px-4 absolute bottom-0  py-4 z-[999] w-full left-0">
-                      <Button
-                        onClick={() => {
-                          // Reset filterForm
-                          filterForm.reset();
-                          // Clear cache
-                          clearMartrys();
-                          setCurrentPage(1);
-                          handleSearch({
-                            name: searchKey,
-                            page: 0,
-                            size: DEFAULT_SEARCH_SIZE,
-                          });
-
-                          // Reset local filters
-                          setFilters({
-                            graveRow: {
-                              areaName: "",
-                              rowName: "",
-                            },
-                          });
-                        }}
-                        variant="light"
-                        size="md"
-                        radius={"xl"}
-                        fullWidth={true}
-                      >
-                        Xóa
-                      </Button>
-                      <Button
-                        size="md"
-                        type="submit"
-                        radius={"xl"}
-                        fullWidth={true}
-                      >
-                        Áp dụng
-                      </Button>
-                    </div>
-                  </form>
-                </Modal>
-                <div className="bg-white  bg-red-400">
-                  {/* {searchSession} */}
-                  {
-                    // Loading
-                    isLoadingSearchResults ? (
-                      <div className="bg-white ">
-                        <div className="flex gap-2 py-4 px-2 items-center justify-center">
-                          <Loader size={30} />
-                          <Text>Đang tìm kiếm...</Text>
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        {/* Filters */}
-                        <div class="flex flex-row gap-4 overflow-y-auto pb-2">
-                          <div>
-                            <Button
-                              onClick={() => {
-                                setActiveTab("info");
-                                openFilterSetting();
-                              }}
-                              radius={"xl"}
-                              variant="filled"
-                            >
-                              <Flex gap={2} justify={"center"} align={"center"}>
-                                <Text c="white">Bộ lọc</Text>
-                                <Text c="white">
-                                  <HiAdjustments />
-                                </Text>
-                              </Flex>
-                            </Button>
-                          </div>
-                        </div>
-                        {searchResults ? (
-                          <>
-                            {searchResults?.content?.length > 0 ? (
-                              <>
-                                <Flex gap={4} m={4} align="center">
-                                  <Text c="gray">Tìm thấy </Text>
-                                  <Text c="blue" fw={700}>
-                                    {searchResults?.totalElements} kết quả
-                                  </Text>
-                                </Flex>
-                                {searchResults?.content.map((item) => (
-                                  <SearchResultEntry
-                                    item={item}
-                                    selectItem={() => {
-                                      close();
-                                      selectMartyr(item);
-                                      openMartyrDetail();
-                                    }}
-                                  />
-                                ))}{" "}
-                                <div className="flex justify-center w-full pb-4 px-8">
-                                  <Pagination
-                                    value={currentPage}
-                                    onChange={(value) => {
-                                      setCurrentPage(value);
-                                      handleSearch({
-                                        name: searchKey,
-                                        page: value - 1,
-                                        size: DEFAULT_SEARCH_SIZE,
-                                        filters: filterQuery,
-                                      });
-                                    }}
-                                    total={searchResults?.totalPages}
-                                    size="xl"
-                                    radius="xl"
-                                    siblings={1}
-                                  />
-                                </div>
-                                <div className="flex justify-center h-[4rem]"></div>
-                              </>
-                            ) : (
-                              <>
-                                <div className="flex flex-col gap-2 pt-24 px-2 items-center justify-center">
-                                  <Text size="xl" c="gray">
-                                    Không tìm thấy kết quả phù hợp
-                                  </Text>
-                                  <>
-                                    <div className="flex gap-2 py-4 px-2 flex-col gap-2 items-center justify-center">
-                                      <Text>
-                                        Bạn có thể thử các thao tác nhanh
-                                      </Text>
-                                      <div className="flex flex-col gap-2">
-                                        <Button
-                                          color="orange"
-                                          radius={"xl"}
-                                          size="xl"
-                                        >
-                                          Thử tìm theo khu
-                                        </Button>
-                                        <Button
-                                          color="green"
-                                          radius={"xl"}
-                                          size="xl"
-                                        >
-                                          Hiển thị toàn bộ danh sách
-                                        </Button>
-                                      </div>
-                                    </div>
-                                  </>
-                                </div>
-                              </>
-                            )}
-                          </>
-                        ) : (
-                          <>
-                            <div className="flex gap-2 py-4 px-2 flex-col gap-2 items-center justify-center">
-                              <Text>Bạn có thể thử các thao tách nhanh</Text>
-                              <div className="flex flex-col gap-2">
-                                <Button
-                                  onClick={() => {
-                                    setActiveTab("position");
-
-                                    openFilterSetting();
-                                  }}
-                                  color="orange"
-                                  radius={"xl"}
-                                  size="xl"
-                                >
-                                  Thử tìm theo khu
-                                </Button>{" "}
-                              </div>
-                            </div>
-                          </>
-                        )}
-                      </>
-                    )
+                    }
+                  }}
+                  rightSectionPointerEvents="all"
+                  onChange={(e) => {
+                    setSearchKey(e.target.value);
+                  }}
+                  radius="lg"
+                  style={{
+                    border: "none",
+                    outline: "none",
+                    boxShadow: "none",
+                  }}
+                  size="md"
+                  className="w-full  border-none text-[2rem]"
+                  placeholder="Nhập tên liệt sĩ"
+                  rightSection={
+                    <CloseIcon
+                      aria-label="Clear input"
+                      className="mr-2"
+                      onClick={() => {
+                        setSearchKey("");
+                        searchInputRef.current.focus();
+                      }}
+                      style={{ display: searchKey ? undefined : "none" }}
+                    />
                   }
-                </div>
+                />
               </div>
             </div>
-          </div>
+          )}
         </div>
+      </div>
+      <MartyrBriefInfo
+        martyr={selectedMartyr}
+        onViewDetail={openMartyrDetail}
+        onShowRoute={onRouteFromCurrentLocation}
+      />
+      {opened && (
+        <SearchPopupModal
+          offSetHeight={offsetHeight}
+          filters={filters}
+          autoSuggestions={autoSuggestions}
+          setFilters={setFilters}
+          grave_rows={grave_rows}
+          clearMartrys={clearMartrys}
+          setCurrentPage={setCurrentPage}
+          currentPage={currentPage}
+          handleSearch={handleSearch}
+          filterForm={filterForm}
+          setSearchKey={(value) => setSearchKey(value)}
+          isLoadingSearchResults={isLoadingSearchResults}
+          showFilterSetting={showFilterSetting}
+          closeFilterSetting={closeFilterSetting}
+          isLoadingAutoSuggestions={isLoadingAutoSuggestions}
+          showAutoSuggestions={showAutoSuggestions}
+          searchKey={searchKey}
+          setShowAutoSuggestions={setShowAutoSuggestions}
+          setAutoSuggestions={setAutoSuggestions}
+          openFilterSetting={openFilterSetting}
+          selectMartyr={selectMartyr}
+          openMartyrDetail={openMartyrDetail}
+          openSearchPopup={openSearchPopup}
+          closeSearchPopup={closeSearchPopup}
+          setFilterQuery={setFilterQuery}
+          filterQuery={filterQuery}
+          searchResults={searchResults}
+        />
       )}
     </>
   );

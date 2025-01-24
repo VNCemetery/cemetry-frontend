@@ -1,37 +1,46 @@
 import { ActionIcon, Button, Flex, Group } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
-import { FaMapMarkerAlt, FaPhone } from "react-icons/fa";
-import { FaAccusoft, FaEarDeaf } from "react-icons/fa6";
 import { useLocation, useNavigate, useNavigation } from "react-router";
+import { tabarItems } from "../../constants/tabarItems.jsx";
 
-export default function TabBar({ items, currentItem }) {
+export default function TabBar({ currentPath, updateCurrentPath }) {
   const navigate = useNavigate();
   const matches = useMediaQuery("(min-width: 768px)");
-  const { pathname } = useLocation();
+
+  // Create variable to check condition currentItem
+
   return (
-    <div className="">
-      <div className="gap-2 flex py-1 w-full justify-between">
-        {items.map((item) => {
-          return (
-            <button
-              key={item.to}
-              className={`flex py-2 gap-1 transition-all ease-in-out border-[1px] duration-50 justify-center   items-center w-full rounded-lg  ${
-                item.to === pathname ? "text-blue-500 " : "text-slate-500"
-              } 
- 
-               ${matches ? "flex-row" : "flex-col"}
-             
-              `}
-              onClick={() => navigate(item.to)}
+    <div className="flex text-blue-900 bg-gray-100 px-2 gap-2 h-full flex-row items-center justify-center py-1">
+      {tabarItems.map((item) => {
+        const isActive = item.to === currentPath;
+        return (
+          <div
+            key={item.to}
+            onClick={() => {
+              updateCurrentPath(item.to);
+              navigate(item.to, { replace: true });
+            }}
+            className="flex h-full cursor-pointer flex-col  rounded-xl border-[1px]  w-full max-w-[9rem] flex "
+          >
+            <div
+              className={`h-full text-gray-600 ${
+                isActive
+                  ? "text-blue-700 bg-blue-200 border-[1px] border-blue-400"
+                  : "text-blue-900"
+              } flex justify-center py-3 rounded-2xl mx-2`}
             >
-              {item.icon}
-              {item.to === pathname && (
-                <span className="text-[.9rem] font-bold">{item.label}</span>
-              )}
-            </button>
-          );
-        })}
-      </div>
+              {isActive ? item.filled : item.outline}
+            </div>
+            <div
+              className={`h-full text-[1rem] text-center ${
+                isActive ? "font-extrabold" : "font-normal"
+              }`}
+            >
+              {item.label}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
