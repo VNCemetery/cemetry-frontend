@@ -55,6 +55,8 @@ const SearchPopupModal = ({
   setAutoSuggestions,
   offSetHeight,
   filterQuery,
+  openRoutingHandlerPopup,
+  onSelectMartyrHandler,
 }) => {
   const [
     showFilterSetting,
@@ -274,7 +276,7 @@ const SearchPopupModal = ({
                 });
               }}
             >
-              Tìm kiếm
+              TÌM KIẾM
             </Button>
           </div>
           {isLoadingAutoSuggestions ? (
@@ -288,10 +290,8 @@ const SearchPopupModal = ({
                 <SearchResultEntry
                   item={item}
                   match={searchKey}
-                  selectItem={async () => {
-                    closeSearchPopup();
-                    selectMartyr(item);
-                    openMartyrDetail();
+                  selectItem={() => {
+                    onSelectMartyrHandler(item);
                   }}
                 />
               ))}
@@ -308,7 +308,7 @@ const SearchPopupModal = ({
       )}
 
       {/* Show search result section */}
-      {!showAutoSuggestions && searchResults && (
+      {!showAutoSuggestions && (searchResults || isLoadingSearchResults) && (
         <>
           {isLoadingSearchResults ? (
             <Loading />
@@ -317,6 +317,16 @@ const SearchPopupModal = ({
               <>
                 {searchResults?.content?.length > 0 ? (
                   <>
+                    <div className="flex justify-start gap-2">
+                      <Button
+                        className="text-xl"
+                        onClick={() => {
+                          openFilterSetting();
+                        }}
+                      >
+                        Bộ lọc
+                      </Button>
+                    </div>
                     <Flex gap={4} m={4} align="center">
                       <Text c="black" fw={700}>
                         Đã tìm thấy{" "}
@@ -330,25 +340,29 @@ const SearchPopupModal = ({
                         item={item}
                         key={item.id}
                         selectItem={() => {
-                          closeSearchPopup();
-                          selectMartyr(item);
-                          openMartyrDetail();
+                          onSelectMartyrHandler(item);
                         }}
                       />
                     ))}{" "}
                     <div className="flex justify-center w-full pb-4 px-8">
                       <Pagination
                         value={currentPage == 0 ? 1 : currentPage}
-                        onChange={(value) => {
+                        onChange={async (value) => {
                           setCurrentPage(value);
-                          handleSearch({
+
+                          await handleSearch({
                             name: searchKey,
                             page: value - 1,
                           });
+
+                          // Scroll to bottom with smooth behavior
+                          window.scrollTo({
+                            top: document.documentElement.scrollHeight,
+                          });
                         }}
                         total={searchResults?.totalPages}
-                        size="xl"
-                        radius="xl"
+                        size="md"
+                        radius="md"
                         siblings={1}
                       />
                     </div>
@@ -365,8 +379,19 @@ const SearchPopupModal = ({
                           <Text>Bạn có thể thử các thao tác nhanh</Text>
                           <div className="flex flex-col gap-2">
                             <Button
+                              onClick={() => {
+                                openFilterSetting();
+                              }}
+                              size="xl"
+                              radius="md"
+                              leftSection={<HiAdjustments size={20} />}
+                              className="shadow-md"
+                            >
+                              Chọn khu vực tìm kiếm
+                            </Button>
+                            <Button
                               color="green"
-                              radius={"xl"}
+                              radius={"md"}
                               size="xl"
                               onClick={() => {
                                 setAutoSuggestions([]);
@@ -394,15 +419,8 @@ const SearchPopupModal = ({
       )}
 
       {/* Empty state when no suggestions or results */}
-      {!(showAutoSuggestions || searchResults) && (
+      {!(showAutoSuggestions || searchResults) && !isLoadingSearchResults && (
         <div className="flex h-full flex-col items-center justify-center text-center">
-          <BiSearch size={64} className="text-blue-500 mb-4" />
-          <Text className="text-xl mb-2 font-medium">
-            Bạn muốn tìm liệt sĩ?
-          </Text>
-          <Text className="text-gray-600 text-lg mb-6">
-            Bạn có thể tìm theo tên hoặc chọn khu vực để dễ dàng tìm kiếm
-          </Text>
           <Button
             onClick={() => {
               openFilterSetting();
@@ -414,6 +432,14 @@ const SearchPopupModal = ({
           >
             Chọn khu vực tìm kiếm
           </Button>
+          <BiSearch size={64} className="text-blue-500 my-8" />
+
+          <Text className="text-xl mb-2 font-medium">
+            Bạn muốn tìm liệt sĩ?
+          </Text>
+          <Text className="text-gray-600 text-lg mb-6">
+            Bạn có thể tìm theo tên hoặc chọn khu vực để dễ dàng tìm kiếm
+          </Text>
         </div>
       )}
     </div>

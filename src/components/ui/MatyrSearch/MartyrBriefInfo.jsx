@@ -1,8 +1,15 @@
-import { Paper, Text, Button, Group, Stack } from "@mantine/core";
+import { Paper, Text, Button, Group, Stack, ActionIcon } from "@mantine/core";
 import { BiSolidInfoCircle } from "react-icons/bi";
+import { IoClose } from "react-icons/io5";
 import { MdDirections } from "react-icons/md";
 
-const MartyrBriefInfo = ({ martyr, onViewDetail, onShowRoute }) => {
+const MartyrBriefInfo = ({
+  martyr,
+  onViewDetail,
+  onShowRoute,
+  closeBrief,
+  openRoutingHandlerPopup,
+}) => {
   if (!martyr) return null;
 
   return (
@@ -22,6 +29,15 @@ const MartyrBriefInfo = ({ martyr, onViewDetail, onShowRoute }) => {
             <Text size="24px" fw={700} className="text-blue-700 mb-2">
               {martyr.fullName}
             </Text>
+
+            <ActionIcon
+              color="gray"
+              radius="xl"
+              size={"lg"}
+              className="absolute top-0 right-0 m-2"
+            >
+              <IoClose size={24} onClick={closeBrief} />
+            </ActionIcon>
           </div>
 
           <table className="w-full mb-0 border-collapse">
@@ -47,22 +63,20 @@ const MartyrBriefInfo = ({ martyr, onViewDetail, onShowRoute }) => {
 
         <Group grow spacing="sm">
           <Button
-            size="xl"
+            size="lg"
             variant="filled"
-            className="py-4"
             leftSection={<BiSolidInfoCircle size={24} />}
             onClick={onViewDetail}
           >
-            Chi tiết
+            CHI TIẾT
           </Button>
           <Button
-            size="xl"
+            size="lg"
             color="green"
-            className="py-4"
             leftSection={<MdDirections size={24} />}
-            onClick={onShowRoute}
+            onClick={openRoutingHandlerPopup}
           >
-            Chỉ đường
+            CHỈ ĐƯỜNG
           </Button>
         </Group>
       </Stack>

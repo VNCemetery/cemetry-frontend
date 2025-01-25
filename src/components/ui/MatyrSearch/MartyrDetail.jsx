@@ -14,12 +14,28 @@ import {
 } from "@mantine/core";
 import MartyrInfoCard from "./MartyrInfoCard";
 import { BiDirections, BiMap, BiNote } from "react-icons/bi";
-import { FaDirections } from "react-icons/fa";
+import { FaDirections, FaShare } from "react-icons/fa";
 import { BsFillPersonFill } from "react-icons/bs";
 import { MdMilitaryTech } from "react-icons/md";
 import { IoLocation } from "react-icons/io5";
 
 export default function MartyrDetail({ martyr, onRoute }) {
+  const handleShare = async () => {
+    const shareUrl = window.location.href;
+    const shareData = {
+      title: `Thông tin liệt sĩ ${martyr.name}`,
+      text: `Thông tin chi tiết về liệt sĩ ${martyr.name}`,
+      url: shareUrl,
+    };
+
+    try {
+      await navigator.share(shareData);
+      resultPara.textContent = "Cảm ơn bạn đã chia sẻ!";
+    } catch (err) {
+      resultPara.textContent = `Lỗi: ${err}`;
+    }
+  };
+
   return (
     <div className="h-screen w-full p-4">
       <div className="h-full w-full grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -62,14 +78,23 @@ export default function MartyrDetail({ martyr, onRoute }) {
               </Table.Tr>
             </Table.Tbody>
           </Table>
+
           <Button
             onClick={() => onRoute()}
             rightSection={<FaDirections size={24} />}
             size="xl"
-            className="w-full mt-4 text-2xl py-4"
-            styles={{ root: { height: "60px" } }}
+            className="py-4 w-full"
           >
             CHỈ ĐƯỜNG
+          </Button>
+          <Button
+            size="xl"
+            color="green"
+            className="py-4 w-full"
+            rightSection={<FaShare size={24} />}
+            onClick={handleShare}
+          >
+            CHIA SẺ
           </Button>
         </div>
 

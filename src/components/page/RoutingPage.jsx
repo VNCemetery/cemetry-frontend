@@ -5,25 +5,16 @@ import { findPath, provideFeedback } from "../../services/pathFindingService";
 import { useInfoStore } from "../../store/useInfoStore";
 import { useMatyrStore } from "../../store/useMatyrStore";
 import { useMapStore } from "../../store/useMapStore";
-import { Paper, ActionIcon, Text } from "@mantine/core";
+import { Paper, ActionIcon, Text, Modal } from "@mantine/core";
 import { FaThumbsUp, FaThumbsDown } from "react-icons/fa";
 import { notifications } from "@mantine/notifications";
-
 export default function RoutingPage() {
-  // Move refs here
   const mapContainer = useRef(null);
   const map = useRef(null);
   const markerRef = useRef(null);
   const markerElementRef = useRef(null);
   const previousRotationRef = useRef(0);
   const totalRotationRef = useRef(0);
-
-  const [viewport, setViewport] = useState({
-    latitude: 10.461780290048,
-    longitude: 105.645622290328,
-    bearing: 50,
-    zoom: 5,
-  });
 
   const mapInstance = useRef(null);
   const [isSelectingLocation, setIsSelectingLocation] = useState(false);
@@ -242,22 +233,6 @@ export default function RoutingPage() {
 
   const { findGraveRowIdByName } = useInfoStore();
   const { selectedMartyr } = useMatyrStore();
-  const handleShowTestRoute = async () => {
-    if (!mapInstance.current) return;
-    if (!selectedMartyr) return;
-    // Example coordinates for testing
-    const start = [105.644921898426, 10.461701682269];
-    let graveRowId = findGraveRowIdByName(selectedMartyr.rowName);
-    let currentLocation = {
-      latitude: start[1],
-      longitude: start[0],
-    };
-    let data = await findPath(currentLocation, graveRowId);
-    let coordinates = data?.features[0].geometry.coordinates;
-    let end = coordinates[coordinates.length - 1];
-    showRoute(start, end, [start, ...coordinates], data);
-    // After drawing route, show feedback UI
-  };
 
   const {
     currentPosition: currentLocation,
@@ -272,7 +247,9 @@ export default function RoutingPage() {
       // Get current position
 
       const start = [currentLocation.longitude, currentLocation.latitude];
-      let graveRowId = findGraveRowIdByName(selectedMartyr.rowName);
+      let graveRowId =
+        selectedMartyr.graveRow.id ||
+        findGraveRowIdByName(selectedMartyr.rowName, selectedMartyr.areaName);
 
       let data = await findPath(currentLocation, graveRowId);
       let coordinates = data?.features[0].geometry.coordinates;
@@ -313,6 +290,27 @@ export default function RoutingPage() {
   return (
     <div className="h-full relative">
       <MatyrSearch
+        onClearRoute={() => {
+          setShowLocationMarker(false);
+          setCurrentPath(null);
+          setShowFeedback(false);
+          // Clear route on mapInstance
+          // Clean up existing layers
+          ["route", "route-case", "route-start", "route-end"].forEach(
+            (layer) => {
+              if (map.current.getLayer(layer)) {
+                map.current.removeLayer(layer);
+              }
+            }
+          );
+
+          // Clean up existing sources
+          ["route", "start-point", "end-point"].forEach((source) => {
+            if (map.current.getSource(source)) {
+              map.current.removeSource(source);
+            }
+          });
+        }}
         onRouteFromCurrentLocation={handleRouteFromCurrentLocation}
         onSelectLocationOnMap={handleStartLocationSelection}
       />

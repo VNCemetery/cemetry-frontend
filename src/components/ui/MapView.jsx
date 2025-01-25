@@ -3,7 +3,7 @@ import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useMapStore } from "../../store/useMapStore";
 import { Paper, Text } from "@mantine/core";
-import { HiOutlineCursorClick } from "react-icons/hi";
+import { HiLocationMarker, HiMap, HiOutlineCursorClick } from "react-icons/hi";
 
 export default function MapViewPage({
   mapContainer,
@@ -19,9 +19,9 @@ export default function MapViewPage({
   showSelectionMarker = false,
   currentPosition,
 }) {
-  const lng = 105.644921898426;
-  const lat = 10.461701682269;
-  const zoom = 17.3;
+  const lng = 105.645323;
+  const lat = 10.461975;
+  const zoom = 17.5;
   const mapUrl = import.meta.env.VITE_MAPTILES_URL;
   const mapKey = import.meta.env.VITE_MAPTILES_KEY;
 
@@ -63,7 +63,7 @@ export default function MapViewPage({
     const markerEl = document.createElement("div");
     markerEl.className = "bg-transparent w-8 scale-300 h-8";
     markerEl.innerHTML = `
-<svg className="navigation-arrow" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+<svg class="navigation-arrow" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
   <circle cx="16.058" cy="23.799" r="7.295" fill="#4285F4" stroke="white" style="stroke-width: 0.5px;"></circle>
   <path d="M 16 0.476 L 26.818 19.272 L 16 13.633 L 5.182 19.272 L 16 0.476 Z" fill="#4285F4" stroke="white" style="stroke-width: 0.5px;"></path>
 </svg>
@@ -91,7 +91,6 @@ export default function MapViewPage({
   useEffect(() => {
     const handleOrientation = (event) => {
       let heading = event.webkitCompassHeading || Math.abs(event.alpha - 360);
-
       // Calculate continuous rotation
       const previousRotation = previousRotationRef.current;
       let deltaRotation = heading - (previousRotation % 360);
@@ -107,7 +106,6 @@ export default function MapViewPage({
       previousRotationRef.current = heading;
 
       setCurrentHeading(heading);
-
       // Update marker rotation with continuous value
       if (markerElementRef.current) {
         const arrow =
@@ -121,7 +119,6 @@ export default function MapViewPage({
     const isIOS =
       navigator.userAgent.match(/(iPod|iPhone|iPad)/) &&
       navigator.userAgent.match(/AppleWebKit/);
-
     if (isIOS) {
       let isSupported =
         typeof window.DeviceOrientationEvent.requestPermission != "undefined";
@@ -241,35 +238,50 @@ export default function MapViewPage({
           .center-location-button:active {
             transform: scale(0.95);
           }
+          @media (max-width: 640px) {
+            .navigation-arrow {
+              width: 28px;
+              height: 28px;
+            }
+          }
         `}
       </style>
 
       {isSelectingLocation && (
-        <Paper
-          className="fixed top-20 left-1/2 transform -translate-x-1/2 px-6 py-3 
-            rounded-full shadow-lg z-[1000] bg-white/95 backdrop-blur-sm
-            border border-gray-200 hover:shadow-xl transition-shadow"
-        >
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <HiOutlineCursorClick className="text-blue-500 w-5 h-5 " />
-              <Text size="sm" fw={500} className="text-gray-700">
-                Chọn vị trí trên bản đồ
-              </Text>
+        <div className="absolute inset-x-0 top-0 p-2 md:px-3 md:pt-3 lg:pt-5 lg:px-8 z-[9]">
+          <Paper
+            className="w-full lg:max-w-3xl mx-auto p-3 sm:p-4 
+              rounded-lg md:rounded-xl lg:rounded-2xl 
+              shadow-lg sm:shadow-xl bg-white/95 backdrop-blur-md 
+              border border-blue-100/80 transition-all duration-300"
+          >
+            <div className="flex flex-col md:flex-row items-center justify-between gap-3 md:gap-6">
+              <div className="flex items-center justify-center gap-2 md:gap-3 w-full md:w-auto">
+                <HiLocationMarker className="text-blue-600 w-6 h-6" />
+                <Text
+                  size="md"
+                  fw={600}
+                  className="text-gray-800 leading-tight text-xl text-center"
+                >
+                  Chọn vị trí trên bản đồ
+                </Text>
+              </div>
+              <button
+                onClick={onCancelSelection}
+                className="w-full md:w-auto px-4 py-3 md:py-2.5 
+                  bg-red-50 hover:bg-red-100 text-red-600 
+                  rounded-lg text-base font-medium md:font-semibold
+                  transition-all focus:outline-none focus:ring-2 
+                  focus:ring-red-400 active:scale-98 touch-manipulation"
+              >
+                Hủy chọn
+              </button>
             </div>
-            <div className="w-[1px] h-4 bg-gray-300" />
-            <button
-              onClick={onCancelSelection}
-              className="text-red-500 hover:text-red-600 text-sm font-medium 
-                transition-colors focus:outline-none active:scale-95"
-            >
-              Hủy
-            </button>
-          </div>
-        </Paper>
+          </Paper>
+        </div>
       )}
 
-      <div ref={mapContainer} className="absolute z-[0] w-full h-screen" />
+      <div ref={mapContainer} className="fixed inset-0 w-full h-full z-0" />
     </>
   );
 }

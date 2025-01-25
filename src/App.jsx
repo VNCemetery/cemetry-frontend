@@ -53,12 +53,9 @@ export default function App() {
           <Routes>
             {/* Client Routes */}
             <Route path="/*" element={<ClientAppLayout />}>
-              {/* <Route index element={<RoutingPage />} />
-              <Route
-                path="map"
-                element={}
-              />
-              <Route path="contact" element={<AboutProjectPage />} /> */}
+              <Route index element={<RoutingPage />} />
+              <Route path="map" element={<MapPage />} />
+              <Route path="contact" element={<NewsPage />} />
             </Route>
 
             {/* Admin Routes */}

@@ -1,60 +1,56 @@
-import FloatingSelector from "../FloatingSelector";
 import MartyrDetail from "./MartyrDetail";
 import {
   DEFAULT_AUTO_SUGGEST_SIZE,
   DEFAULT_SEARCH_SIZE,
 } from "../../../utils/constants";
-import { flattenObject } from "../../../utils/objectUtil";
-import { SelectDropdownSearch } from "../SelectDropdownSearch";
 import {
   ActionIcon,
-  AppShell,
-  Avatar,
-  Badge,
-  Card,
   CloseIcon,
-  Drawer,
-  Flex,
-  Group,
   Input,
-  Loader,
   Modal,
-  NumberInput,
-  Pagination,
-  Tabs,
-  Text,
-  Popover,
-  Stack,
   Button,
-  Collapse,
+  Text,
 } from "@mantine/core";
-import VIETNAM_LOGO from "../../../assets/VIETNAM_FLAG_LOGO.png";
-import {
-  BiLeftArrow,
-  BiMicrophone,
-  BiSearch,
-  BiSolidInfoCircle,
-} from "react-icons/bi";
-import { MdDirections, MdShare } from "react-icons/md";
+import { BiSearch } from "react-icons/bi";
 import { useEffect, useRef, useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
-import { FaMagic } from "react-icons/fa";
 import { BsArrowLeft } from "react-icons/bs";
 import { HiLocationMarker } from "react-icons/hi";
 
-import { getMatyrs } from "../../../services/martyrManagementService";
-import { HiAdjustments, HiCheck } from "react-icons/hi";
-import SearchResultEntry from "./SearchResultEntry";
+import {
+  getMartyrById,
+  getMatyrs,
+} from "../../../services/martyrManagementService";
 import { useInfoStore } from "../../../store/useInfoStore";
 import { useMatyrStore } from "../../../store/useMatyrStore";
 import { useForm } from "@mantine/form";
-import { buildFilterFormQuery } from "../../../utils/queryBuilder";
-import { FiMoreHorizontal } from "react-icons/fi";
 import { FiMap } from "react-icons/fi"; // Add this import
 import SearchPopupModal from "./SearchPopupModal";
 import MartyrBriefInfo from "./MartyrBriefInfo";
+import { useLocation } from "react-router-dom";
 
-const MatyrSearch = ({ onRouteFromCurrentLocation, onSelectLocationOnMap }) => {
+const MatyrSearch = ({
+  onClearRoute,
+  onRouteFromCurrentLocation,
+  onSelectLocationOnMap,
+}) => {
+  const { history } = useLocation();
+  const location = useLocation();
+  useEffect(() => {
+    (async () => {
+      const searchParams = new URLSearchParams(location.search);
+      const martyrId = searchParams.get("martyrId");
+      if (martyrId) {
+        // Fetch martyr by id
+        const martyr = await getMartyrById(martyrId);
+        if (martyr) {
+          selectMartyr(martyr);
+          openMartyrDetail();
+        }
+      }
+    })();
+  }, []);
+
   const searchInputRef = useRef(null);
   const headerRef = useRef(null);
   const [searchKey, setSearchKey] = useState("");
@@ -66,7 +62,7 @@ const MatyrSearch = ({ onRouteFromCurrentLocation, onSelectLocationOnMap }) => {
   const loadMatyrs = useMatyrStore((state) => state.loadMatyrs);
   const clearMartrys = useMatyrStore((state) => state.clearMartrys);
   const [currentPage, setCurrentPage] = useState(0);
-
+  const [showRoutingOptions, setShowRoutingOptions] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
 
   const handleSearch = async ({
@@ -80,6 +76,7 @@ const MatyrSearch = ({ onRouteFromCurrentLocation, onSelectLocationOnMap }) => {
       setShowAutoSuggestions(false);
       setIsLoadingSearchResults(true);
       setSearchResults(null);
+
       const results = await loadMatyrs(name, page, size, filters);
       if (!results) {
         setSearchResults(null);
@@ -151,6 +148,7 @@ const MatyrSearch = ({ onRouteFromCurrentLocation, onSelectLocationOnMap }) => {
     },
   });
 
+  const [showReturnToSearch, setShowReturnToSearch] = useState(false);
   const { selectedMartyr, selectMartyr } = useMatyrStore();
 
   const filterForm = useForm({
@@ -163,10 +161,70 @@ const MatyrSearch = ({ onRouteFromCurrentLocation, onSelectLocationOnMap }) => {
       return;
     }
     setOffsetHeight(headerRef.current.offsetHeight);
-  }, []);
+  }, [headerRef?.current?.offSetHeight, showReturnToSearch]);
+
+  const [
+    showRoutingHandlerPopup,
+    { open: openRoutingHandlerPopup, close: closeRoutingHandlerPopup },
+  ] = useDisclosure(false);
+
+  useEffect(() => {
+    let newShowReturnToSearch = !opened && !(selectedMartyr === null);
+    setShowReturnToSearch(newShowReturnToSearch);
+  }, [opened, selectedMartyr]);
+
+  const clearMartyrIdFromUrl = () => {
+    const newUrl = new URL(window.location);
+    newUrl.searchParams.delete("martyrId");
+    window.history.pushState({}, "", newUrl);
+  };
 
   return (
     <>
+      <Modal
+        opened={showRoutingHandlerPopup}
+        onClose={closeRoutingHandlerPopup}
+        centered
+        radius="md"
+      >
+        <div className="px-6 pb-4 flex flex-col gap-4">
+          <Text size="xl" className="font-extrabold text-2xl text-center">
+            VỊ TRÍ XUẤT PHÁT
+          </Text>
+          <Button
+            fullWidth
+            size="xl"
+            variant="filled"
+            color="blue"
+            radius="md"
+            className="py-4"
+            leftSection={<FiMap size={28} />}
+            onClick={() => {
+              setShowRoutingOptions(false);
+              closeRoutingHandlerPopup();
+              onRouteFromCurrentLocation();
+            }}
+          >
+            <span className="text-lg">Từ vị trí hiện tại</span>
+          </Button>
+          <Button
+            size="xl"
+            variant="filled"
+            radius="md"
+            fullWidth
+            className="py-4"
+            color="gray"
+            leftSection={<HiLocationMarker size={28} />}
+            onClick={() => {
+              closeRoutingHandlerPopup();
+              onSelectLocationOnMap();
+              setShowRoutingOptions(false);
+            }}
+          >
+            <span className="text-lg">Chọn vị trí khác</span>
+          </Button>
+        </div>
+      </Modal>
       <Modal
         offset={8}
         radius="md"
@@ -180,6 +238,7 @@ const MatyrSearch = ({ onRouteFromCurrentLocation, onSelectLocationOnMap }) => {
           onRoute={() => {
             closeMartyrDetail();
             setShowRoutingOptions(true);
+            openRoutingHandlerPopup();
           }}
         />
       </Modal>{" "}
@@ -190,162 +249,32 @@ const MatyrSearch = ({ onRouteFromCurrentLocation, onSelectLocationOnMap }) => {
             !opened ? "transparent" : "bg-white"
           } right-0 z-[4]`}
         >
-          {!opened && !(selectedMartyr === null) ? (
-            <div className="flex flex-col w-full">
+          {showReturnToSearch && (
+            <div
+              className="flex flex-col w-full"
+              style={{
+                height: offsetHeight,
+              }}
+            >
               <div className="rounded-xl m-2 p-2">
                 <Button
                   size="lg"
                   onClick={() => {
                     selectMartyr(null);
-                    // setShowRoutingOptions(false);
+                    clearMartyrIdFromUrl();
                     openSearchPopup();
-                    // Change focus to input
                     searchInputRef.current.focus();
                   }}
                   variant="filled"
                   leftSection={<BsArrowLeft size={24} />}
                 >
-                  Trở về
+                  TRỞ VỀ
                 </Button>
-
-                {/* <div className="flex-1 ml-1">
-                    <Flex gap={2}>
-                      <Text size="xl" fw={700} className="text-gray-600">
-                        Liệt sĩ:{" "}
-                      </Text>
-                      <Text size="xl" fw={700} className="text-blue-600">
-                        {selectedMartyr.fullName}
-                      </Text>
-                    </Flex>
-                    <div className="mt-0">
-                      {selectedMartyr.rankPositionUnit && (
-                        <Text size="lg" fw={500}>
-                          {selectedMartyr.rankPositionUnit}
-                        </Text>
-                      )}
-
-                      <div className="flex flex-col mt-0">
-                        <Text size="md" c="dimmed" fw={500}>
-                          Khu {selectedMartyr.graveRow?.areaName || "---"}
-                        </Text>
-                        <Text size="md" c="dimmed" fw={500}>
-                          Hàng {selectedMartyr.graveRow?.rowName || "---"}
-                        </Text>
-                        <Text size="md" c="dimmed" fw={500}>
-                          Mộ số {selectedMartyr.graveCode || "---"}
-                        </Text>
-                      </div>
-
-                      {selectedMartyr.homeTown && (
-                        <Text size="md" c="dimmed" fw={500}>
-                          Quê quán: {selectedMartyr.homeTown}
-                        </Text>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex gap-2 items-center">
-                    <ActionIconf
-                      variant="filled"
-                      color="green"
-                      radius="xl"
-                      size="lg"
-                      className={`hover:scale-110 transition-transform ${
-                        showRoutingOptions ? "rotate-180" : ""
-                      }`}
-                      onClick={() => setShowRoutingOptions(!showRoutingOptions)}
-                    >
-                      <MdDirections size={24} className="text-white" />
-                    </ActionIcon>
-
-                    <Popover
-                      position="bottom-end"
-                      shadow="md"
-                      opened={popoverOpened}
-                      onChange={closePopover}
-                    >
-                      <Popover.Target>
-                        <ActionIcon
-                          variant="filled"
-                          color="blue"
-                          radius="xl"
-                          size="lg"
-                          className="hover:scale-110 transition-transform"
-                          onClick={openPopover}
-                        >
-                          <FiMoreHorizontal size={24} className="text-white" />
-                        </ActionIcon>
-                      </Popover.Target>
-                      <Popover.Dropdown>
-                        <Stack gap="xs">
-                          <Text size="sm" fw={500} c="dimmed">
-                            Tùy chọn
-                          </Text>
-                          <Button
-                            variant="filled"
-                            color="blue"
-                            fullWidth
-                            leftSection={<BiSolidInfoCircle size={16} />}
-                            onClick={() => {
-                              openMartyrDetail();
-                              closePopover();
-                            }}
-                          >
-                            Xem chi tiết
-                          </Button>
-                          <Text size="sm" fw={500} c="dimmed">
-                            Thao tác khác
-                          </Text>
-                          <Button
-                            variant="light"
-                            color="gray"
-                            fullWidth
-                            leftSection={<MdShare size={16} />}
-                            onClick={() => {
-                              closePopover();
-                            }}
-                          >
-                            Chia sẻ thông tin
-                          </Button>
-                        </Stack>
-                      </Popover.Dropdown>
-                    </Popover>
-                  </div> */}
               </div>
-              {/* 
-                <Collapse in={showRoutingOptions}>
-                  <div className="px-4 pb-2 flex flex-col gap-2">
-                    <Button
-                      fullWidth
-                      variant="white"
-                      color="blue"
-                      radius="xl"
-                      leftSection={
-                        <FiMap size={20} className="text-blue-500" />
-                      }
-                      onClick={() => {
-                        setShowRoutingOptions(false);
-                        onRouteFromCurrentLocation();
-                      }}
-                    >
-                      Tìm đường
-                    </Button>
-                    <Button
-                      variant="white"
-                      radius="xl"
-                      fullWidth
-                      color="gray"
-                      leftSection={<HiLocationMarker size={20} />}
-                      onClick={() => {
-                        onSelectLocationOnMap();
-                        setShowRoutingOptions(false);
-                      }}
-                    >
-                      Chọn vị trí
-                    </Button>
-                  </div>
-                </Collapse> */}
             </div>
-          ) : (
+          )}
+
+          {!showReturnToSearch && (
             <div className="items-center flex gap-1 bg-white rounded-2xl  m-[.25rem]">
               <div className="flex items-center w-full text-gray-600   w-full p-1 gap-1">
                 {!opened ? (
@@ -378,16 +307,14 @@ const MatyrSearch = ({ onRouteFromCurrentLocation, onSelectLocationOnMap }) => {
                         setAutoSuggestions([]);
                         setShowAutoSuggestions(false);
                       } else {
-                        // Check if auto suggestions is shown
+                        onClearRoute();
+
                         setSearchKey("");
                         setShowAutoSuggestions(false);
                         setSearchResults(null);
                         closeSearchPopup();
                         close_record_modal();
                       }
-
-                      // stop focus to input
-                      searchInputRef.current.blur();
                     }}
                   >
                     <BsArrowLeft
@@ -449,6 +376,13 @@ const MatyrSearch = ({ onRouteFromCurrentLocation, onSelectLocationOnMap }) => {
         </div>
       </div>
       <MartyrBriefInfo
+        closeBrief={() => {
+          selectMartyr(null);
+          clearMartyrIdFromUrl();
+          openSearchPopup();
+          searchInputRef.current.focus();
+        }}
+        openRoutingHandlerPopup={openRoutingHandlerPopup}
         martyr={selectedMartyr}
         onViewDetail={openMartyrDetail}
         onShowRoute={onRouteFromCurrentLocation}
@@ -482,6 +416,15 @@ const MatyrSearch = ({ onRouteFromCurrentLocation, onSelectLocationOnMap }) => {
           setFilterQuery={setFilterQuery}
           filterQuery={filterQuery}
           searchResults={searchResults}
+          onSelectMartyrHandler={(martyr) => {
+            closeSearchPopup();
+            selectMartyr(martyr);
+            // Update URL without page reload
+            const newUrl = new URL(window.location);
+            newUrl.searchParams.set("martyrId", martyr.id);
+            window.history.pushState({}, "", newUrl);
+            openMartyrDetail();
+          }}
         />
       )}
     </>

@@ -44,7 +44,8 @@ function ClientAppLayout() {
   return (
     <AppShell>
       <AppShell.Main>
-        <div
+        <Outlet />
+        {/* <div
           className={`
           ${pathname === "/" ? "" : "hidden"}
           `}
@@ -64,7 +65,7 @@ function ClientAppLayout() {
           `}
         >
           <NewsPage />
-        </div>
+        </div> */}
       </AppShell.Main>
       <AppShell.Footer
         style={{
