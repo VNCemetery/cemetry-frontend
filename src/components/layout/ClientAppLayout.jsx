@@ -12,33 +12,60 @@ import { useDisclosure } from "@mantine/hooks";
 import {
   FaGrimace,
   FaInfo,
-  FaMapMarkerAlt,
   FaNewspaper,
+  FaPlus,
+  FaPlusCircle,
   FaSearch,
   FaShare,
   FaUser,
 } from "react-icons/fa";
 import TabBar from "../ui/TabBar";
-import { FaMap, FaSailboat } from "react-icons/fa6";
+import { FaMap, FaLocationDot, FaSailboat } from "react-icons/fa6";
 import { Outlet, useLocation } from "react-router";
 import { BiChevronDown, BiChevronRight, BiSearch } from "react-icons/bi";
 import { CgChevronDoubleDown } from "react-icons/cg";
 import { BsApp, BsAppIndicator } from "react-icons/bs";
+import {
+  TiLocationOutline,
+  TiLocation,
+  TiPlusOutline,
+  TiPlus,
+} from "react-icons/ti";
+import { HiOutlineMap, HiMap } from "react-icons/hi";
+import RoutingPage from "../page/RoutingPage";
+import MapPage from "../page/MapPage";
+import { useState } from "react";
+import NewsPage from "../page/NewsPage";
 
 function ClientAppLayout() {
   const { pathname } = useLocation();
-  const [opened, { toggle }] = useDisclosure();
+  const [currentPath, setCurrentPath] = useState(pathname);
 
   return (
-    <AppShell
-    // navbar={{
-    //   width: 300,
-    //   breakpoint: "sm",
-    //   collapsed: { mobile: !opened },
-    // }}
-    >
+    <AppShell>
       <AppShell.Main>
         <Outlet />
+        {/* <div
+          className={`
+          ${pathname === "/" ? "" : "hidden"}
+          `}
+        >
+          <RoutingPage />
+        </div>
+        <div
+          className={`
+            ${pathname === "/map" ? "" : "hidden"}
+          `}
+        >
+          <MapPage center={[21.028511, 105.804817]} zoom={13} />
+        </div>
+        <div
+          className={`
+            ${pathname === "/contact" ? "" : "hidden"}
+          `}
+        >
+          <NewsPage />
+        </div> */}
       </AppShell.Main>
       <AppShell.Footer
         style={{
@@ -47,29 +74,8 @@ function ClientAppLayout() {
         }}
       >
         <TabBar
-          currentItem={pathname}
-          items={[
-            {
-              icon: <FaMapMarkerAlt />,
-              label: "Chỉ đường",
-              to: "/",
-            },
-            {
-              icon: <FaMap />,
-              label: "Giới thiệu",
-              to: "/map",
-            },
-            {
-              icon: <FaNewspaper />,
-              label: "Tin tức",
-              to: "/news",
-            },
-            {
-              icon: <BsAppIndicator />,
-              label: "Liên hệ",
-              to: "/contact",
-            },
-          ]}
+          updateCurrentPath={(path) => setCurrentPath(path)}
+          currentPath={currentPath}
         />
       </AppShell.Footer>
     </AppShell>

@@ -1,56 +1,64 @@
-import { Avatar, Button, Card, Flex, Group, Text } from "@mantine/core";
-import { FaDirections, FaInfo, FaPrint, FaStar } from "react-icons/fa";
+import { Avatar, Button, Card, Group, Text } from "@mantine/core";
+import classes from "./MartyrInfoCard.module.css";
 
-export default function MartyrInfoCard({ fullName }) {
+const stats = [
+  { value: "34K", label: "Followers" },
+  { value: "187", label: "Follows" },
+  { value: "1.6K", label: "Posts" },
+];
+
+export default function MartyrInfoCard({
+  fullName,
+  homeTown,
+  yearOfBirth,
+  dateOfDeath,
+  rankPositionUnit,
+}) {
   return (
-    <Card
-      padding="xl"
-      withBorder
-      radius="md"
-      p="xl"
-      mb={15}
-      sx={{ borderColor: "#228be6" }}
-    >
+    <Card radius="md" className="bg-white" p="xl" shadow="lg">
+      {/* <Card.Section h={160} /> */}
       <Avatar
-        src=""
-        className="bg-white"
-        size={80}
-        radius={80}
+        size={120}
+        radius={120}
         mx="auto"
-        mt={-20}
+        mt={-40}
+        className={classes.avatar}
+        styles={{
+          root: {
+            border: "4px solid white",
+            boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+          },
+        }}
       />
-      <div className="flex flex-col items-center">
-        <Text ta={"center"}>Liệt sĩ</Text>
-        <Text ta="center" fz="lg" fw={700}>
+      <Text ta="center" mt="xl">
+        <Text c="dark" fw={900} fz={28} mb={15} className="text-blue-900">
+          LIỆT SĨ
+        </Text>
+        <Text c="blue.9" fw={900} fz={32} mb={20} className="text-blue-700">
           {fullName}
         </Text>
-      </div>
-      <Text ta="center" fz="sm" c="dimmed"></Text>
 
-      <div className="flex mt-2 gap-1">
-        <Button
-          color="green"
-          className="flex items-center justify-center "
-          fullWidth
-          radius="md"
-          size="md"
-          variant="filled"
-        >
-          <Text>In thông tin</Text>
-          <FaPrint className="m-2" />
-        </Button>{" "}
-        <Button
-          color="orange"
-          className="flex items-center justify-center "
-          fullWidth
-          radius="md"
-          size="md"
-          variant="filled"
-        >
-          <Text>Đóng góp</Text>
-          <FaStar className="m-2" />
-        </Button>
-      </div>
+        {[
+          { label: "CHỨC VỤ", value: rankPositionUnit },
+          { label: "SINH NĂM", value: yearOfBirth },
+          { label: "NGUYÊN QUÁN", value: homeTown },
+          { label: "NGÀY HY SINH", value: dateOfDeath },
+        ].map(({ label, value }) => (
+          <Text
+            key={label}
+            c="dark"
+            fz={22}
+            fw={500}
+            mb={15}
+            className="bg-gray-50 p-3 rounded-lg"
+          >
+            {label}:{" "}
+            <span style={{ fontWeight: 800 }}>
+              {value || "CHƯA CÓ THÔNG TIN"}
+            </span>
+          </Text>
+        ))}
+      </Text>
     </Card>
   );
 }
