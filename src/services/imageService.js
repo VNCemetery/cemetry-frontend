@@ -1,29 +1,39 @@
 import ApiClient from "../api/apiClient";
 
-const graveRowApi = new ApiClient("/images");
+const imageApi = new ApiClient("/images");
 
-export const uploadImage = async (data) => {
+export const uploadImage = async (file) => {
   try {
     const formData = new FormData();
-    formData.append("file", data);
+    formData.append('file', file);
 
-    const response = await graveRowApi.protected().post("/upload", formData);
-    return response.data;
+    const response = await imageApi.protected().post('/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    return {
+      fileName: response.data.fileName || response.data
+    };
   } catch (error) {
+    console.error('Upload image error:', error);
     throw error;
   }
 };
 
 export const deleteImage = async (fileName) => {
   try {
-    const response = await graveRowApi.protected().delete(`/${fileName}`);
+    const cleanFileName = fileName.replace('/images/', '');
+    const response = await imageApi.protected().delete(`/${cleanFileName}`);
     return response.data;
   } catch (error) {
+    console.error('Delete image error:', error);
     throw error;
   }
 };
 
 export const getImageURL = (imageURL) => {
-  let baseURL = graveRowApi.baseURL;
+  let baseURL = imageApi.baseURL;
   return imageURL ? `${baseURL}/${imageURL}` : null;
 };
