@@ -35,7 +35,7 @@ export const useMatyrStore = create((set, get) => ({
     searchTerm: "",
   },
 
-  loadAdminMartyrs: async (searchTerm = "", page = 1, size = 10) => {
+  loadAdminMartyrs: async (searchTerm = "", page = 1, size = 10, filters = {}) => {
     try {
       set((state) => ({
         adminMartyrs: {
@@ -45,13 +45,19 @@ export const useMatyrStore = create((set, get) => ({
         },
       }));
 
-      const response = await getMatyrs(searchTerm, page - 1, size);
+      const validFilters = {
+        hometown: filters.hometown?.trim() || null,
+        yearOfBirth: filters.yearOfBirth ? filters.yearOfBirth.toString() : null,
+        yearOfDeath: filters.yearOfDeath ? filters.yearOfDeath.toString() : null,
+      };
+
+      const response = await getMatyrs(searchTerm, page - 1, size, validFilters);
 
       set((state) => ({
         adminMartyrs: {
           ...state.adminMartyrs,
           data: response,
-          totalPages: response.totalPages,
+          totalPages: response.totalPages || 0,
           loading: false,
           currentPage: page,
           searchTerm,
@@ -60,14 +66,24 @@ export const useMatyrStore = create((set, get) => ({
 
       return response;
     } catch (error) {
+      console.error("Load martyrs error:", error);
       set((state) => ({
         adminMartyrs: {
           ...state.adminMartyrs,
           loading: false,
-          error: error.message,
+          error: error.message || "Không thể tải danh sách liệt sĩ",
         },
       }));
       throw error;
     }
+  },
+
+  clearAdminCache: () => {
+    set((state) => ({
+      adminMartyrs: {
+        ...state.adminMartyrs,
+        data: null,
+      },
+    }));
   },
 }));

@@ -35,14 +35,43 @@ class ApiClient {
 
     instance.interceptors.request.use(
       (config) => {
-        const currentToken = useAuthStore.getState().accessToken;
-        if (currentToken) {
-          config.headers.Authorization = `Bearer ${currentToken}`;
+        const accessToken = useAuthStore.getState().accessToken;
+        if (accessToken) {
+          config.headers.Authorization = `Bearer ${accessToken}`;
         }
-        console.log("API Request:", config);
         return config;
       },
-      (error) => {
+      (error) => Promise.reject(error)
+    );
+
+    instance.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        const originalRequest = error.config;
+        
+        if (error.response?.status === 401 && !originalRequest._retry) {
+          originalRequest._retry = true;
+          
+          try {
+            const refreshToken = useAuthStore.getState().refreshToken;
+            if (!refreshToken) {
+              throw new Error("No refresh token");
+            }
+
+            const response = await this.public().post("/auth/refresh-token", {
+              refreshToken: refreshToken
+            });
+
+            const { access_token, refresh_token } = response.data;
+            useAuthStore.getState().setTokens(access_token, refresh_token);
+
+            originalRequest.headers.Authorization = `Bearer ${access_token}`;
+            return instance(originalRequest);
+          } catch (refreshError) {
+            useAuthStore.getState().logout();
+            throw refreshError;
+          }
+        }
         return Promise.reject(error);
       }
     );

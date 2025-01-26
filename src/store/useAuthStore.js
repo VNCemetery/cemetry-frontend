@@ -5,16 +5,19 @@ import * as authService from "../services/authService";
 export const useAuthStore = create(
   persist(
     (set, get) => ({
-      // Trạng thái
       accessToken: null,
       refreshToken: null, 
       user: null,
       isLoading: false,
       error: null,
-
-      // Actions
+      isAuthenticated: false,
+      
       setTokens: (accessToken, refreshToken) => {
-        set({ accessToken, refreshToken });
+        set({ 
+          accessToken, 
+          refreshToken,
+          isAuthenticated: true
+        });
       },
 
       setUser: (user) => {
@@ -29,6 +32,7 @@ export const useAuthStore = create(
           set({
             accessToken: response.access_token,
             refreshToken: response.refresh_token,
+            isAuthenticated: true,
             isLoading: false,
           });
 
@@ -36,7 +40,8 @@ export const useAuthStore = create(
         } catch (error) {
           set({ 
             error: "Tên đăng nhập hoặc mật khẩu không đúng",
-            isLoading: false 
+            isLoading: false,
+            isAuthenticated: false
           });
           throw error;
         }
@@ -55,7 +60,8 @@ export const useAuthStore = create(
             accessToken: null,
             refreshToken: null,
             user: null,
-            error: null
+            error: null,
+            isAuthenticated: false
           });
         }
       },
@@ -87,7 +93,8 @@ export const useAuthStore = create(
       partialize: (state) => ({
         accessToken: state.accessToken,
         refreshToken: state.refreshToken,
-        user: state.user
+        user: state.user,
+        isAuthenticated: state.isAuthenticated
       })
     }
   )
