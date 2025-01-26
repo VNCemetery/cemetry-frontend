@@ -25,38 +25,13 @@ import {
 import { FiArrowLeft, FiImage, FiSave, FiTrash2 } from "react-icons/fi";
 import { uploadImage } from "../../../services/imageService";
 
-export default function MartyrDetail() {
-  const { id } = useParams();
-  const navigate = useNavigate();
+export default function MartyrDetail({ martyr: initialMartyr, onSave, onCancel }) {
   const [loading, setLoading] = useState(false);
-  const [martyr, setMartyr] = useState(null);
+  const [martyr, setMartyr] = useState(initialMartyr || null);
   const [dateOfDeath, setDateOfDeath] = useState(null);
-  const [image, setImage] = useState(null);
+  const [image, setImage] = useState(initialMartyr?.image || null);
   const [error, setError] = useState(null);
-  const [imageFile, setImageFile] = useState(null); // Add this state for storing File object
-
-  // Load data khi component mount
-  useEffect(() => {
-    const loadMartyr = async () => {
-      if (!id) return;
-      try {
-        setLoading(true);
-        const data = await getMartyrById(id);
-        setMartyr(data);
-        setImage(data.image);
-      } catch (error) {
-        notifications.show({
-          title: "Lỗi",
-          message: "Không thể tải thông tin liệt sĩ",
-          color: "red",
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadMartyr();
-  }, [id]);
+  const [imageFile, setImageFile] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -67,18 +42,26 @@ export default function MartyrDetail() {
       const formData = new FormData(e.target);
 
       // Validate các trường bắt buộc
-      const requiredFields = ["fullName"];
+      const requiredFields = [
+        { field: "fullName", label: "Họ và tên đầy đủ" }
+      ];
+      
       const missingFields = requiredFields.filter(
-        (field) => !formData.get(field)
+        ({ field }) => !formData.get(field)
       );
 
       if (missingFields.length > 0) {
+        notifications.show({
+          title: "Lỗi",
+          message: `Vui lòng điền: ${missingFields.map(f => f.label).join(", ")}`,
+          color: "red"
+        });
         setError("Vui lòng điền đầy đủ các trường bắt buộc");
         setLoading(false);
         return;
       }
 
-      // Validate năm nếu có nhập
+      // Validate năm sinh và năm nhập ngũ
       const yearOfBirth = formData.get("yearOfBirth")
         ? parseInt(formData.get("yearOfBirth"))
         : null;
@@ -86,34 +69,71 @@ export default function MartyrDetail() {
         ? parseInt(formData.get("yearOfEnlistment"))
         : null;
 
+      if (yearOfBirth && (yearOfBirth < 1900 || yearOfBirth > new Date().getFullYear())) {
+        notifications.show({
+          title: "Lỗi",
+          message: "Năm sinh không hợp lệ (phải từ 1900 đến hiện tại)",
+          color: "red"
+        });
+        setLoading(false);
+        return;
+      }
+
       if (yearOfBirth && yearOfEnlistment && yearOfEnlistment < yearOfBirth) {
+        notifications.show({
+          title: "Lỗi",
+          message: "Năm nhập ngũ không thể nhỏ hơn năm sinh",
+          color: "red"
+        });
         setError("Năm nhập ngũ không thể nhỏ hơn năm sinh");
         setLoading(false);
         return;
       }
 
-      if (
-        dateOfDeath &&
-        yearOfEnlistment &&
-        dateOfDeath.getFullYear() < yearOfEnlistment
-      ) {
-        setError("Ngày hy sinh không thể trước năm nhập ngũ");
-        setLoading(false);
-        return;
+      // Validate ngày hy sinh
+      if (dateOfDeath) {
+        if (yearOfBirth && dateOfDeath.getFullYear() < yearOfBirth) {
+          notifications.show({
+            title: "Lỗi",
+            message: "Ngày hy sinh không thể trước năm sinh",
+            color: "red"
+          });
+          setLoading(false);
+          return;
+        }
+
+        if (yearOfEnlistment && dateOfDeath.getFullYear() < yearOfEnlistment) {
+          notifications.show({
+            title: "Lỗi",
+            message: "Ngày hy sinh không thể trước năm nhập ngũ",
+            color: "red"
+          });
+          setLoading(false);
+          return;
+        }
       }
 
-      // Upload image first if exists
+      // Upload ảnh
       let imageUrl = image;
       if (imageFile) {
-        const uploadResponse = await uploadImage(imageFile);
-        imageUrl = uploadResponse.url;
+        try {
+          const uploadResponse = await uploadImage(imageFile);
+          imageUrl = uploadResponse.url;
+        } catch (error) {
+          notifications.show({
+            title: "Lỗi",
+            message: "Không thể tải lên ảnh. Vui lòng thử lại",
+            color: "red"
+          });
+          setLoading(false);
+          return;
+        }
       }
-      alert(imageUrl);
 
       // Tạo object data
       const data = {
         codeName: formData.get("codeName"),
-        fullName: formData.get("fullName"), // Bắt buộc
+        fullName: formData.get("fullName"),
         name: formData.get("name") || null,
         rhyme: formData.get("rhyme") || null,
         yearOfBirth: yearOfBirth,
@@ -125,31 +145,44 @@ export default function MartyrDetail() {
         commune: formData.get("commune") || null,
         district: formData.get("district") || null,
         placeOfExhumation: formData.get("placeOfExhumation") || null,
-        image: imageUrl, // Add the image URL to data
+        image: imageUrl,
       };
 
-      // Chỉ thêm id nếu đang trong chế độ edit
-      if (id) {
-        data.id = id;
+      if (martyr.id) {
+        data.id = martyr.id;
       }
 
-      await updateMartyr(id, data);
+      await updateMartyr(martyr.id, data);
 
       notifications.show({
         title: "Thành công",
-        message: id ? "Đã cập nhật thông tin liệt sĩ" : "Đã thêm liệt sĩ mới",
+        message: "Đã cập nhật thông tin liệt sĩ",
         color: "green",
       });
 
-      navigate("/admin/martyrs");
+      onSave();
     } catch (error) {
-      console.error("Error:", error); // Thêm log để debug
+      console.error("Error:", error);
+      
+      // Hiển thị lỗi chi tiết
+      let errorMessage = "Có lỗi xảy ra. Vui lòng thử lại.";
+      
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.data?.errors) {
+        // Nếu có nhiều lỗi validation
+        errorMessage = Object.values(error.response.data.errors)
+          .flat()
+          .join("\n");
+      }
+
       notifications.show({
         title: "Lỗi",
-        message:
-          error.response?.data?.message || "Có lỗi xảy ra. Vui lòng thử lại.",
+        message: errorMessage,
         color: "red",
       });
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -158,47 +191,6 @@ export default function MartyrDetail() {
   return (
     <Container size="xl">
       <Paper shadow="xs" p="md">
-        <Group justify="space-between" mb="lg">
-          <Group>
-            <Tooltip label="Quay lại">
-              <ActionIcon
-                variant="subtle"
-                onClick={() => navigate("/admin/martyrs")}
-              >
-                <FiArrowLeft />
-              </ActionIcon>
-            </Tooltip>
-            <Title order={2}>
-              {id ? "Chỉnh sửa thông tin liệt sĩ" : "Thêm liệt sĩ mới"}
-            </Title>
-          </Group>
-          <Group>
-            <Button
-              variant="light"
-              color="red"
-              leftSection={<FiTrash2 size={16} />}
-              onClick={() => {
-                if (window.confirm("Bạn có chắc muốn xóa liệt sĩ này?")) {
-                  // Xử lý xóa
-                  navigate("/admin/martyrs");
-                }
-              }}
-            >
-              Xóa
-            </Button>
-            <Button
-              type="submit"
-              form="martyr-form"
-              loading={loading}
-              leftSection={<FiSave size={16} />}
-            >
-              Lưu thay đổi
-            </Button>
-          </Group>
-        </Group>
-
-        <Divider mb="lg" />
-
         <form id="martyr-form" onSubmit={handleSubmit}>
           <Stack>
             {error && (
@@ -334,6 +326,19 @@ export default function MartyrDetail() {
             </Group>
           </Stack>
         </form>
+        <Group position="right" mt="md">
+          <Button variant="light" onClick={onCancel}>
+            Hủy
+          </Button>
+          <Button 
+            type="submit" 
+            form="martyr-form"
+            loading={loading}
+            leftSection={<FiSave size={16} />}
+          >
+            Lưu thay đổi
+          </Button>
+        </Group>
       </Paper>
     </Container>
   );

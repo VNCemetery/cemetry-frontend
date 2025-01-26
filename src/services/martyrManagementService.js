@@ -2,16 +2,23 @@ import ApiClient from "../api/apiClient";
 
 const martyrApi = new ApiClient("/martyrs");
 
-export const getMatyrs = async (name = "", page = 0, size = 10, filters) => {
+export const getMatyrs = async (name = "", page = 0, size = 10, filters = {}) => {
   try {
+    console.log("Service sending request with:", { name, page, size, filters }); // Debug log
+    
     const response = await martyrApi.public().post("/search", {
       name,
       page,
       size,
-      filters,
+      hometown: filters.hometown || null,
+      yearOfBirth: filters.yearOfBirth || null,
+      yearOfDeath: filters.yearOfDeath || null,
     });
+
+    console.log("Service received response:", response.data); // Debug log
     return response.data;
   } catch (error) {
+    console.error("Service error:", error);
     throw error;
   }
 };
