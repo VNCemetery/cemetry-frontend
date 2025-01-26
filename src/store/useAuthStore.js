@@ -1,50 +1,42 @@
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
-import {
-  login as loginApi,
-  logout as logoutApi,
-  refreshToken as refreshTokenApi,
-} from "../services/authService";
+import { persist } from "zustand/middleware";
+import * as authService from "../services/authService";
 
 export const useAuthStore = create(
   persist(
     (set, get) => ({
-      user: null,
+      // Trạng thái
       accessToken: null,
-      refreshToken: null,
-      isAuthenticated: false,
+      refreshToken: null, 
+      user: null,
       isLoading: false,
       error: null,
 
+      // Actions
+      setTokens: (accessToken, refreshToken) => {
+        set({ accessToken, refreshToken });
+      },
+
+      setUser: (user) => {
+        set({ user });
+      },
+
       login: async (username, password) => {
-        set({ isLoading: true, error: null });
         try {
-          const response = await loginApi(username, password);
-          console.log("Login response:", response);
-
-          const { access_token, refresh_token, expires_in } = response;
-
-          if (!access_token) {
-            throw new Error("Token không hợp lệ từ server");
-          }
-
+          set({ isLoading: true, error: null });
+          const response = await authService.login(username, password);
+          
           set({
-            accessToken: access_token,
-            refreshToken: refresh_token,
-            isAuthenticated: true,
+            accessToken: response.access_token,
+            refreshToken: response.refresh_token,
             isLoading: false,
-            error: null,
           });
 
           return response;
         } catch (error) {
-          set({
-            user: null,
-            accessToken: null,
-            refreshToken: null,
-            isAuthenticated: false,
-            isLoading: false,
-            error: error.message || "Đăng nhập thất bại",
+          set({ 
+            error: "Tên đăng nhập hoặc mật khẩu không đúng",
+            isLoading: false 
           });
           throw error;
         }
@@ -52,59 +44,51 @@ export const useAuthStore = create(
 
       logout: async () => {
         try {
-          const { refreshToken } = get();
-          console.log("Refresh token when logout:", refreshToken);
-
+          const refreshToken = get().refreshToken;
           if (refreshToken) {
-            await logoutApi(refreshToken);
-          } else {
-            console.warn("Không có refresh token để logout");
+            await authService.logout(refreshToken);
           }
         } catch (error) {
-          console.error("Lỗi khi logout:", error);
-          if (error.response) {
-            console.error("Response error:", error.response.data);
-          }
+          console.error("Lỗi khi đăng xuất:", error);
         } finally {
           set({
-            user: null,
             accessToken: null,
             refreshToken: null,
-            isAuthenticated: false,
+            user: null,
+            error: null
           });
         }
       },
 
-      setAccessToken: (token) => {
-        set({
-          accessToken: token,
-          isAuthenticated: true,
-        });
-      },
-
-      refreshToken: async () => {
+      refreshAccessToken: async () => {
         try {
-          const response = await refreshTokenApi();
-          const { access_token } = response;
+          const response = await authService.refreshToken();
           set({
-            accessToken: access_token,
-            isAuthenticated: true,
+            accessToken: response.access_token,
+            refreshToken: response.refresh_token
           });
           return response;
         } catch (error) {
           set({
-            user: null,
             accessToken: null,
             refreshToken: null,
-            isAuthenticated: false,
+            user: null
           });
           throw error;
         }
       },
+
+      clearError: () => {
+        set({ error: null });
+      }
     }),
     {
       name: "auth-storage",
-      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({
+        accessToken: state.accessToken,
+        refreshToken: state.refreshToken,
+        user: state.user
+      })
     }
   )
 );
