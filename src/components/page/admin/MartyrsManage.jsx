@@ -12,6 +12,9 @@ import {
   Center,
   Pagination,
   Loader,
+  Select,
+  Grid,
+  Modal,
 } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -28,6 +31,9 @@ import {
   FiEye,
   FiEyeOff,
 } from "react-icons/fi";
+import { useDebouncedValue } from '@mantine/hooks';
+import { useDisclosure } from '@mantine/hooks';
+import MartyrDetail from './MartyrDetail';
 
 export default function MartyrsManage() {
   const navigate = useNavigate();
@@ -40,12 +46,35 @@ export default function MartyrsManage() {
     clearAdminCache,
   } = useMatyrStore();
   const pageSize = 10;
+  const [debouncedSearch] = useDebouncedValue(search, 300);
+  const [filters, setFilters] = useState({
+    hometown: '',
+    yearOfBirth: '',
+    yearOfDeath: '',
+  });
+  const [selectedMartyr, setSelectedMartyr] = useState(null);
+  const [opened, { open, close }] = useDisclosure(false);
 
   const loadData = async (page = currentPage) => {
     try {
-      const response = await loadAdminMartyrs(search, page, pageSize);
-      setMartyrs(response.content || []);
+      console.log("Loading with filters:", filters);
+      const response = await loadAdminMartyrs(
+        debouncedSearch, 
+        page, 
+        pageSize,
+        filters
+      );
+      
+      console.log("API Response:", response);
+      
+      if (response?.content) {
+        setMartyrs(response.content);
+      } else {
+        console.error("Invalid response format:", response);
+        setMartyrs([]);
+      }
     } catch (error) {
+      console.error("Load data error:", error);
       notifications.show({
         title: "Lỗi",
         message: "Không thể tải danh sách liệt sĩ",
@@ -55,19 +84,19 @@ export default function MartyrsManage() {
   };
 
   useEffect(() => {
-    loadData();
+    if (debouncedSearch !== search || Object.values(filters).some(val => val)) {
+      setCurrentPage(1);
+      loadData(1);
+    }
+  }, [debouncedSearch, filters]);
+
+  useEffect(() => {
+    loadData(currentPage);
   }, [currentPage]);
 
-  // Debounce search và clear cache khi search thay đổi
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setCurrentPage(1);
-      clearAdminCache(search, 0); // Clear cache của trang đầu tiên
-      loadData(1);
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [search]);
+    console.log("Filters changed:", filters);
+  }, [filters]);
 
   const handleDelete = async (id) => {
     if (window.confirm("Bạn có chắc muốn xóa liệt sĩ này?")) {
@@ -91,8 +120,31 @@ export default function MartyrsManage() {
     }
   };
 
+  const handleEdit = (martyr) => {
+    setSelectedMartyr(martyr);
+    open();
+  };
+
+  const handleSaveSuccess = () => {
+    close();
+    loadData(currentPage);
+  };
+
   return (
     <>
+      <Modal 
+        opened={opened} 
+        onClose={close}
+        size="xl"
+        title={selectedMartyr ? "Chỉnh sửa thông tin liệt sĩ" : "Thêm liệt sĩ mới"}
+      >
+        <MartyrDetail 
+          martyr={selectedMartyr}
+          onSave={handleSaveSuccess}
+          onCancel={close}
+        />
+      </Modal>
+
       <Group justify="space-between" mb="lg">
         <Title order={2}>Quản lý liệt sĩ</Title>
         <Button
@@ -103,13 +155,51 @@ export default function MartyrsManage() {
         </Button>
       </Group>
 
-      <TextInput
-        placeholder="Tìm kiếm theo tên..."
-        mb="md"
-        leftSection={<FiSearch size={16} />}
-        value={search}
-        onChange={(e) => setSearch(e.currentTarget.value)}
-      />
+      <Grid mb="md">
+        <Grid.Col span={6}>
+          <TextInput
+            placeholder="Tìm kiếm theo tên..."
+            leftSection={<FiSearch size={16} />}
+            value={search}
+            onChange={(e) => setSearch(e.currentTarget.value)}
+          />
+        </Grid.Col>
+        <Grid.Col span={2}>
+          <TextInput
+            placeholder="Quê quán"
+            value={filters.hometown}
+            onChange={(e) => {
+              setFilters(prev => ({...prev, hometown: e.currentTarget.value}));
+            }}
+          />
+        </Grid.Col>
+        <Grid.Col span={2}>
+          <TextInput
+            type="number"
+            placeholder="Năm sinh"
+            value={filters.yearOfBirth}
+            onChange={(e) => {
+              const value = e.currentTarget.value;
+              setFilters(prev => ({...prev, yearOfBirth: value}));
+            }}
+            min={1900}
+            max={new Date().getFullYear()}
+          />
+        </Grid.Col>
+        <Grid.Col span={2}>
+          <TextInput
+            type="number"
+            placeholder="Năm mất"
+            value={filters.yearOfDeath}
+            onChange={(e) => {
+              const value = e.currentTarget.value;
+              setFilters(prev => ({...prev, yearOfDeath: value}));
+            }}
+            min={1900}
+            max={new Date().getFullYear()}
+          />
+        </Grid.Col>
+      </Grid>
 
       {loading ? (
         <Center py="xl">
@@ -206,7 +296,7 @@ export default function MartyrsManage() {
                       <Menu.Dropdown>
                         <Menu.Item
                           leftSection={<FiEdit size={14} />}
-                          onClick={() => navigate(`${martyr.id}`)}
+                          onClick={() => handleEdit(martyr)}
                         >
                           Chỉnh sửa
                         </Menu.Item>
@@ -249,7 +339,9 @@ export default function MartyrsManage() {
             <Group justify="center" mt="xl">
               <Pagination
                 value={currentPage}
-                onChange={setCurrentPage}
+                onChange={(page) => {
+                  setCurrentPage(page);
+                }}
                 total={totalPages}
               />
             </Group>
