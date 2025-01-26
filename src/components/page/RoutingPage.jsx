@@ -5,7 +5,7 @@ import { findPath, provideFeedback } from "../../services/pathFindingService";
 import { useInfoStore } from "../../store/useInfoStore";
 import { useMatyrStore } from "../../store/useMatyrStore";
 import { useMapStore } from "../../store/useMapStore";
-import { Paper, ActionIcon, Text, Modal } from "@mantine/core";
+import { Paper, ActionIcon, Text, Modal, Button } from "@mantine/core";
 import { FaThumbsUp, FaThumbsDown } from "react-icons/fa";
 import { notifications } from "@mantine/notifications";
 export default function RoutingPage() {
@@ -20,6 +20,8 @@ export default function RoutingPage() {
   const [isSelectingLocation, setIsSelectingLocation] = useState(false);
   const [showLocationMarker, setShowLocationMarker] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleStartLocationSelection = () => {
     setIsSelectingLocation(true);
@@ -252,6 +254,7 @@ export default function RoutingPage() {
         findGraveRowIdByName(selectedMartyr.rowName, selectedMartyr.areaName);
 
       let data = await findPath(currentLocation, graveRowId);
+
       let coordinates = data?.features[0].geometry.coordinates;
       let end = coordinates[coordinates.length - 1];
 
@@ -266,8 +269,12 @@ export default function RoutingPage() {
         duration: 1000,
       });
     } catch (error) {
-      console.error("Error finding route:", error);
-      // Handle error appropriately
+      if (error.response?.data?.code === 400) {
+        setErrorMessage(
+          "Không tìm thấy đường đi!\nVui lòng đảm bảo bạn đang ở trong khuôn viên nghĩa trang."
+        );
+        setShowErrorModal(true);
+      }
     }
   };
 
@@ -289,6 +296,42 @@ export default function RoutingPage() {
 
   return (
     <div className="h-full relative">
+      <Modal
+        opened={showErrorModal}
+        onClose={() => setShowErrorModal(false)}
+        title={
+          <Text size="xl" weight={600} color="red">
+            Thông báo
+          </Text>
+        }
+        centered
+        size="lg"
+        padding="xl"
+      >
+        <div className="flex flex-col items-center gap-4 p-4">
+          <Text
+            size="xl"
+            weight={500}
+            align="center"
+            style={{ lineHeight: 1.5 }}
+          >
+            Không tìm thấy đường đi!
+          </Text>
+          <Text size="lg" align="center" style={{ lineHeight: 1.5 }}>
+            Vui lòng đảm bảo bạn đang ở trong khuôn viên nghĩa trang
+          </Text>
+          <Button
+            size="lg"
+            fullWidth
+            onClick={() => setShowErrorModal(false)}
+            mt="md"
+            style={{ fontSize: "1.2rem", padding: "15px" }}
+          >
+            Đồng ý
+          </Button>
+        </div>
+      </Modal>
+
       <MatyrSearch
         onClearRoute={() => {
           setShowLocationMarker(false);
