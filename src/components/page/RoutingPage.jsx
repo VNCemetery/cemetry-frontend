@@ -7,6 +7,7 @@ import { useMatyrStore } from "../../store/useMatyrStore";
 import { useMapStore } from "../../store/useMapStore";
 import { Paper, ActionIcon, Text, Modal, Button } from "@mantine/core";
 import { FaThumbsUp, FaThumbsDown } from "react-icons/fa";
+import { MdLocationOff } from "react-icons/md"; // Add this import
 import { notifications } from "@mantine/notifications";
 export default function RoutingPage() {
   const mapContainer = useRef(null);
@@ -300,34 +301,58 @@ export default function RoutingPage() {
         opened={showErrorModal}
         onClose={() => setShowErrorModal(false)}
         title={
-          <Text size="xl" weight={600} color="red">
-            Thông báo
+          <Text
+            size="30px"
+            weight={900}
+            color="red"
+            align="center"
+            className="mb-4"
+          >
+            Không tìm được đường đi
           </Text>
         }
         centered
         size="lg"
         padding="xl"
+        radius="lg"
       >
-        <div className="flex flex-col items-center gap-4 p-4">
+        <div className="flex flex-col items-center gap-6 p-6">
+          <MdLocationOff size={120} color="#ff6b6b" className="mb-4" />
           <Text
-            size="xl"
-            weight={500}
+            size="28px"
+            weight={700}
             align="center"
-            style={{ lineHeight: 1.5 }}
+            style={{ lineHeight: 1.6 }}
+            className="max-w-[400px]"
+            color="#333"
           >
-            Không tìm thấy đường đi!
+            Vui lòng kiểm tra lại:
           </Text>
-          <Text size="lg" align="center" style={{ lineHeight: 1.5 }}>
-            Vui lòng đảm bảo bạn đang ở trong khuôn viên nghĩa trang
-          </Text>
+          <div className="flex flex-col gap-4">
+            <Text
+              className="text-xl font-bold"
+              align="center"
+              style={{ lineHeight: 1.6 }}
+              color="#444"
+            >
+              • Bạn đã cho phép ứng dụng xác định vị trí
+            </Text>
+            <Text
+              className="text-xl font-bold"
+              align="center"
+              style={{ lineHeight: 1.6 }}
+              color="#444"
+            >
+              • Bạn đang ở trong khuôn viên nghĩa trang
+            </Text>
+          </div>
           <Button
-            size="lg"
+            size="xl"
             fullWidth
             onClick={() => setShowErrorModal(false)}
-            mt="md"
-            style={{ fontSize: "1.2rem", padding: "15px" }}
+            mt="xl"
           >
-            Đồng ý
+            Đã hiểu
           </Button>
         </div>
       </Modal>
