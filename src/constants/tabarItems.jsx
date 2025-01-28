@@ -1,12 +1,9 @@
-import { FaMapMarkerAlt, FaPhone } from "react-icons/fa";
-import { FaAccusoft, FaEarDeaf } from "react-icons/fa6";
+import { FaPhone } from "react-icons/fa";
 import { HiMap, HiOutlineMap } from "react-icons/hi";
 
 import {
   TiLocation,
   TiLocationOutline,
-  TiPlus,
-  TiPlusOutline,
 } from "react-icons/ti";
 
 export const tabarItems = [
@@ -23,9 +20,9 @@ export const tabarItems = [
     to: "/map",
   },
   {
-    outline: <TiPlusOutline />,
-    filled: <TiPlus className="text-blue-600" />,
-    label: "Đóng góp",
+    outline: <FaPhone />,
+    filled: <FaPhone className="text-blue-600" />,
+    label: "Liên hệ",
     to: "/contact",
   },
 ];
