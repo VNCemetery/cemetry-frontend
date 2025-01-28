@@ -34,6 +34,7 @@ import {
 import { useDebouncedValue } from '@mantine/hooks';
 import { useDisclosure } from '@mantine/hooks';
 import MartyrDetail from './MartyrDetail';
+import { getImageUrl } from '../../../utils/imageUtils';
 
 export default function MartyrsManage() {
   const navigate = useNavigate();
@@ -46,7 +47,7 @@ export default function MartyrsManage() {
     clearAdminCache,
   } = useMatyrStore();
   const pageSize = 10;
-  const [debouncedSearch] = useDebouncedValue(search, 300);
+  const [debouncedSearch] = useDebouncedValue(search, 200);
   const [filters, setFilters] = useState({
     hometown: '',
     yearOfBirth: '',
@@ -65,10 +66,11 @@ export default function MartyrsManage() {
         filters
       );
       
-      console.log("API Response:", response);
-      
       if (response?.content) {
         setMartyrs(response.content);
+        if (!debouncedSearch && !Object.values(filters).some(val => val)) {
+          setCurrentPage(page);
+        }
       } else {
         console.error("Invalid response format:", response);
         setMartyrs([]);
@@ -84,19 +86,20 @@ export default function MartyrsManage() {
   };
 
   useEffect(() => {
-    if (debouncedSearch !== search || Object.values(filters).some(val => val)) {
+    if (debouncedSearch || Object.values(filters).some(val => val)) {
+      setCurrentPage(1);
+      loadData(1);
+    } else {
       setCurrentPage(1);
       loadData(1);
     }
   }, [debouncedSearch, filters]);
 
   useEffect(() => {
-    loadData(currentPage);
+    if (!debouncedSearch && !Object.values(filters).some(val => val)) {
+      loadData(currentPage);
+    }
   }, [currentPage]);
-
-  useEffect(() => {
-    console.log("Filters changed:", filters);
-  }, [filters]);
 
   const handleDelete = async (id) => {
     if (window.confirm("Bạn có chắc muốn xóa liệt sĩ này?")) {
@@ -161,7 +164,14 @@ export default function MartyrsManage() {
             placeholder="Tìm kiếm theo tên..."
             leftSection={<FiSearch size={16} />}
             value={search}
-            onChange={(e) => setSearch(e.currentTarget.value)}
+            onChange={(e) => {
+              const newValue = e.currentTarget.value;
+              setSearch(newValue);
+              if (!newValue) {
+                setCurrentPage(1);
+                loadData(1);
+              }
+            }}
           />
         </Grid.Col>
         <Grid.Col span={2}>
@@ -214,7 +224,7 @@ export default function MartyrsManage() {
           <Table striped highlightOnHover withTableBorder>
             <Table.Thead>
               <Table.Tr>
-                <Table.Th>Ảnh</Table.Th>
+                <Table.Th style={{ width: 80 }}>Ảnh</Table.Th>
                 <Table.Th>Họ và tên</Table.Th>
                 <Table.Th>Bí danh</Table.Th>
                 <Table.Th>Năm sinh</Table.Th>
@@ -228,27 +238,60 @@ export default function MartyrsManage() {
             <Table.Tbody>
               {martyrs.map((martyr) => (
                 <Table.Tr key={martyr.id}>
-                  <Table.Td style={{ width: 60, padding: "8px" }}>
+                  <Table.Td style={{ padding: "8px" }}>
                     {martyr.image ? (
-                      <Image
-                        src={martyr.image}
-                        alt={martyr.fullName}
-                        width={40}
-                        height={40}
-                        radius="sm"
-                        fit="cover"
-                        style={{ cursor: "pointer" }}
-                        onClick={() => {
-                          window.open(martyr.image, "_blank");
-                        }}
-                      />
+                      <div style={{ position: 'relative' }}>
+                        <Image
+                          src={getImageUrl(martyr.image)}
+                          alt={martyr.fullName}
+                          width={60}
+                          height={60}
+                          radius="md"
+                          fit="cover"
+                          style={{ cursor: "pointer" }}
+                          onClick={() => {
+                            window.open(getImageUrl(martyr.image), "_blank");
+                          }}
+                        />
+                        <div 
+                          style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            background: 'rgba(0,0,0,0.1)',
+                            opacity: 0,
+                            transition: 'opacity 0.2s',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.opacity = 1}
+                          onMouseLeave={(e) => e.currentTarget.style.opacity = 0}
+                        >
+                          <FiEye size={20} color="white" />
+                        </div>
+                      </div>
                     ) : (
-                      <Center>
-                        <FiImage size={20} color="gray" />
+                      <Center
+                        w={60}
+                        h={60}
+                        bg="gray.1"
+                        style={{ borderRadius: '8px' }}
+                      >
+                        <FiImage size={24} color="gray" />
                       </Center>
                     )}
                   </Table.Td>
-                  <Table.Td>{martyr.fullName}</Table.Td>
+                  <Table.Td>
+                    <Group>
+                      <Text size="sm" fw={500}>
+                        {martyr.fullName}
+                      </Text>
+                    </Group>
+                  </Table.Td>
                   <Table.Td>{martyr.codeName}</Table.Td>
                   <Table.Td>{martyr.yearOfBirth}</Table.Td>
                   <Table.Td>{martyr.dateOfDeath || ""}</Table.Td>
@@ -339,9 +382,7 @@ export default function MartyrsManage() {
             <Group justify="center" mt="xl">
               <Pagination
                 value={currentPage}
-                onChange={(page) => {
-                  setCurrentPage(page);
-                }}
+                onChange={setCurrentPage}
                 total={totalPages}
               />
             </Group>
