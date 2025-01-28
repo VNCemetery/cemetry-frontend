@@ -9,8 +9,11 @@ import {
   SimpleGrid,
   Box,
   rem,
+  ActionIcon,
+  Tooltip,
 } from "@mantine/core";
 import { FiMapPin, FiPhone, FiMail, FiClock } from "react-icons/fi";
+import { FaFacebook, FaGlobe, FaNewspaper } from "react-icons/fa";
 import classes from "./NewsPage.module.css";
 
 const contactData = [
@@ -33,6 +36,27 @@ const contactData = [
     title: "GIỜ LÀM VIỆC",
     description: "Thứ 2 - Thứ 6: 7h00 - 17h00\nThứ 7, Chủ nhật: 7h00 - 11h30",
     icon: FiClock,
+  },
+];
+
+const socialLinks = [
+  {
+    icon: FaGlobe,
+    color: "blue",
+    label: "Cổng thông tin Đồng Tháp",
+    url: "https://dongthap.gov.vn/",
+  },
+  {
+    icon: FaFacebook,
+    color: "blue",
+    label: "Facebook Đồng Tháp",
+    url: "https://www.facebook.com/cttdongthap",
+  },
+  {
+    icon: FaNewspaper,
+    color: "blue",
+    label: "Báo Đồng Tháp",
+    url: "https://baodongthap.vn/",
   },
 ];
 
@@ -77,6 +101,30 @@ export default function ContactPage() {
         <SimpleGrid cols={{ base: 1, sm: 2 }}>
           {items}
         </SimpleGrid>
+
+        <Paper withBorder p="xl" radius="md">
+          <Title order={2} size="h3" mb="md" ta="center">
+            Các cổng thông tin liên quan
+          </Title>
+          <Group justify="center" gap="xl">
+            {socialLinks.map((link) => (
+              <Tooltip key={link.url} label={link.label}>
+                <ActionIcon
+                  component="a"
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  size="xl"
+                  radius="xl"
+                  variant="light"
+                  color={link.color}
+                >
+                  <link.icon size={rem(28)} />
+                </ActionIcon>
+              </Tooltip>
+            ))}
+          </Group>
+        </Paper>
 
         <Paper withBorder p="xl" radius="md">
           <Title order={2} size="h3" mb="md">
