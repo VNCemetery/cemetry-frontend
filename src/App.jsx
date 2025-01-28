@@ -20,6 +20,7 @@ import NewsPage from "./components/page/NewsPage";
 import AboutProjectPage from "./components/page/AboutProjectPage";
 import MapPage from "./components/page/MapPage";
 import AdminLogin from "./components/page/AdminLogin";
+import ContactPage from "./components/page/ContactPage";
 
 // Admin Pages
 import Dashboard from "./components/page/admin/Dashboard";
@@ -55,7 +56,7 @@ export default function App() {
             <Route path="/*" element={<ClientAppLayout />}>
               <Route index element={<RoutingPage />} />
               <Route path="map" element={<MapPage />} />
-              <Route path="contact" element={<NewsPage />} />
+              <Route path="contact" element={<ContactPage />} />
             </Route>
 
             {/* Admin Routes */}
