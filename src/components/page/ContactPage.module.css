@@ -1,0 +1,35 @@
+.heroWrapper {
+  background: linear-gradient(135deg, var(--mantine-color-blue-7) 0%, var(--mantine-color-indigo-9) 100%);
+  padding: rem(60px) 0;
+  margin-bottom: rem(50px);
+}
+
+.hero {
+  text-align: center;
+  color: var(--mantine-color-white);
+}
+
+.heroTitle {
+  font-size: rem(52px);
+  letter-spacing: -1px;
+  color: var(--mantine-color-white);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  margin-bottom: rem(24px);
+  font-weight: 900;
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    font-size: rem(38px);
+  }
+}
+
+.heroDescription {
+  font-size: rem(24px);
+  margin: 0 auto;
+  max-width: rem(800px);
+  line-height: 1.4;
+  font-weight: 500;
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    font-size: rem(20px);
+  }
+} 

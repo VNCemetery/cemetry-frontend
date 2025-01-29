@@ -11,6 +11,7 @@ import {
   Group,
   Stack,
   rem,
+  SimpleGrid,
 } from "@mantine/core";
 import {
   FaMonument,
@@ -48,10 +49,10 @@ export default function MapPage() {
   ];
 
   const stats = [
-    { value: "3.5", label: "Héc ta diện tích", icon: <FaLeaf /> },
-    { value: "2,500+", label: "Liệt sĩ an nghỉ", icon: <FaMonument /> },
-    { value: "18", label: "Bậc thang tưởng niệm", icon: <GiLotus /> },
-    { value: "1984", label: "Năm khánh thành", icon: <FaHistory /> },
+    { value: "3.5", label: "Héc ta diện tích", icon: <FaLeaf color="blue" style={{ marginTop: '10px' }} /> },
+    { value: "2,500+", label: "Liệt sĩ an nghỉ", icon: <FaMonument color="green" style={{ marginTop: '10px' }} /> },
+    { value: "18", label: "Bậc thang tưởng niệm", icon: <GiLotus color="pink" style={{ marginTop: '10px' }} /> },
+    { value: "1984", label: "Năm khánh thành", icon: <FaHistory color="orange" style={{ marginTop: '10px' }} /> },
   ];
 
   return (
@@ -73,7 +74,26 @@ export default function MapPage() {
       </div>
 
       <Container size="xl" className={classes.wrapper}>
-        {/* Hướng dẫn tham quan - Đưa lên đầu */}
+        {/* Stats Grid - Đưa lên đầu */}
+        <SimpleGrid cols={{ base: 2, md: 4 }} spacing={{ base: 'md', md: 'lg' }} mb={50}>
+          {stats.map((stat, index) => (
+            <Card key={stat.label} className={classes.statCard}>
+              <div className={classes.iconWrapper}>
+                <div className={classes.statIcon}>
+                  {stat.icon}
+                </div>
+              </div>
+              <Text className={classes.statValue} mt={35}>
+                {stat.value}
+              </Text>
+              <Text size="md" c="dimmed">
+                {stat.label}
+              </Text>
+            </Card>
+          ))}
+        </SimpleGrid>
+
+        {/* Hướng dẫn tham quan - Chuyển xuống sau stats */}
         <Card withBorder radius="md" className={classes.guideCard} mb={50}>
           <Group mb="md">
             <ThemeIcon size={40} radius="md" color="blue" variant="light">
@@ -136,29 +156,8 @@ export default function MapPage() {
           </Grid>
         </Card>
 
-        {/* Stats Grid - Chuyển xuống sau */}
-        <Grid mb={50}>
-          {stats.map((stat, index) => (
-            <Grid.Col key={stat.label} span={{ base: 12, sm: 6, md: 3 }}>
-              <Card className={classes.statCard}>
-                <div className={classes.iconWrapper}>
-                  <div className={classes.statIcon}>
-                    {stat.icon}
-                  </div>
-                </div>
-                <Text className={classes.statValue} mt={35}>
-                  {stat.value}
-                </Text>
-                <Text size="md" c="dimmed">
-                  {stat.label}
-                </Text>
-              </Card>
-            </Grid.Col>
-          ))}
-        </Grid>
-
         {/* Thông tin chi tiết */}
-        <Accordion defaultValue="info" variant="separated" mt={40}>
+        <Accordion variant="separated" mt={40}>
           <Accordion.Item value="info">
             <Accordion.Control>
               <Group>
@@ -190,7 +189,7 @@ export default function MapPage() {
         </Accordion>
 
         <Grid mt={60}>
-          <Grid.Col span={{ base: 12, md: 6 }}>
+          <Grid.Col>
             <Timeline active={3} bulletSize={30} lineWidth={2}>
               {timelineData.map((item, index) => (
                 <Timeline.Item
@@ -215,35 +214,6 @@ export default function MapPage() {
                 </Timeline.Item>
               ))}
             </Timeline>
-          </Grid.Col>
-
-          <Grid.Col span={{ base: 12, md: 6 }}>
-            <Card withBorder radius="md" className={classes.featureCard}>
-              <Title order={2} size="h3" mb="md" fw={700}>
-                Kiến trúc độc đáo
-              </Title>
-              <List
-                spacing="sm"
-                size="lg"
-                center
-                icon={
-                  <ThemeIcon color="blue" size={24} radius="xl">
-                    <GiLotus size={16} />
-                  </ThemeIcon>
-                }
-              >
-                <List.Item>
-                  Tượng đài người lính với đóa sen tưởng niệm
-                </List.Item>
-                <List.Item>
-                  18 bậc thang tượng trưng cho 18 đời vua Hùng
-                </List.Item>
-                <List.Item>Hoa văn trống đồng Ngọc Lũ độc đáo</List.Item>
-                <List.Item>
-                  Thiết kế hình bông sen nở với hồ nước trung tâm
-                </List.Item>
-              </List>
-            </Card>
           </Grid.Col>
         </Grid>
       </Container>
