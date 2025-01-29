@@ -20,7 +20,7 @@ export default function TabBar({ currentPath, updateCurrentPath }) {
               updateCurrentPath(item.to);
               navigate(item.to, { replace: true });
             }}
-            className="p-1 flex h-full cursor-pointer flex-col  rounded-md border-[1px]  w-full max-w-[9rem] flex "
+            className="p-1 flex h-full cursor-pointer flex-col  rounded-md border-[1px]  w-full max-w-[9rem] "
           >
             <div
               className={`h-full text-gray-600 ${

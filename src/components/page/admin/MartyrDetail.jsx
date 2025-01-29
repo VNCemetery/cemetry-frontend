@@ -24,6 +24,7 @@ import {
 } from "../../../services/martyrManagementService";
 import { FiArrowLeft, FiImage, FiSave, FiTrash2 } from "react-icons/fi";
 import { uploadImage } from "../../../services/imageService";
+import { getImageUrl } from '../../../utils/imageUtils';
 
 export default function MartyrDetail({ martyr: initialMartyr, onSave, onCancel }) {
   const [loading, setLoading] = useState(false);
@@ -32,6 +33,58 @@ export default function MartyrDetail({ martyr: initialMartyr, onSave, onCancel }
   const [image, setImage] = useState(initialMartyr?.image || null);
   const [error, setError] = useState(null);
   const [imageFile, setImageFile] = useState(null);
+
+  // Set initial image từ martyr
+  useEffect(() => {
+    if (initialMartyr?.image) {
+      setImage(getImageUrl(initialMartyr.image));
+    }
+  }, [initialMartyr]);
+
+  const handleImageUpload = async (file) => {
+    try {
+      if (file) {
+        // Kiểm tra kích thước file (10MB)
+        if (file.size > 10 * 1024 * 1024) {
+          notifications.show({
+            title: "Lỗi",
+            message: "Kích thước ảnh không được vượt quá 10MB",
+            color: "red"
+          });
+          return null;
+        }
+
+        // Kiểm tra định dạng file
+        const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        if (!validTypes.includes(file.type)) {
+          notifications.show({
+            title: "Lỗi",
+            message: "Chỉ chấp nhận file ảnh định dạng JPG, PNG hoặc GIF",
+            color: "red"
+          });
+          return null;
+        }
+
+        setLoading(true);
+        const response = await uploadImage(file);
+        setLoading(false);
+
+        // Trả về đường dẫn ảnh dạng /images/filename.jpg
+        if (response.fileName) {
+          return `/images/${response.fileName}`;
+        }
+      }
+      return null;
+    } catch (error) {
+      setLoading(false);
+      notifications.show({
+        title: "Lỗi",
+        message: "Không thể tải ảnh lên. Vui lòng thử lại",
+        color: "red"
+      });
+      return null;
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -113,44 +166,41 @@ export default function MartyrDetail({ martyr: initialMartyr, onSave, onCancel }
         }
       }
 
-      // Upload ảnh
+      // Upload ảnh nếu có
       let imageUrl = image;
       if (imageFile) {
-        try {
-          const uploadResponse = await uploadImage(imageFile);
-          imageUrl = uploadResponse.url;
-        } catch (error) {
-          notifications.show({
-            title: "Lỗi",
-            message: "Không thể tải lên ảnh. Vui lòng thử lại",
-            color: "red"
-          });
+        imageUrl = await handleImageUpload(imageFile);
+        if (!imageUrl) {
           setLoading(false);
           return;
         }
       }
 
-      // Tạo object data
+      // Tạo object data theo format API
       const data = {
-        codeName: formData.get("codeName"),
+        id: martyr?.id,
+        image: imageUrl,
+        graveCode: formData.get("graveCode") || null,
         fullName: formData.get("fullName"),
         name: formData.get("name") || null,
-        rhyme: formData.get("rhyme") || null,
-        yearOfBirth: yearOfBirth,
-        yearOfEnlistment: yearOfEnlistment,
+        codeName: formData.get("codeName") || null,
+        yearOfBirth: formData.get("yearOfBirth") 
+          ? parseInt(formData.get("yearOfBirth")) 
+          : null,
+        dateOfEnlistment: formData.get("yearOfEnlistment") || null,
         dateOfDeath: formData.get("dateOfDeath") || null,
-        graveRowId: martyr.graveRow.id,
         rankPositionUnit: formData.get("rankPositionUnit") || null,
         homeTown: formData.get("homeTown") || null,
+        placeOfExhumation: formData.get("placeOfExhumation") || null,
         commune: formData.get("commune") || null,
         district: formData.get("district") || null,
-        placeOfExhumation: formData.get("placeOfExhumation") || null,
-        image: imageUrl,
+        graveRowId: martyr.graveRow.id,
+        // Thêm các trường mới theo API
+        dieuChinh: null,
+        quyTap: null,
+        ngayThangNam: null,
+        note: null
       };
-
-      if (martyr.id) {
-        data.id = martyr.id;
-      }
 
       await updateMartyr(martyr.id, data);
 
@@ -160,7 +210,11 @@ export default function MartyrDetail({ martyr: initialMartyr, onSave, onCancel }
         color: "green",
       });
 
-      onSave();
+      // Đợi 1 chút để API cập nhật xong
+      setTimeout(() => {
+        onSave(); // Đóng modal và reload data
+      }, 500);
+
     } catch (error) {
       console.error("Error:", error);
       
@@ -204,7 +258,7 @@ export default function MartyrDetail({ martyr: initialMartyr, onSave, onCancel }
               <Stack style={{ width: 200 }}>
                 {image ? (
                   <Image
-                    src={image}
+                    src={typeof image === 'string' ? image : URL.createObjectURL(image)}
                     alt="Preview"
                     radius="md"
                     h={250}
@@ -221,23 +275,21 @@ export default function MartyrDetail({ martyr: initialMartyr, onSave, onCancel }
                 )}
                 <FileInput
                   label="Ảnh liệt sĩ"
-                  description="Chọn ảnh JPG, PNG (tối đa 2MB)"
-                  accept="image/png,image/jpeg"
+                  description="Chọn ảnh JPG, PNG, GIF (tối đa 10MB)"
+                  accept="image/png,image/jpeg,image/gif"
                   leftSection={<FiImage size={14} />}
                   placeholder="Chọn ảnh..."
                   value={imageFile}
                   onChange={(file) => {
                     setImageFile(file);
                     if (file) {
-                      const reader = new FileReader();
-                      reader.onloadend = () => {
-                        setImage(reader.result); // For preview only
-                      };
-                      reader.readAsDataURL(file);
+                      // Preview ảnh local
+                      setImage(URL.createObjectURL(file));
                     } else {
-                      setImage(null);
+                      setImage(initialMartyr?.image ? getImageUrl(initialMartyr.image) : null);
                     }
                   }}
+                  error={error && error.includes('ảnh')}
                 />
               </Stack>
 
@@ -324,6 +376,17 @@ export default function MartyrDetail({ martyr: initialMartyr, onSave, onCancel }
                 />
               </Stack>
             </Group>
+
+            {/* Preview ảnh */}
+            {image && (
+              <Image
+                src={typeof image === 'string' ? image : URL.createObjectURL(image)}
+                alt="Preview"
+                radius="md"
+                h={200}
+                fit="contain"
+              />
+            )}
           </Stack>
         </form>
         <Group position="right" mt="md">
