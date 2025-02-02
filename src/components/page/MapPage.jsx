@@ -10,22 +10,29 @@ import {
   Accordion,
   Group,
   Stack,
-  rem,
+  Badge,
 } from "@mantine/core";
 import {
   FaMonument,
   FaHistory,
   FaLandmark,
   FaLeaf,
-  FaClock,
   FaMapMarkedAlt,
+  FaPhoneAlt,
+  FaFacebook,
+  FaEnvelope,
+  FaClock,
+  FaMapMarkerAlt,
   FaInfoCircle,
-  FaExclamationCircle,
+  FaUserFriends,
 } from "react-icons/fa";
 import { GiTempleDoor, GiLotus } from "react-icons/gi";
+import { useDisclosure } from "@mantine/hooks";
 import classes from "./MapPage.module.css";
 
 export default function MapPage() {
+  const [drawerOpened, { toggle: toggleDrawer }] = useDisclosure(false);
+
   const timelineData = [
     {
       title: "Khởi công xây dựng",
@@ -54,102 +61,70 @@ export default function MapPage() {
     { value: "1984", label: "Năm khánh thành", icon: <FaHistory /> },
   ];
 
+  const cardColors = [
+    { bg: "blue.0", border: "blue.3", icon: "blue.6", text: "blue.9" },
+    { bg: "green.0", border: "green.3", icon: "green.6", text: "green.9" },
+    { bg: "pink.0", border: "pink.3", icon: "pink.6", text: "pink.9" },
+    { bg: "orange.0", border: "orange.3", icon: "orange.6", text: "orange.9" },
+  ];
+
   return (
     <>
-      <div className={classes.heroWrapper}>
+      <div className={classes.hero}>
         <Container size="xl">
-          <div className={classes.hero}>
-            <Title className={classes.heroTitle} fw={900}>
-              Nghĩa Trang Liệt Sĩ Tỉnh Đồng Tháp
-            </Title>
-            <Text className={classes.heroDescription} fw={500}>
-              Di tích lịch sử văn hóa cấp tỉnh
-            </Text>
-            <Text className={classes.heroDescription} fw={500}>
-              Nơi tưởng nhớ và tri ân các anh hùng liệt sĩ
-            </Text>
-          </div>
+          <Title className={classes.heroTitle}>
+            Nghĩa Trang Liệt Sĩ Tỉnh Đồng Tháp
+          </Title>
+          <Text className={classes.heroDescription}>
+            Di tích lịch sử văn hóa cấp tỉnh <br /> Nơi tưởng nhớ và tri ân các
+            anh hùng liệt sĩ
+          </Text>
         </Container>
       </div>
 
       <Container size="xl" className={classes.wrapper}>
-        {/* Hướng dẫn tham quan - Đưa lên đầu */}
-        <Card withBorder radius="md" className={classes.guideCard} mb={50}>
-          <Group mb="md">
-            <ThemeIcon size={40} radius="md" color="blue" variant="light">
-              <FaInfoCircle size={24} />
-            </ThemeIcon>
-            <Title order={2} fw={700}>Hướng dẫn tham quan</Title>
-          </Group>
-
-          <Grid>
-            <Grid.Col span={{ base: 12, md: 6 }}>
-              <Stack spacing="lg">
-                <Group>
-                  <ThemeIcon size={32} color="blue" variant="light">
-                    <FaClock size={18} />
-                  </ThemeIcon>
-                  <div>
-                    <Text fw={700} mb={4}>Thời gian tham quan</Text>
-                    <List spacing={8} size="md">
-                      <List.Item>Mở cửa: 6:00 - 17:30 hàng ngày</List.Item>
-                      <List.Item>Thời gian thắp hương: 6:00 - 17:00</List.Item>
-                      <List.Item>Nghỉ trưa: 11:30 - 13:30</List.Item>
-                    </List>
-                  </div>
-                </Group>
-
-                <Group>
-                  <ThemeIcon size={32} color="blue" variant="light">
-                    <FaExclamationCircle size={18} />
-                  </ThemeIcon>
-                  <div>
-                    <Text fw={700} mb={4}>Quy định chung</Text>
-                    <List spacing={8} size="md">
-                      <List.Item>Trang phục lịch sự, trang nghiêm</List.Item>
-                      <List.Item>Giữ gìn vệ sinh, không xả rác</List.Item>
-                      <List.Item>Không gây ồn ào, mất trật tự</List.Item>
-                    </List>
-                  </div>
-                </Group>
-              </Stack>
-            </Grid.Col>
-
-            <Grid.Col span={{ base: 12, md: 6 }}>
-              <Stack spacing="lg">
-                <Group>
-                  <ThemeIcon size={32} color="blue" variant="light">
-                    <FaMapMarkedAlt size={18} />
-                  </ThemeIcon>
-                  <div>
-                    <Text fw={700} mb={4}>Các khu vực tham quan</Text>
-                    <List spacing={8} size="md">
-                      <List.Item>Đài tưởng niệm trung tâm</List.Item>
-                      <List.Item>Khu mộ liệt sĩ theo khu vực</List.Item>
-                      <List.Item>Nhà bia ghi danh</List.Item>
-                      <List.Item>Khu vực thắp hương, đặt hoa</List.Item>
-                    </List>
-                  </div>
-                </Group>
-              </Stack>
-            </Grid.Col>
-          </Grid>
-        </Card>
-
-        {/* Stats Grid - Chuyển xuống sau */}
-        <Grid mb={50}>
+        {/* Stats Grid */}
+        <Grid my={50}>
           {stats.map((stat, index) => (
-            <Grid.Col key={stat.label} span={{ base: 12, sm: 6, md: 3 }}>
-              <Card className={classes.statCard}>
+            <Grid.Col key={stat.label} span={{ base: 6, sm: 6, md: 3 }}>
+              <Card
+                className={classes.statCard}
+                bg={cardColors[index].bg}
+                withBorder
+                styles={{
+                  root: {
+                    borderColor: `var(--mantine-color-${cardColors[index].border})`,
+                    overflow: "visible",
+                  },
+                  content: {
+                    ".mantine-Text-root.statValue": {
+                      color: `var(--mantine-color-${cardColors[index].text})`,
+                      fontWeight: 900,
+                    },
+                    ".mantine-Text-root:last-child": {
+                      color: `var(--mantine-color-${cardColors[index].border})`,
+                    },
+                  },
+                }}
+              >
                 <div className={classes.iconWrapper}>
-                  <div className={classes.statIcon}>
+                  <ThemeIcon
+                    size={80}
+                    radius="xl"
+                    color={cardColors[index].icon}
+                    className={classes.statIcon}
+                  >
                     {stat.icon}
-                  </div>
+                  </ThemeIcon>
                 </div>
-                <Text className={classes.statValue} mt={35}>
+                <Text
+                  className={classes.statValue}
+                  mt={45}
+                  c={cardColors[index].text}
+                >
                   {stat.value}
                 </Text>
-                <Text size="md" c="dimmed">
+                <Text size="lg" c="dimmed" mt={5}>
                   {stat.label}
                 </Text>
               </Card>
@@ -157,40 +132,249 @@ export default function MapPage() {
           ))}
         </Grid>
 
-        {/* Thông tin chi tiết */}
-        <Accordion defaultValue="info" variant="separated" mt={40}>
-          <Accordion.Item value="info">
+        {/* Information Accordion */}
+        <Accordion
+          multiple
+          variant="separated"
+          mt={40}
+          defaultValue={["visiting"]}
+          classNames={{ item: classes.accordionItem }}
+        >
+          <Accordion.Item value="visiting">
             <Accordion.Control>
               <Group>
-                <ThemeIcon size={32} color="blue" variant="light">
-                  <FaInfoCircle size={18} />
+                <ThemeIcon color="blue" variant="light" size={34}>
+                  <FaMapMarkerAlt size={20} />
                 </ThemeIcon>
-                <Title order={3} fw={700}>Thông tin chi tiết</Title>
+                <div>
+                  <Text fw={600} size="lg">Hướng dẫn thăm quan</Text>
+                  <Text size="sm" c="dimmed">Thông tin chi tiết về thời gian, quy định và tiện ích</Text>
+                </div>
               </Group>
             </Accordion.Control>
             <Accordion.Panel>
-              <Stack spacing="lg">
-                <Text size="lg" style={{ lineHeight: 1.6 }}>
-                  Nghĩa trang liệt sĩ tỉnh Đồng Tháp được xây dựng từ năm 1980 trên diện tích hơn 3,5 héc ta. 
-                  Đây là nơi yên nghỉ của hơn 2.500 liệt sĩ đã hy sinh trong hai cuộc kháng chiến chống Pháp và chống Mỹ.
-                </Text>
+              <Grid>
+                <Grid.Col span={{ base: 12, md: 4 }}>
+                  <Card withBorder radius="md" padding="lg" className={classes.infoCard}>
+                    <Stack spacing="md">
+                      <Group>
+                        <ThemeIcon color="blue" size={34} variant="light" radius="xl">
+                          <FaClock size={20} />
+                        </ThemeIcon>
+                        <Text fw={600} size="xl">Thời gian tham quan</Text>
+                      </Group>
+                      <List spacing="sm" size="sm" ml={10}>
+                        <List.Item icon={
+                          <ThemeIcon color="blue" size={24} variant="light">
+                            <FaClock size={14} />
+                          </ThemeIcon>
+                        }>
+                          <Text fw={500}>Giờ mở cửa:</Text>
+                          <Text ml={10} size="md">6:00 - 17:30 hàng ngày</Text>
+                          <Text ml={10} size="xs" c="dimmed">Mở cửa tất cả các ngày trong năm</Text>
+                        </List.Item>
+                        <List.Item icon={
+                          <ThemeIcon color="green" size={24} variant="light">
+                            <FaLeaf size={14} />
+                          </ThemeIcon>
+                        }>
+                          <Text fw={500}>Thời gian lý tưởng:</Text>
+                          <Text ml={10} size="md">Sáng sớm (6:00 - 8:00)</Text>
+                          <Text ml={10} size="md">Chiều mát (15:30 - 17:00)</Text>
+                          <Text ml={10} size="xs" c="dimmed">Tránh thời điểm nắng gắt</Text>
+                        </List.Item>
+                        <List.Item icon={
+                          <ThemeIcon color="grape" size={24} variant="light">
+                            <FaHistory size={14} />
+                          </ThemeIcon>
+                        }>
+                          <Text fw={500}>Thời lượng đề xuất:</Text>
+                          <Text ml={10} size="md">1-2 giờ để tham quan đầy đủ</Text>
+                          <Text ml={10} size="xs" c="dimmed">Bao gồm thời gian dâng hương</Text>
+                        </List.Item>
+                      </List>
+                    </Stack>
+                  </Card>
+                </Grid.Col>
+                
+                <Grid.Col span={{ base: 12, md: 4 }}>
+                  <Card withBorder radius="md" padding="lg" className={classes.infoCard}>
+                    <Stack spacing="md">
+                      <Group>
+                        <ThemeIcon color="teal" size={34} variant="light" radius="xl">
+                          <FaInfoCircle size={20} />
+                        </ThemeIcon>
+                        <Text fw={600} size="xl">Quy định tham quan</Text>
+                      </Group>
+                      <List spacing="sm" size="sm" ml={10}>
+                        <List.Item icon={
+                          <ThemeIcon color="blue" size={24} variant="light">
+                            <FaUserFriends size={14} />
+                          </ThemeIcon>
+                        }>
+                          <Text fw={500}>Trang phục:</Text>
+                          <Text ml={10} size="md">Lịch sự, trang nghiêm</Text>
+                          <Text ml={10} size="xs" c="dimmed">Không mặc quần đùi, áo ba lỗ</Text>
+                          <Text ml={10} size="xs" c="dimmed">Tránh trang phục quá sặc sỡ</Text>
+                        </List.Item>
+                        <List.Item icon={
+                          <ThemeIcon color="orange" size={24} variant="light">
+                            <FaInfoCircle size={14} />
+                          </ThemeIcon>
+                        }>
+                          <Text fw={500}>Ứng xử:</Text>
+                          <Text ml={10} size="md">Giữ yên lặng, trang nghiêm</Text>
+                          <Text ml={10} size="md">Không gây ồn ào, nói chuyện lớn tiếng</Text>
+                          <Text ml={10} size="xs" c="dimmed">Tôn trọng không gian thiêng liêng</Text>
+                        </List.Item>
+                        <List.Item icon={
+                          <ThemeIcon color="red" size={24} variant="light">
+                            <FaInfoCircle size={14} />
+                          </ThemeIcon>
+                        }>
+                          <Text fw={500}>Lưu ý:</Text>
+                          <Text ml={10} size="md">Không mang đồ ăn, thức uống</Text>
+                          <Text ml={10} size="md">Không hút thuốc trong khuôn viên</Text>
+                          <Text ml={10} size="xs" c="dimmed">Không chụp ảnh phản cảm</Text>
+                        </List.Item>
+                      </List>
+                    </Stack>
+                  </Card>
+                </Grid.Col>
 
-                <Text size="lg" style={{ lineHeight: 1.6 }}>
-                  Công trình được thiết kế với ý tưởng độc đáo, lấy cảm hứng từ hình tượng bông sen - biểu tượng của vùng đất Sen Hồng Đồng Tháp. 
-                  Điểm nhấn của công trình là đài tưởng niệm trung tâm với 18 bậc thang tượng trưng cho 18 đời vua Hùng, thể hiện tinh thần "uống nước nhớ nguồn" của dân tộc.
-                </Text>
+                <Grid.Col span={{ base: 12, md: 4 }}>
+                  <Card withBorder radius="md" padding="lg" className={classes.infoCard}>
+                    <Stack spacing="md">
+                      <Group>
+                        <ThemeIcon color="violet" size={34} variant="light" radius="xl">
+                          <FaMapMarkedAlt size={20} />
+                        </ThemeIcon>
+                        <Text fw={600} size="xl">Tiện ích</Text>
+                      </Group>
+                      <List spacing="sm" size="sm" ml={10}>
+                        <List.Item icon={
+                          <ThemeIcon color="indigo" size={24} variant="light">
+                            <FaMonument size={14} />
+                          </ThemeIcon>
+                        }>
+                          <Text fw={500}>Khu vực tâm linh:</Text>
+                          <Text ml={10} size="md">Khu đặt hoa, thắp hương</Text>
+                          <Text ml={10} size="md">Nhà tưởng niệm</Text>
+                          <Text ml={10} size="xs" c="dimmed">Khu tượng đài tưởng niệm</Text>
+                        </List.Item>
+                        <List.Item icon={
+                          <ThemeIcon color="cyan" size={24} variant="light">
+                            <FaMapMarkerAlt size={14} />
+                          </ThemeIcon>
+                        }>
+                          <Text fw={500}>Cơ sở vật chất:</Text>
+                          <Text ml={10} size="md">Bãi đỗ xe rộng rãi, miễn phí</Text>
+                          <Text ml={10} size="md">Nhà vệ sinh sạch sẽ</Text>
+                          <Text ml={10} size="md">Ghế nghỉ trong khuôn viên</Text>
+                          <Text ml={10} size="xs" c="dimmed">Khu vực che nắng, mưa</Text>
+                        </List.Item>
+                        <List.Item icon={
+                          <ThemeIcon color="green" size={24} variant="light">
+                            <FaUserFriends size={14} />
+                          </ThemeIcon>
+                        }>
+                          <Text fw={500}>Hỗ trợ:</Text>
+                          <Text ml={10} size="md">Hướng dẫn viên miễn phí</Text>
+                          <Text ml={10} size="md">Bảo vệ 24/7</Text>
+                          <Text ml={10} size="md">Sơ cứu y tế</Text>
+                          <Text ml={10} size="xs" c="dimmed">Hỗ trợ người khuyết tật</Text>
+                        </List.Item>
+                      </List>
+                    </Stack>
+                  </Card>
+                </Grid.Col>
+              </Grid>
+            </Accordion.Panel>
+          </Accordion.Item>
 
-                <Text size="lg" style={{ lineHeight: 1.6 }}>
-                  Kiến trúc tổng thể của nghĩa trang được bố trí hài hòa giữa các khu vực chức năng: khu mộ liệt sĩ, đài tưởng niệm, nhà bia ghi danh, và khu vực thắp hương. 
-                  Toàn bộ không gian được bao phủ bởi nhiều cây xanh, tạo nên không gian trang nghiêm, thanh tịnh.
-                </Text>
-              </Stack>
+          <Accordion.Item value="info">
+            <Accordion.Control>
+              <Group>
+                <ThemeIcon color="blue" variant="light" size={34}>
+                  <FaUserFriends size={20} />
+                </ThemeIcon>
+                <div>
+                  <Text fw={600} size="lg">Thông tin chi tiết</Text>
+                  <Text size="sm" c="dimmed">Lịch sử và ý nghĩa của di tích</Text>
+                </div>
+              </Group>
+            </Accordion.Control>
+            <Accordion.Panel>
+              <Grid>
+                <Grid.Col span={{ base: 12, md: 8 }}>
+                  <Card withBorder radius="md" padding="lg" className={classes.infoCard}>
+                    <Stack spacing="lg">
+                      <Group>
+                        <ThemeIcon color="blue" size={34} variant="light" radius="xl">
+                          <FaMonument size={20} />
+                        </ThemeIcon>
+                        <Text fw={600} size="xl">Giới thiệu chung</Text>
+                      </Group>
+                      <Text size="md">
+                        Nghĩa trang liệt sĩ tỉnh Đồng Tháp là nơi yên nghỉ của hơn
+                        2.500 liệt sĩ đã hy sinh trong hai cuộc kháng chiến. Công
+                        trình được xây dựng theo hình tượng bông sen - biểu tượng của
+                        vùng đất Sen Hồng.
+                      </Text>
+                      <Text size="md">
+                        Đây là công trình có ý nghĩa đặc biệt quan trọng, thể hiện đạo lý 
+                        "Uống nước nhớ nguồn" và lòng biết ơn sâu sắc của Đảng bộ, chính quyền 
+                        và nhân dân tỉnh Đồng Tháp đối với các anh hùng liệt sĩ.
+                      </Text>
+                      <Group mt="md">
+                        <Badge size="lg" variant="light" color="blue">Di tích cấp tỉnh</Badge>
+                        <Badge size="lg" variant="light" color="green">Mở cửa tự do</Badge>
+                        <Badge size="lg" variant="light" color="grape">Có hướng dẫn viên</Badge>
+                      </Group>
+                    </Stack>
+                  </Card>
+                </Grid.Col>
+
+                <Grid.Col span={{ base: 12, md: 4 }}>
+                  <Card withBorder radius="md" padding="lg" className={classes.infoCard}>
+                    <Stack spacing="md">
+                      <Group>
+                        <ThemeIcon color="teal" size={34} variant="light" radius="xl">
+                          <FaLandmark size={20} />
+                        </ThemeIcon>
+                        <Text fw={600} size="xl">Kiến trúc</Text>
+                      </Group>
+                      <List spacing="sm" size="sm" center icon={
+                        <ThemeIcon color="teal" size={24} variant="light">
+                          <GiLotus size={14} />
+                        </ThemeIcon>
+                      }>
+                        <List.Item>
+                          <Text size="md">Diện tích: 3.5 héc ta</Text>
+                        </List.Item>
+                        <List.Item>
+                          <Text size="md">Thiết kế theo hình bông sen nở</Text>
+                        </List.Item>
+                        <List.Item>
+                          <Text size="md">18 bậc thang tượng trưng cho 18 đời vua Hùng</Text>
+                        </List.Item>
+                        <List.Item>
+                          <Text size="md">Tượng đài trung tâm cao 39m</Text>
+                        </List.Item>
+                        <List.Item>
+                          <Text size="md">Hệ thống chiếu sáng hiện đại</Text>
+                        </List.Item>
+                      </List>
+                    </Stack>
+                  </Card>
+                </Grid.Col>
+              </Grid>
             </Accordion.Panel>
           </Accordion.Item>
         </Accordion>
 
         <Grid mt={60}>
-          <Grid.Col span={{ base: 12, md: 6 }}>
+          <Grid.Col span={12}>
             <Timeline active={3} bulletSize={30} lineWidth={2}>
               {timelineData.map((item, index) => (
                 <Timeline.Item
@@ -215,35 +399,6 @@ export default function MapPage() {
                 </Timeline.Item>
               ))}
             </Timeline>
-          </Grid.Col>
-
-          <Grid.Col span={{ base: 12, md: 6 }}>
-            <Card withBorder radius="md" className={classes.featureCard}>
-              <Title order={2} size="h3" mb="md" fw={700}>
-                Kiến trúc độc đáo
-              </Title>
-              <List
-                spacing="sm"
-                size="lg"
-                center
-                icon={
-                  <ThemeIcon color="blue" size={24} radius="xl">
-                    <GiLotus size={16} />
-                  </ThemeIcon>
-                }
-              >
-                <List.Item>
-                  Tượng đài người lính với đóa sen tưởng niệm
-                </List.Item>
-                <List.Item>
-                  18 bậc thang tượng trưng cho 18 đời vua Hùng
-                </List.Item>
-                <List.Item>Hoa văn trống đồng Ngọc Lũ độc đáo</List.Item>
-                <List.Item>
-                  Thiết kế hình bông sen nở với hồ nước trung tâm
-                </List.Item>
-              </List>
-            </Card>
           </Grid.Col>
         </Grid>
       </Container>
