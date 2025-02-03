@@ -37,7 +37,7 @@ export default function MapPage() {
     {
       title: "Khởi công xây dựng",
       date: "1980",
-      icon: <FaLandmark size={18} />,
+      icon: <FaMonument size={18} />,
       description: "Bắt đầu xây dựng với diện tích hơn 3,5 héc ta",
     },
     {
@@ -49,7 +49,7 @@ export default function MapPage() {
     {
       title: "Công nhận Di tích",
       date: "10/4/2003",
-      icon: <FaMonument size={18} />,
+      icon: <FaLandmark size={18} />,
       description: "Được công nhận di tích lịch sử cấp tỉnh",
     },
   ];
