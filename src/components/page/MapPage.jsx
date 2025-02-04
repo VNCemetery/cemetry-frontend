@@ -37,19 +37,19 @@ export default function MapPage() {
     {
       title: "Khởi công xây dựng",
       date: "1980",
-      icon: <FaMonument />,
+      icon: <FaMonument size={18} />,
       description: "Bắt đầu xây dựng với diện tích hơn 3,5 héc ta",
     },
     {
       title: "Khánh thành",
       date: "26/7/1984",
-      icon: <GiTempleDoor />,
+      icon: <GiTempleDoor size={18} />,
       description: "Chính thức khánh thành và đưa vào sử dụng",
     },
     {
       title: "Công nhận Di tích",
       date: "10/4/2003",
-      icon: <FaLandmark />,
+      icon: <FaLandmark size={18} />,
       description: "Được công nhận di tích lịch sử cấp tỉnh",
     },
   ];
@@ -89,20 +89,20 @@ export default function MapPage() {
             <Grid.Col key={stat.label} span={{ base: 6, sm: 6, md: 3 }}>
               <Card
                 className={classes.statCard}
-                bg={cardColors[index].bg}
+                bg={cardColors[index % cardColors.length].bg}
                 withBorder
                 styles={{
                   root: {
-                    borderColor: `var(--mantine-color-${cardColors[index].border})`,
+                    borderColor: `var(--mantine-color-${cardColors[index % cardColors.length].border})`,
                     overflow: "visible",
                   },
                   content: {
                     ".mantine-Text-root.statValue": {
-                      color: `var(--mantine-color-${cardColors[index].text})`,
+                      color: `var(--mantine-color-${cardColors[index % cardColors.length].text})`,
                       fontWeight: 900,
                     },
                     ".mantine-Text-root:last-child": {
-                      color: `var(--mantine-color-${cardColors[index].border})`,
+                      color: `var(--mantine-color-${cardColors[index % cardColors.length].border})`,
                     },
                   },
                 }}
@@ -111,7 +111,7 @@ export default function MapPage() {
                   <ThemeIcon
                     size={80}
                     radius="xl"
-                    color={cardColors[index].icon}
+                    color={cardColors[index % cardColors.length].icon}
                     className={classes.statIcon}
                   >
                     {stat.icon}
@@ -120,7 +120,7 @@ export default function MapPage() {
                 <Text
                   className={classes.statValue}
                   mt={45}
-                  c={cardColors[index].text}
+                  c={cardColors[index % cardColors.length].text}
                 >
                   {stat.value}
                 </Text>
@@ -375,30 +375,67 @@ export default function MapPage() {
 
         <Grid mt={60}>
           <Grid.Col span={12}>
-            <Timeline active={3} bulletSize={30} lineWidth={2}>
-              {timelineData.map((item, index) => (
-                <Timeline.Item
-                  key={index}
-                  bullet={
-                    <ThemeIcon size={30} radius="xl" color="blue">
-                      {item.icon}
-                    </ThemeIcon>
-                  }
-                  title={
-                    <Text fw={700} size="lg">
-                      {item.title}
-                    </Text>
-                  }
-                >
-                  <Text size="xs" c="dimmed" mt={4}>
-                    {item.date}
-                  </Text>
-                  <Text size="sm" mt={4}>
-                    {item.description}
-                  </Text>
-                </Timeline.Item>
-              ))}
-            </Timeline>
+            <Card withBorder padding="xl" radius="md" className={classes.infoCard}>
+              <Stack spacing="lg">
+                <Group>
+                  <ThemeIcon color="blue" size={34} variant="light" radius="xl">
+                    <FaHistory size={20} />
+                  </ThemeIcon>
+                  <Text fw={600} size="xl">Lịch sử phát triển</Text>
+                </Group>
+
+                <Timeline active={3} bulletSize={34} lineWidth={2} color="blue" sx={{ padding: '20px 0' }}>
+                  {timelineData.map((item, index) => (
+                    <Timeline.Item
+                      key={index}
+                      bullet={
+                        <ThemeIcon
+                          size={34}
+                          radius="xl"
+                          variant="gradient"
+                          gradient={{ from: "blue", to: "cyan" }}
+                        >
+                          {item.icon}
+                        </ThemeIcon>
+                      }
+                      title={
+                        <Group gap="xs" align="center" sx={{ marginBottom: 5 }}>
+                          <Text fw={600} size="lg" color="blue.9">
+                            {item.title}
+                          </Text>
+                          <Badge size="lg" variant="filled" color="blue">
+                            {item.date}
+                          </Badge>
+                        </Group>
+                      }
+                    >
+                      <Card withBorder mt="sm" radius="md" padding="md" bg="white" shadow="sm">
+                        <Stack spacing="xs">
+                          <Text size="md" fw={500} color="gray.8">
+                            {item.description}
+                          </Text>
+                          {index === 0 && (
+                            <Text size="sm" c="dimmed" italic>
+                              Khởi công xây dựng trên khu đất rộng hơn 3,5 héc ta, với sự đóng góp của nhân dân trong tỉnh
+                            </Text>
+                          )}
+                          {index === 1 && (
+                            <Text size="sm" c="dimmed" italic>
+                              Khánh thành và đưa vào sử dụng với sự tham dự của lãnh đạo tỉnh và đông đảo nhân dân
+                            </Text>
+                          )}
+                          {index === 2 && (
+                            <Text size="sm" c="dimmed" italic>
+                              Được Bộ Văn hóa - Thông tin công nhận là di tích lịch sử văn hóa cấp tỉnh
+                            </Text>
+                          )}
+                        </Stack>
+                      </Card>
+                    </Timeline.Item>
+                  ))}
+                </Timeline>
+              </Stack>
+            </Card>
           </Grid.Col>
         </Grid>
       </Container>
