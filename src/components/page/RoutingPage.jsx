@@ -5,8 +5,9 @@ import { findPath, provideFeedback } from "../../services/pathFindingService";
 import { useInfoStore } from "../../store/useInfoStore";
 import { useMatyrStore } from "../../store/useMatyrStore";
 import { useMapStore } from "../../store/useMapStore";
-import { Paper, ActionIcon, Text, Modal } from "@mantine/core";
+import { Paper, ActionIcon, Text, Modal, Button } from "@mantine/core";
 import { FaThumbsUp, FaThumbsDown } from "react-icons/fa";
+import { MdLocationOff } from "react-icons/md"; // Add this import
 import { notifications } from "@mantine/notifications";
 export default function RoutingPage() {
   const mapContainer = useRef(null);
@@ -20,6 +21,8 @@ export default function RoutingPage() {
   const [isSelectingLocation, setIsSelectingLocation] = useState(false);
   const [showLocationMarker, setShowLocationMarker] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleStartLocationSelection = () => {
     setIsSelectingLocation(true);
@@ -43,7 +46,6 @@ export default function RoutingPage() {
       let coordinates = data?.features[0].geometry.coordinates;
       let end = coordinates[coordinates.length - 1];
 
-      //back
       showRoute(start, end, [start, ...coordinates], data);
 
       const bounds = new maplibregl.LngLatBounds();
@@ -53,7 +55,33 @@ export default function RoutingPage() {
         duration: 1000,
       });
     } catch (error) {
-      console.error("Error finding route:", error);
+      if (error.response?.data?.code === 400) {
+        setShowErrorModal(true);
+        setErrorMessage(
+          <div className="flex flex-col items-center gap-6 p-6">
+            <MdLocationOff size={120} color="#ff6b6b" className="mb-4" />
+            <Text
+              size="28px"
+              weight={700}
+              align="center"
+              style={{ lineHeight: 1.6 }}
+              className="max-w-[400px]"
+              color="#333"
+            >
+              Vui lòng kiểm tra lại:
+            </Text>
+            <Text
+              size="24px"
+              weight={600}
+              align="center"
+              style={{ lineHeight: 1.6 }}
+              color="#444"
+            >
+              • Chỉ hỗ trợ tìm trong khu vực nghĩa trang
+            </Text>
+          </div>
+        );
+      }
     }
   };
 
@@ -252,6 +280,7 @@ export default function RoutingPage() {
         findGraveRowIdByName(selectedMartyr.rowName, selectedMartyr.areaName);
 
       let data = await findPath(currentLocation, graveRowId);
+
       let coordinates = data?.features[0].geometry.coordinates;
       let end = coordinates[coordinates.length - 1];
 
@@ -266,8 +295,12 @@ export default function RoutingPage() {
         duration: 1000,
       });
     } catch (error) {
-      console.error("Error finding route:", error);
-      // Handle error appropriately
+      if (error.response?.data?.code === 400) {
+        setErrorMessage(
+          "Không tìm thấy đường đi!\nVui lòng đảm bảo bạn đang ở trong khuôn viên nghĩa trang."
+        );
+        setShowErrorModal(true);
+      }
     }
   };
 
@@ -289,6 +322,66 @@ export default function RoutingPage() {
 
   return (
     <div className="h-full relative">
+      <Modal
+        opened={showErrorModal}
+        onClose={() => setShowErrorModal(false)}
+        title={
+          <Text
+            size="30px"
+            weight={900}
+            color="red"
+            align="center"
+            className="mb-4"
+          >
+            Không tìm được đường đi
+          </Text>
+        }
+        centered
+        size="lg"
+        padding="xl"
+        radius="lg"
+      >
+        <div className="flex flex-col items-center gap-6 p-6">
+          <MdLocationOff size={120} color="#ff6b6b" className="mb-4" />
+          <Text
+            size="28px"
+            weight={700}
+            align="center"
+            style={{ lineHeight: 1.6 }}
+            className="max-w-[400px]"
+            color="#333"
+          >
+            Vui lòng kiểm tra lại:
+          </Text>
+          <div className="flex flex-col gap-4">
+            <Text
+              className="text-xl font-bold"
+              align="center"
+              style={{ lineHeight: 1.6 }}
+              color="#444"
+            >
+              • Bạn đã cho phép ứng dụng xác định vị trí
+            </Text>
+            <Text
+              className="text-xl font-bold"
+              align="center"
+              style={{ lineHeight: 1.6 }}
+              color="#444"
+            >
+              • Bạn đang ở trong khuôn viên nghĩa trang
+            </Text>
+          </div>
+          <Button
+            size="xl"
+            fullWidth
+            onClick={() => setShowErrorModal(false)}
+            mt="xl"
+          >
+            Đã hiểu
+          </Button>
+        </div>
+      </Modal>
+
       <MatyrSearch
         onClearRoute={() => {
           setShowLocationMarker(false);

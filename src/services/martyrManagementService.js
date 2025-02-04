@@ -4,8 +4,6 @@ const martyrApi = new ApiClient("/martyrs");
 
 export const getMatyrs = async (name = "", page = 0, size = 10, filters = {}) => {
   try {
-    console.log("Service sending request with:", { name, page, size, filters }); // Debug log
-    
     const response = await martyrApi.public().post("/search", {
       name,
       page,
@@ -14,11 +12,8 @@ export const getMatyrs = async (name = "", page = 0, size = 10, filters = {}) =>
       yearOfBirth: filters.yearOfBirth || null,
       yearOfDeath: filters.yearOfDeath || null,
     });
-
-    console.log("Service received response:", response.data); // Debug log
     return response.data;
   } catch (error) {
-    console.error("Service error:", error);
     throw error;
   }
 };
@@ -34,19 +29,30 @@ export const getMartyrById = async (id) => {
 
 export const updateMartyr = async (id, data) => {
   try {
-    const jsonData = {};
-    const formData = new FormData();
+    // Chuẩn bị data theo format API yêu cầu
+    const martyrData = {
+      id: data.id,
+      image: data.image,
+      graveCode: data.graveCode || null,
+      fullName: data.fullName,
+      name: data.name,
+      codeName: data.codeName,
+      yearOfBirth: data.yearOfBirth,
+      dateOfEnlistment: data.yearOfEnlistment?.toString(), // Chuyển sang string
+      dateOfDeath: data.dateOfDeath,
+      rankPositionUnit: data.rankPositionUnit,
+      homeTown: data.homeTown,
+      placeOfExhumation: data.placeOfExhumation,
+      dieuChinh: data.dieuChinh || null,
+      quyTap: data.quyTap || null,
+      ngayThangNam: data.ngayThangNam || null,
+      note: data.note || null,
+      commune: data.commune,
+      district: data.district,
+      graveRowId: data.graveRowId
+    };
 
-    // Convert formData to JSON
-    for (const key in data) {
-      if (data[key] instanceof File) {
-        formData.append(key, data[key]);
-      } else {
-        jsonData[key] = data[key];
-      }
-    }
-
-    const response = await martyrApi.protected().post("/upsert", jsonData);
+    const response = await martyrApi.protected().post("/upsert", martyrData);
     return response.data;
   } catch (error) {
     console.error("Service Error:", error);
