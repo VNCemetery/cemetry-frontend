@@ -46,7 +46,6 @@ export default function RoutingPage() {
       let coordinates = data?.features[0].geometry.coordinates;
       let end = coordinates[coordinates.length - 1];
 
-      //back
       showRoute(start, end, [start, ...coordinates], data);
 
       const bounds = new maplibregl.LngLatBounds();
@@ -56,7 +55,33 @@ export default function RoutingPage() {
         duration: 1000,
       });
     } catch (error) {
-      console.error("Error finding route:", error);
+      if (error.response?.data?.code === 400) {
+        setShowErrorModal(true);
+        setErrorMessage(
+          <div className="flex flex-col items-center gap-6 p-6">
+            <MdLocationOff size={120} color="#ff6b6b" className="mb-4" />
+            <Text
+              size="28px"
+              weight={700}
+              align="center"
+              style={{ lineHeight: 1.6 }}
+              className="max-w-[400px]"
+              color="#333"
+            >
+              Vui lòng kiểm tra lại:
+            </Text>
+            <Text
+              size="24px"
+              weight={600}
+              align="center"
+              style={{ lineHeight: 1.6 }}
+              color="#444"
+            >
+              • Chỉ hỗ trợ tìm trong khu vực nghĩa trang
+            </Text>
+          </div>
+        );
+      }
     }
   };
 
