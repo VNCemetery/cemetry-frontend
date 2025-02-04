@@ -30,7 +30,7 @@ const contactData = [
   },
   {
     title: "EMAIL",
-    description: "abc@gmail.com",
+    description: "tinhdoan_dongthap@yahoo.com",
     icon: FiMail,
   },
   {
