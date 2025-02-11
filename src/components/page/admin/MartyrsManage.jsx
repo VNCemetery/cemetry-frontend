@@ -45,6 +45,7 @@ import { buildFilterFormQuery } from "../../../utils/queryBuilder";
 import { DEFAULT_AUTO_SUGGEST_SIZE, DEFAULT_PAGE, DEFAULT_SEARCH_SIZE } from "../../../utils/constants";
 import Loading from "../../ui/Loading";
 
+
 export default function MartyrsManage() {
   const navigate = useNavigate();
   const { grave_rows } = useInfoStore();

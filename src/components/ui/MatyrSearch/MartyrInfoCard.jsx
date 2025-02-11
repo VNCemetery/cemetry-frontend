@@ -2,11 +2,6 @@ import { Avatar, Button, Card, Group, Text } from "@mantine/core";
 import classes from "./MartyrInfoCard.module.css";
 import { getImageUrl } from "../../../utils/imageUtils";
 
-const stats = [
-  { value: "34K", label: "Followers" },
-  { value: "187", label: "Follows" },
-  { value: "1.6K", label: "Posts" },
-];
 
 export default function MartyrInfoCard({
   fullName,

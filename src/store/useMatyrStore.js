@@ -68,9 +68,9 @@ export const useMatyrStore = create((set, get) => ({
     
     return { success: wasDeleted, needsReload: false };
   },
-  loadMartyrs: async (name, page = 0, size, filters) => {
+  loadMartyrs: async (name, page = 0, size, filters, sorts = []) => {
     try {
-      const response = await getMatyrs(name, page, size, filters);
+      const response = await getMatyrs(name, page, size, filters, sorts);
       set({
         matyrs: response,
         totalPages: response.totalPages,
@@ -93,7 +93,8 @@ export const useMatyrStore = create((set, get) => ({
     searchTerm = "",
     page = 1,
     size = 10,
-    filters = {}
+    filters = {},
+    sorts = []
   ) => {
     try {
       set((state) => ({
@@ -118,7 +119,8 @@ export const useMatyrStore = create((set, get) => ({
         searchTerm,
         page - 1,
         size,
-        validFilters
+        validFilters,
+        sorts
       );
 
       set((state) => ({

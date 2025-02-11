@@ -2,7 +2,7 @@ import ApiClient from "../api/apiClient";
 
 const martyrApi = new ApiClient("/martyrs");
 
-export const getMatyrs = async (name = "", page = 0, size = 10, filters = {}) => {
+export const getMatyrs = async (name = "", page = 0, size = 10, filters = {}, sorts = []) => {
   try {
     const response = await martyrApi.public().post("/search", {
       name,
@@ -12,6 +12,7 @@ export const getMatyrs = async (name = "", page = 0, size = 10, filters = {}) =>
       hometown: filters.homeTown || null,
       yearOfBirth: filters.yearOfBirth || null,
       yearOfDeath: filters.yearOfDeath || null,
+      sorts: sorts // Add sorts parameter
     });
     return response.data;
   } catch (error) {
