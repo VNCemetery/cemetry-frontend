@@ -91,7 +91,6 @@ const SearchPopupModal = ({
             };
 
             const filters_query = buildFilterFormQuery(queryData);
-            alert(JSON.stringify(filters_query));
             clearMartrys();
             setCurrentPage(0);
             handleSearch({

@@ -8,7 +8,8 @@ export const getMatyrs = async (name = "", page = 0, size = 10, filters = {}) =>
       name,
       page,
       size,
-      hometown: filters.hometown || null,
+      filters: filters,
+      hometown: filters.homeTown || null,
       yearOfBirth: filters.yearOfBirth || null,
       yearOfDeath: filters.yearOfDeath || null,
     });
@@ -63,7 +64,7 @@ export const updateMartyr = async (id, data) => {
 export const deleteMartyr = async (id) => {
   try {
     const response = await martyrApi.protected().delete(`/${id}`);
-    return response.data;
+    return response;
   } catch (error) {
     throw error;
   }

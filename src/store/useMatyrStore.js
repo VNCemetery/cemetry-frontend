@@ -10,8 +10,65 @@ export const useMatyrStore = create((set, get) => ({
 
   selectedMartyr: null,
   selectMartyr: (martyr) => set({ selectedMartyr: martyr }),
+  updateMartyrInStore: (id, newMartyrData) => {
+    const currentMatyrs = get().matyrs;
+    if (!currentMatyrs || !currentMatyrs.content) return;
+    
+    const updatedContent = currentMatyrs.content.map((martyr) => {
+      if (martyr.id === id) {
+        // Preserve the graveRow data from the original martyr
+        return { ...martyr, ...newMartyrData };
+      }
+      return martyr;
+    });
 
-  loadMatyrs: async (name, page = 0, size, filters) => {
+    set({ 
+      matyrs: { 
+        ...currentMatyrs,
+        content: updatedContent 
+      } 
+    });
+  },
+  deleteMartyrInStore: (id) => {
+    const currentMatyrs = get().matyrs;
+    if (!currentMatyrs || !currentMatyrs.content) return { success: false };
+    
+    const currentContent = currentMatyrs.content;
+    const isLastPage = currentMatyrs.number === currentMatyrs.totalPages - 1;
+    const isLastItemOnPage = currentContent.length === 1;
+    
+    // If this is the last item on the last page
+    if (isLastPage && isLastItemOnPage) {
+      return { 
+        success: true, 
+        needsReload: true,
+        previousPage: Math.max(0, currentMatyrs.number - 1)
+      };
+    }
+    
+    // Normal deletion flow
+    const updatedContent = currentContent.filter(martyr => martyr.id !== id);
+    const wasDeleted = updatedContent.length < currentContent.length;
+    
+    if (wasDeleted) {
+      const newTotalElements = currentMatyrs.totalElements - 1;
+      const pageSize = currentMatyrs.size || 10;
+      const newTotalPages = Math.max(1, Math.ceil(newTotalElements / pageSize));
+      
+      set({ 
+        matyrs: { 
+          ...currentMatyrs,
+          content: updatedContent,
+          totalElements: newTotalElements,
+          totalPages: newTotalPages
+        },
+        totalPages: newTotalPages
+      });
+    }
+    
+    return { success: wasDeleted, needsReload: false };
+  },
+  loadMartyrs: async (name, page = 0, size, filters) => {
     try {
       const response = await getMatyrs(name, page, size, filters);
       set({
@@ -25,8 +82,6 @@ export const useMatyrStore = create((set, get) => ({
   },
 
   clearMartrys: () => set({ matyrs: null }),
-
-  // Admin section
   adminMartyrs: {
     loading: false,
     error: null,
@@ -34,8 +89,12 @@ export const useMatyrStore = create((set, get) => ({
     currentPage: 1,
     searchTerm: "",
   },
-
-  loadAdminMartyrs: async (searchTerm = "", page = 1, size = 10, filters = {}) => {
+  loadAdminMartyrs: async (
+    searchTerm = "",
+    page = 1,
+    size = 10,
+    filters = {}
+  ) => {
     try {
       set((state) => ({
         adminMartyrs: {
@@ -47,11 +106,20 @@ export const useMatyrStore = create((set, get) => ({
 
       const validFilters = {
         hometown: filters.hometown?.trim() || null,
-        yearOfBirth: filters.yearOfBirth ? filters.yearOfBirth.toString() : null,
-        yearOfDeath: filters.yearOfDeath ? filters.yearOfDeath.toString() : null,
+        yearOfBirth: filters.yearOfBirth
+          ? filters.yearOfBirth.toString()
+          : null,
+        yearOfDeath: filters.yearOfDeath
+          ? filters.yearOfDeath.toString()
+          : null,
       };
 
-      const response = await getMatyrs(searchTerm, page - 1, size, validFilters);
+      const response = await getMatyrs(
+        searchTerm,
+        page - 1,
+        size,
+        validFilters
+      );
 
       set((state) => ({
         adminMartyrs: {

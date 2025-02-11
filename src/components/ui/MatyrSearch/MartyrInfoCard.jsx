@@ -1,5 +1,6 @@
 import { Avatar, Button, Card, Group, Text } from "@mantine/core";
 import classes from "./MartyrInfoCard.module.css";
+import { getImageUrl } from "../../../utils/imageUtils";
 
 const stats = [
   { value: "34K", label: "Followers" },
@@ -13,15 +14,17 @@ export default function MartyrInfoCard({
   yearOfBirth,
   dateOfDeath,
   rankPositionUnit,
+  image
 }) {
   return (
     <Card radius="md" className="bg-white" p="xl" shadow="lg">
-      {/* <Card.Section h={160} /> */}
+      {/* <Card.Section h={1R60} /> */}
       <Avatar
         size={120}
         radius={120}
         mx="auto"
         mt={-40}
+        src={getImageUrl(image)}
         className={classes.avatar}
         styles={{
           root: {
