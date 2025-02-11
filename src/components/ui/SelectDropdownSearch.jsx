@@ -7,6 +7,8 @@ export const SelectDropdownSearch = ({
   description,
   setValue,
   placeholder,
+  size = "xl",
+  radius = "xl",
 }) => {
   const [search, setSearch] = useState("");
   const combobox = useCombobox({
@@ -31,7 +33,7 @@ export const SelectDropdownSearch = ({
 
   return (
     <Combobox
-      size="xl"
+      size={size}
       store={combobox}
       withinPortal={false}
       onOptionSubmit={(val) => {
@@ -41,9 +43,10 @@ export const SelectDropdownSearch = ({
     >
       <Combobox.Target>
         <InputBase
+          label={description}
           component="button"
-          size="xl"
-          radius={"xl"}
+          size={size}
+          radius={radius}
           type="button"
           pointer
           rightSection={<Combobox.Chevron />}
@@ -56,7 +59,7 @@ export const SelectDropdownSearch = ({
 
       <Combobox.Dropdown>
         <Combobox.Search
-          size="xl"
+          size={size}
           value={search}
           onChange={(event) => setSearch(event.currentTarget.value)}
           placeholder={placeholder}

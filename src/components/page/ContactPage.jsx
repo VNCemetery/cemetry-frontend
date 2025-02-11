@@ -19,17 +19,18 @@ import classes from "./ContactPage.module.css";
 const contactData = [
   {
     title: "ĐỊA CHỈ",
-    description: "Nghĩa trang Liệt sĩ tỉnh Đồng Tháp,\nPhường 6, TP. Cao Lãnh, Đồng Tháp",
+    description:
+      "Nghĩa trang Liệt sĩ tỉnh Đồng Tháp,\nPhường 6, TP. Cao Lãnh, Đồng Tháp",
     icon: FiMapPin,
   },
   {
     title: "HOTLINE",
-    description: "(0277) 3851 259",
+    description: "(0277) 3851 316",
     icon: FiPhone,
   },
   {
     title: "EMAIL",
-    description: "abc@gmail.com",
+    description: "tinhdoan_dongthap@yahoo.com",
     icon: FiMail,
   },
   {
@@ -64,12 +65,7 @@ export default function ContactPage() {
   const items = contactData.map((item) => (
     <Paper withBorder p="md" radius="md" key={item.title}>
       <Group>
-        <ThemeIcon
-          size={40}
-          radius="md"
-          variant="light"
-          color="blue"
-        >
+        <ThemeIcon size={40} radius="md" variant="light" color="blue">
           <item.icon size={rem(20)} />
         </ThemeIcon>
 
@@ -77,7 +73,11 @@ export default function ContactPage() {
           <Text size="sm" tt="uppercase" fw={700} c="dimmed">
             {item.title}
           </Text>
-          <Text size="md" fw={500} style={{ whiteSpace: 'pre-line', lineHeight: 1.5 }}>
+          <Text
+            size="md"
+            fw={500}
+            style={{ whiteSpace: "pre-line", lineHeight: 1.5 }}
+          >
             {item.description}
           </Text>
         </Box>
@@ -94,7 +94,8 @@ export default function ContactPage() {
               Liên hệ với Ban quản lý Nghĩa trang Liệt sĩ
             </Title>
             <Text className={classes.heroDescription} fw={500}>
-              Mọi thông tin chi tiết xin vui lòng liên hệ với Ban quản lý Nghĩa trang Liệt sĩ tỉnh Đồng Tháp
+              Mọi thông tin chi tiết xin vui lòng liên hệ với Ban quản lý Nghĩa
+              trang Liệt sĩ tỉnh Đồng Tháp
             </Text>
             <Text className={classes.heroDescription} fw={500}>
               qua các kênh thông tin sau
@@ -103,11 +104,9 @@ export default function ContactPage() {
         </Container>
       </div>
 
-      <Container py="xl" style={{ marginBottom: '80px' }}>
+      <Container py="xl" style={{ marginBottom: "80px" }}>
         <Stack gap="xl">
-          <SimpleGrid cols={{ base: 1, sm: 2 }}>
-            {items}
-          </SimpleGrid>
+          <SimpleGrid cols={{ base: 1, sm: 2 }}>{items}</SimpleGrid>
 
           <Paper withBorder p="xl" radius="md">
             <Title order={2} size="h3" mb="md" ta="center">
@@ -146,18 +145,8 @@ export default function ContactPage() {
               loading="lazy"
             ></iframe>
           </Paper>
-
-          <Paper withBorder p="xl" radius="md" mb="xl">
-            <Title order={2} size="h3" mb="md">
-              Thông tin thêm
-            </Title>
-            <Text size="lg">
-              Ban quản lý Nghĩa trang Liệt sĩ tỉnh Đồng Tháp luôn sẵn sàng hỗ trợ và giải đáp mọi thắc mắc của người thân liệt sĩ và các đoàn khách đến viếng thăm.
-              Chúng tôi cam kết phục vụ quý khách với tinh thần trách nhiệm cao nhất.
-            </Text>
-          </Paper>
         </Stack>
       </Container>
     </>
   );
-} 
+}

@@ -2,15 +2,17 @@ import ApiClient from "../api/apiClient";
 
 const martyrApi = new ApiClient("/martyrs");
 
-export const getMatyrs = async (name = "", page = 0, size = 10, filters = {}) => {
+export const getMatyrs = async (name = "", page = 0, size = 10, filters = {}, sorts = []) => {
   try {
     const response = await martyrApi.public().post("/search", {
       name,
       page,
       size,
-      hometown: filters.hometown || null,
+      filters: filters,
+      hometown: filters.homeTown || null,
       yearOfBirth: filters.yearOfBirth || null,
       yearOfDeath: filters.yearOfDeath || null,
+      sorts: sorts // Add sorts parameter
     });
     return response.data;
   } catch (error) {
@@ -63,7 +65,7 @@ export const updateMartyr = async (id, data) => {
 export const deleteMartyr = async (id) => {
   try {
     const response = await martyrApi.protected().delete(`/${id}`);
-    return response.data;
+    return response;
   } catch (error) {
     throw error;
   }

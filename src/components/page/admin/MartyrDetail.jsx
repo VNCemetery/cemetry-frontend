@@ -25,6 +25,7 @@ import {
 import { FiArrowLeft, FiImage, FiSave, FiTrash2 } from "react-icons/fi";
 import { uploadImage } from "../../../services/imageService";
 import { getImageUrl } from '../../../utils/imageUtils';
+import { useMatyrStore } from "../../../store/useMatyrStore";
 
 export default function MartyrDetail({ martyr: initialMartyr, onSave, onCancel }) {
   const [loading, setLoading] = useState(false);
@@ -85,6 +86,8 @@ export default function MartyrDetail({ martyr: initialMartyr, onSave, onCancel }
       return null;
     }
   };
+
+  const {updateMartyrInStore} = useMatyrStore(state=>state)
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -187,7 +190,7 @@ export default function MartyrDetail({ martyr: initialMartyr, onSave, onCancel }
         yearOfBirth: formData.get("yearOfBirth") 
           ? parseInt(formData.get("yearOfBirth")) 
           : null,
-        dateOfEnlistment: formData.get("yearOfEnlistment") || null,
+        dateOfEnlistment: formData.get("dateOfEnlistment") || null,
         dateOfDeath: formData.get("dateOfDeath") || null,
         rankPositionUnit: formData.get("rankPositionUnit") || null,
         homeTown: formData.get("homeTown") || null,
@@ -199,10 +202,11 @@ export default function MartyrDetail({ martyr: initialMartyr, onSave, onCancel }
         dieuChinh: null,
         quyTap: null,
         ngayThangNam: null,
-        note: null
+        note: formData.get("note") || null
       };
 
       await updateMartyr(martyr.id, data);
+       updateMartyrInStore(martyr.id, data);
 
       notifications.show({
         title: "Thành công",
@@ -295,18 +299,27 @@ export default function MartyrDetail({ martyr: initialMartyr, onSave, onCancel }
 
               {/* Cột phải - Form thông tin */}
               <Stack style={{ flex: 1 }}>
-                <TextInput
-                  label="Họ và tên đầy đủ"
-                  name="fullName"
-                  required
-                  defaultValue={martyr?.fullName}
-                />
-
+                {/* Add grave info section */}
                 <Group grow>
                   <TextInput
-                    label="Họ và tên đệm"
-                    name="rhyme"
-                    defaultValue={martyr?.rhyme}
+                    label="Mã mộ"
+                    name="graveCode"
+                    defaultValue={martyr?.graveCode}
+                  />
+                  <TextInput
+                    label="Bí danh"
+                    name="codeName"
+                    defaultValue={martyr?.codeName}
+                  />
+                </Group>
+
+                {/* Move full name after grave info */}
+                <Group grow>
+                  <TextInput
+                    label="Họ và tên đầy đủ"
+                    name="fullName"
+                    required
+                    defaultValue={martyr?.fullName}
                   />
                   <TextInput
                     label="Tên"
@@ -316,9 +329,10 @@ export default function MartyrDetail({ martyr: initialMartyr, onSave, onCancel }
                 </Group>
 
                 <TextInput
-                  label="Bí danh"
-                  name="codeName"
-                  defaultValue={martyr?.codeName}
+                  label="Cấp bậc/Chức vụ/Đơn vị"
+                  name="rankPositionUnit"
+                  defaultValue={martyr?.rankPositionUnit}
+                  placeholder="Ví dụ: Trung úy, Tiểu đội trưởng, Đại đội 7"
                 />
 
                 <Group grow>
@@ -331,8 +345,8 @@ export default function MartyrDetail({ martyr: initialMartyr, onSave, onCancel }
                   />
                   <NumberInput
                     label="Năm nhập ngũ"
-                    name="yearOfEnlistment"
-                    defaultValue={martyr?.yearOfEnlistment}
+                    name="dateOfEnlistment"
+                    defaultValue={martyr?.dateOfEnlistment}
                     min={1900}
                     max={2000}
                   />
@@ -355,7 +369,7 @@ export default function MartyrDetail({ martyr: initialMartyr, onSave, onCancel }
                   <TextInput
                     label="Quê quán"
                     name="homeTown"
-                    defaultValue={martyr?.hometown}
+                    defaultValue={martyr?.homeTown}
                   />
                   <TextInput
                     label="Xã/Phường"
@@ -369,24 +383,29 @@ export default function MartyrDetail({ martyr: initialMartyr, onSave, onCancel }
                   />
                 </Group>
 
+                <Group grow>
+                  <TextInput
+                    label="Nơi hy sinh"
+                    name="placeOfDeath"
+                    defaultValue={martyr?.placeOfDeath}
+                  />
+                  <TextInput
+                    label="Nơi quy tập"
+                    name="placeOfExhumation"
+                    defaultValue={martyr?.placeOfExhumation}
+                  />
+                </Group>
+
                 <TextInput
-                  label="Nơi quy tập"
-                  name="placeOfExhumation"
-                  defaultValue={martyr?.placeOfExhumation}
+                  label="Ghi chú"
+                  name="note" 
+                  defaultValue={martyr?.note}
+                  placeholder="Nhập ghi chú nếu có..."
                 />
               </Stack>
             </Group>
 
-            {/* Preview ảnh */}
-            {image && (
-              <Image
-                src={typeof image === 'string' ? image : URL.createObjectURL(image)}
-                alt="Preview"
-                radius="md"
-                h={200}
-                fit="contain"
-              />
-            )}
+            
           </Stack>
         </form>
         <Group position="right" mt="md">

@@ -59,7 +59,7 @@ const MatyrSearch = ({
   const [searchResults, setSearchResults] = useState(null);
   const [showAutoSuggestions, setShowAutoSuggestions] = useState(false);
   const [isLoadingSearchResults, setIsLoadingSearchResults] = useState(false);
-  const loadMatyrs = useMatyrStore((state) => state.loadMatyrs);
+  const loadMartyrs = useMatyrStore((state) => state.loadMartyrs);
   const clearMartrys = useMatyrStore((state) => state.clearMartrys);
   const [currentPage, setCurrentPage] = useState(0);
   const [showRoutingOptions, setShowRoutingOptions] = useState(false);
@@ -77,7 +77,7 @@ const MatyrSearch = ({
       setIsLoadingSearchResults(true);
       setSearchResults(null);
 
-      const results = await loadMatyrs(name, page, size, filters);
+      const results = await loadMartyrs(name, page, size, filters);
       if (!results) {
         setSearchResults(null);
         throw new Error("No result found");
