@@ -8,11 +8,11 @@ export const getMatyrs = async (name = "", page = 0, size = 10, filters = {}, so
       name,
       page,
       size,
-      filters: filters,
+      filters: Object.keys(filters).length > 0 ? filters : null,
       hometown: filters.homeTown || null,
       yearOfBirth: filters.yearOfBirth || null,
       yearOfDeath: filters.yearOfDeath || null,
-      sorts: sorts // Add sorts parameter
+      sorts: sorts.length > 0 ? sorts : null
     });
     return response.data;
   } catch (error) {
