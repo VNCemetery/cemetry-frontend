@@ -17,7 +17,6 @@ export const AppDrawer = ({ opened, toggleDrawer, closeDrawer }) => {
       onClose={closeDrawer}
       size="100%"
       padding="md"
-      hiddenFrom="sm"
       zIndex={1000000}
     >
       <Text className="w-full text-center text-2xl font-extrabold">

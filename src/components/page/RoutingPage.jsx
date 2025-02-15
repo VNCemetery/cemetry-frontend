@@ -5,7 +5,7 @@ import { findPath, provideFeedback } from "../../services/pathFindingService";
 import { useInfoStore } from "../../store/useInfoStore";
 import { useMatyrStore } from "../../store/useMatyrStore";
 import { useMapStore } from "../../store/useMapStore";
-import { Paper, ActionIcon, Text, Modal, Button } from "@mantine/core";
+import { Paper, ActionIcon, Text, Modal, Button, Drawer } from "@mantine/core";
 import { FaThumbsUp, FaThumbsDown } from "react-icons/fa";
 import { MdLocationOff } from "react-icons/md"; // Add this import
 import { notifications } from "@mantine/notifications";
@@ -326,8 +326,11 @@ export default function RoutingPage() {
 
   return (
     <div className="h-full relative">
-      <AppDrawer opened={openedDrawer} closeDrawer={closeDrawer} />
-
+      <AppDrawer
+        opened={openedDrawer}
+        closeDrawer={closeDrawer}
+        title="Authentication"
+      />
       <Modal
         opened={showErrorModal}
         onClose={() => setShowErrorModal(false)}
@@ -389,8 +392,9 @@ export default function RoutingPage() {
       </Modal>
 
       <MatyrSearch
-        openDrawer={openDrawer}
-        closeDrawer={closeDrawer}
+        openDrawer={() => {
+          openDrawer();
+        }}
         openedDrawer={openedDrawer}
         onClearRoute={() => {
           setShowLocationMarker(false);

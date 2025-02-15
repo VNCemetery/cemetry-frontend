@@ -32,15 +32,14 @@ import { FiHome, FiMap } from "react-icons/fi"; // Add this import
 import SearchPopupModal from "./SearchPopupModal";
 import MartyrBriefInfo from "./MartyrBriefInfo";
 import { useLocation } from "react-router-dom";
-import { AppDrawer } from "../AppDrawer";
 
 const MatyrSearch = ({
   onClearRoute,
   onRouteFromCurrentLocation,
   onSelectLocationOnMap,
+  closeDrawer,
   openedDrawer,
   openDrawer,
-  closeDrawer,
 }) => {
   const { history } = useLocation();
   const location = useLocation();
