@@ -7,9 +7,13 @@ import {
   ActionIcon,
   CloseIcon,
   Input,
+  Loader,
   Modal,
   Button,
   Text,
+  Burger,
+  useMantineTheme,
+  Drawer,
 } from "@mantine/core";
 import { BiSearch } from "react-icons/bi";
 import { useEffect, useRef, useState } from "react";
@@ -24,15 +28,19 @@ import {
 import { useInfoStore } from "../../../store/useInfoStore";
 import { useMatyrStore } from "../../../store/useMatyrStore";
 import { useForm } from "@mantine/form";
-import { FiMap } from "react-icons/fi"; // Add this import
+import { FiHome, FiMap } from "react-icons/fi"; // Add this import
 import SearchPopupModal from "./SearchPopupModal";
 import MartyrBriefInfo from "./MartyrBriefInfo";
 import { useLocation } from "react-router-dom";
+import { AppDrawer } from "../AppDrawer";
 
 const MatyrSearch = ({
   onClearRoute,
   onRouteFromCurrentLocation,
   onSelectLocationOnMap,
+  openedDrawer,
+  openDrawer,
+  closeDrawer,
 }) => {
   const { history } = useLocation();
   const location = useLocation();
@@ -179,6 +187,8 @@ const MatyrSearch = ({
     window.history.pushState({}, "", newUrl);
   };
 
+  const theme = useMantineTheme();
+
   return (
     <>
       <Modal
@@ -275,101 +285,99 @@ const MatyrSearch = ({
           )}
 
           {!showReturnToSearch && (
-            <div className="items-center flex gap-1 bg-white rounded-2xl  m-[.25rem]">
-              <div className="flex items-center w-full text-gray-600   w-full p-1 gap-1">
-                {!opened ? (
-                  <ActionIcon
-                    variant="transparent"
-                    color="gray"
-                    aria-label="Settings"
-                    onClick={() => {
-                      openSearchPopup();
-                      searchInputRef.current.focus();
-                    }}
-                  >
-                    <BiSearch
-                      style={{ width: "70%", height: "70%" }}
-                      stroke={1.5}
-                    />
-                  </ActionIcon>
-                ) : (
-                  <ActionIcon
-                    variant="filled"
-                    size={"lg"}
-                    radius={"xl"}
-                    color="blue"
-                    aria-label="Settings"
-                    onClick={() => {
-                      if (
-                        showAutoSuggestions &&
-                        searchResults?.content?.length > 0
-                      ) {
-                        setAutoSuggestions([]);
-                        setShowAutoSuggestions(false);
-                      } else {
-                        onClearRoute();
+            <div className="flex w-full items-center">
+              <div className="w-full items-center flex gap-1 bg-white py-1">
+                <div className="flex items-center w-full text-gray-600   w-full p-1 gap-1">
+                  {!opened ? (
+                    <div className="flex flex-col items-center justify-center">
+                      <Burger
+                        lineSize={3}
+                        size="md"
+                        opened={openedDrawer}
+                        onClick={openDrawer}
+                        aria-label="Toggle navigation"
+                      />
+                    </div>
+                  ) : (
+                    <ActionIcon
+                      variant="filled"
+                      size={"lg"}
+                      radius={"xl"}
+                      color="blue"
+                      aria-label="Settings"
+                      onClick={() => {
+                        if (
+                          showAutoSuggestions &&
+                          searchResults?.content?.length > 0
+                        ) {
+                          setAutoSuggestions([]);
+                          setShowAutoSuggestions(false);
+                        } else {
+                          onClearRoute();
 
-                        setSearchKey("");
-                        setShowAutoSuggestions(false);
-                        setSearchResults(null);
-                        closeSearchPopup();
-                        close_record_modal();
+                          setSearchKey("");
+                          setShowAutoSuggestions(false);
+                          setSearchResults(null);
+                          closeSearchPopup();
+                          close_record_modal();
+                        }
+                      }}
+                    >
+                      <BsArrowLeft
+                        style={{ width: "70%", height: "70%" }}
+                        stroke={1.5}
+                      />
+                    </ActionIcon>
+                  )}
+                  <Input
+                    styles={{}}
+                    ref={searchInputRef}
+                    onClick={() => {
+                      if (!opened) {
+                        openSearchPopup();
+                        searchInputRef.current.focus();
                       }
                     }}
-                  >
-                    <BsArrowLeft
-                      style={{ width: "70%", height: "70%" }}
-                      stroke={1.5}
-                    />
-                  </ActionIcon>
-                )}
-                <Input
-                  ref={searchInputRef}
-                  onClick={() => {
-                    if (!opened) {
-                      openSearchPopup();
-                      searchInputRef.current.focus();
+                    value={searchKey}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        setCurrentPage(0);
+                        setAutoSuggestions([]);
+                        setShowAutoSuggestions(false);
+                        handleSearch({
+                          name: e.target.value,
+                          page: 0,
+                          size: DEFAULT_SEARCH_SIZE,
+                          ...filters,
+                        });
+                      }
+                    }}
+                    rightSectionPointerEvents="all"
+                    onChange={(e) => {
+                      setSearchKey(e.target.value);
+                    }}
+                    radius="lg"
+                    style={{
+                      border: "none",
+                      outline: "none",
+                      boxShadow: "none",
+                    }}
+                    size="md"
+                    className="w-full  border-none text-[2rem]"
+                    placeholder="Nhập tên liệt sĩ"
+                    rightSection={
+                      <CloseIcon
+                        aria-label="Clear input"
+                        className="mr-2"
+                        onClick={() => {
+                          setSearchKey("");
+                          searchInputRef.current.focus();
+                        }}
+                        style={{ display: searchKey ? undefined : "none" }}
+                      />
                     }
-                  }}
-                  value={searchKey}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      setCurrentPage(0);
-                      setAutoSuggestions([]);
-                      setShowAutoSuggestions(false);
-                      handleSearch({
-                        name: e.target.value,
-                        page: 0,
-                        size: DEFAULT_SEARCH_SIZE,
-                        ...filters,
-                      });
-                    }
-                  }}
-                  rightSectionPointerEvents="all"
-                  onChange={(e) => {
-                    setSearchKey(e.target.value);
-                  }}
-                  radius="lg"
-                  style={{
-                    border: "none",
-                    outline: "none",
-                    boxShadow: "none",
-                  }}
-                  size="md"
-                  className="w-full  border-none text-[2rem]"
-                  placeholder="Nhập tên liệt sĩ"
-                  rightSection={
-                    <CloseIcon
-                      aria-label="Clear input"
-                      className="mr-2"
-                      onClick={() => {
-                        setSearchKey("");
-                        searchInputRef.current.focus();
-                      }}
-                      style={{ display: searchKey ? undefined : "none" }}
-                    />
-                  }
-                />
+                  />
+                </div>
               </div>
             </div>
           )}

@@ -10,7 +10,7 @@ Bộ icon thiếu border
 
 not to use badge
 
-ASAP pre 24
+ASAP pre 24cmd
 
 tabbar button
 

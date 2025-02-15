@@ -2,17 +2,23 @@ import ApiClient from "../api/apiClient";
 
 const martyrApi = new ApiClient("/martyrs");
 
-export const getMatyrs = async (name = "", page = 0, size = 10, filters = {}, sorts = []) => {
+export const getMatyrs = async (
+  name = "",
+  page = 0,
+  size = 10,
+  filters = {},
+  sorts = []
+) => {
   try {
     const response = await martyrApi.public().post("/search", {
       name,
       page,
       size,
-      filters: filters,
+      filters: Object.keys(filters).length > 0 ? filters : null,
       hometown: filters.homeTown || null,
       yearOfBirth: filters.yearOfBirth || null,
       yearOfDeath: filters.yearOfDeath || null,
-      sorts: sorts // Add sorts parameter
+      sorts: sorts.length > 0 ? sorts : null,
     });
     return response.data;
   } catch (error) {
@@ -51,7 +57,7 @@ export const updateMartyr = async (id, data) => {
       note: data.note || null,
       commune: data.commune,
       district: data.district,
-      graveRowId: data.graveRowId
+      graveRowId: data.graveRowId,
     };
 
     const response = await martyrApi.protected().post("/upsert", martyrData);
