@@ -9,6 +9,8 @@ import { Paper, ActionIcon, Text, Modal, Button } from "@mantine/core";
 import { FaThumbsUp, FaThumbsDown } from "react-icons/fa";
 import { MdLocationOff } from "react-icons/md"; // Add this import
 import { notifications } from "@mantine/notifications";
+import { useDisclosure } from "@mantine/hooks";
+import { AppDrawer } from "../ui/AppDrawer";
 export default function RoutingPage() {
   const mapContainer = useRef(null);
   const map = useRef(null);
@@ -319,9 +321,13 @@ export default function RoutingPage() {
       }
     );
   }, []);
+  const [openedDrawer, { open: openDrawer, close: closeDrawer }] =
+    useDisclosure(false);
 
   return (
     <div className="h-full relative">
+      <AppDrawer opened={openedDrawer} closeDrawer={closeDrawer} />
+
       <Modal
         opened={showErrorModal}
         onClose={() => setShowErrorModal(false)}
@@ -383,6 +389,9 @@ export default function RoutingPage() {
       </Modal>
 
       <MatyrSearch
+        openDrawer={openDrawer}
+        closeDrawer={closeDrawer}
+        openedDrawer={openedDrawer}
         onClearRoute={() => {
           setShowLocationMarker(false);
           setCurrentPath(null);

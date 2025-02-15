@@ -33,6 +33,7 @@ import { useEffect, useState } from "react";
 import { useInfoStore } from "./store/useInfoStore";
 import ForgotPasswordPage from "./components/page/ForgotPasswordPage";
 import ResetPasswordPage from "./components/page/ResetPasswordPage";
+import DefaultLayout from "./components/layout/DefaultLayout";
 
 export default function App() {
   // make state is loading
@@ -53,9 +54,11 @@ export default function App() {
         <BrowserRouter>
           <Routes>
             {/* Client Routes */}
-            <Route path="/*" element={<ClientAppLayout />}>
+            <Route element={<DefaultLayout />} path="/map">
               <Route index element={<RoutingPage />} />
-              <Route path="map" element={<MapPage />} />
+            </Route>
+            <Route path="/*" element={<ClientAppLayout />}>
+              <Route path="/*" element={<MapPage />} />
               <Route path="contact" element={<ContactPage />} />
             </Route>
 
