@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 import FloatingSelector from "../FloatingSelector";
 import MartyrDetail from "./MartyrDetail";
@@ -30,34 +30,63 @@ import SearchResultEntry from "./SearchResultEntry";
 import { buildFilterFormQuery } from "../../../utils/queryBuilder";
 import Loading from "../Loading";
 import { useDisclosure } from "@mantine/hooks";
-import { getMartyrById } from "../../../services/martyrManagementService";
+import {
+  getMartyrById,
+  getMatyrs,
+} from "../../../services/martyrManagementService";
 
 const SearchPopupModal = ({
-  showAutoSuggestions,
   searchKey,
   filterForm,
   filters,
   setFilters,
   grave_rows,
-  selectMartyr,
-  openMartyrDetail,
-  closeSearchPopup,
   setSearchKey,
-  isLoadingAutoSuggestions,
-  isLoadingSearchResults,
   searchResults,
   clearMartrys,
   setCurrentPage,
   handleSearch,
-  autoSuggestions,
   currentPage,
-  setShowAutoSuggestions,
-  setAutoSuggestions,
   offSetHeight,
   filterQuery,
-  openRoutingHandlerPopup,
   onSelectMartyrHandler,
+  showAutoSuggestions,
+  setShowAutoSuggestions,
+  autoSuggestions,
+  setAutoSuggestions,
 }) => {
+  const [isLoadingAutoSuggestions, setIsLoadingAutoSuggestions] =
+    useState(false);
+  const [isLoadingSearchResults, setIsLoadingSearchResults] = useState(false);
+
+  const handleAutoSuggest = async (searchKey) => {
+    try {
+      setIsLoadingAutoSuggestions(true);
+      const results = await getMatyrs(searchKey, 0, DEFAULT_AUTO_SUGGEST_SIZE);
+      const content = results.content;
+      if (!content) {
+        setAutoSuggestions([]);
+        setShowAutoSuggestions(true);
+        throw new Error("No content found");
+      }
+      setShowAutoSuggestions(true);
+      setIsLoadingAutoSuggestions(false);
+      setAutoSuggestions(content);
+    } catch (error) {
+      console.error("Lỗi khi tìm kiếm:", error);
+      setAutoSuggestions([]);
+      setIsLoadingAutoSuggestions(false);
+    }
+  };
+
+  useEffect(() => {
+    if (searchKey.length > 0) {
+      handleAutoSuggest(searchKey);
+    } else {
+      setAutoSuggestions([]);
+    }
+  }, [searchKey]);
+
   const [
     showFilterSetting,
     { open: openFilterSetting, close: closeFilterSetting },
@@ -120,7 +149,7 @@ const SearchPopupModal = ({
                       {...filterForm.getInputProps("yearOfBirth")}
                       min={1800}
                       max={2024}
-                      radius="md"
+                      radius="xl"
                       placeholder="Năm sinh"
                       label="Năm sinh"
                       className="flex-1"
@@ -131,7 +160,7 @@ const SearchPopupModal = ({
                       max={2024}
                       key={filterForm.key("dateOfDeath")}
                       {...filterForm.getInputProps("dateOfDeath")}
-                      radius="md"
+                      radius="xl"
                       placeholder="Năm mất"
                       label="Năm mất"
                       className="flex-1"
@@ -144,7 +173,7 @@ const SearchPopupModal = ({
                     </Text>
                     <Input
                       size="xl"
-                      radius="md"
+                      radius="xl"
                       key={filterForm.key("homeTown")}
                       {...filterForm.getInputProps("homeTown")}
                       placeholder="Ví dụ: Đồng Tháp"
@@ -237,7 +266,7 @@ const SearchPopupModal = ({
               }}
               variant="light"
               size="xl"
-              radius="md"
+              radius="xl"
               className="flex-1"
             >
               Xóa bộ lọc
@@ -245,7 +274,7 @@ const SearchPopupModal = ({
             <Button
               size="xl"
               type="submit"
-              radius="md"
+              radius="xl"
               className="flex-1"
               leftIcon={<HiCheck size={20} />}
             >
@@ -261,7 +290,8 @@ const SearchPopupModal = ({
         <div className="overflow-auto  absolute top-0 h-screen   z-[9999] w-full">
           <div className="px-2 pt-2">
             <Button
-              size="xl"
+              size="md"
+              radius={"xl"}
               className="w-full"
               onClick={() => {
                 setAutoSuggestions([]);
@@ -292,6 +322,7 @@ const SearchPopupModal = ({
                   selectItem={() => {
                     onSelectMartyrHandler(item);
                   }}
+                  key={item.id}
                 />
               ))}
             </div>
@@ -319,6 +350,7 @@ const SearchPopupModal = ({
                     <div className="flex justify-start gap-2">
                       <Button
                         className="text-xl"
+                        radius={"xl"}
                         onClick={() => {
                           openFilterSetting();
                         }}
@@ -361,7 +393,7 @@ const SearchPopupModal = ({
                         }}
                         total={searchResults?.totalPages}
                         size="md"
-                        radius="md"
+                        radius="xl"
                         siblings={1}
                       />
                     </div>
@@ -382,7 +414,7 @@ const SearchPopupModal = ({
                                 openFilterSetting();
                               }}
                               size="xl"
-                              radius="md"
+                              radius="xl"
                               leftSection={<HiAdjustments size={20} />}
                               className="shadow-md"
                             >
@@ -390,7 +422,7 @@ const SearchPopupModal = ({
                             </Button>
                             <Button
                               color="green"
-                              radius={"md"}
+                              radius={"xl"}
                               size="xl"
                               onClick={() => {
                                 setAutoSuggestions([]);
@@ -425,7 +457,7 @@ const SearchPopupModal = ({
               openFilterSetting();
             }}
             size="xl"
-            radius="md"
+            radius="xl"
             leftSection={<HiAdjustments size={20} />}
             className="shadow-md"
           >

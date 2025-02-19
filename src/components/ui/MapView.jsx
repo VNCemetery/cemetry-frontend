@@ -61,11 +61,13 @@ export default function MapViewPage({
 
     // Create marker element
     const markerEl = document.createElement("div");
-    markerEl.className = "bg-transparent w-8 scale-300 h-8";
+    markerEl.className = "bg-transparent w-12 scale-[1.01] h-12";
     markerEl.innerHTML = `
-<svg class="navigation-arrow" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="16.058" cy="23.799" r="7.295" fill="#4285F4" stroke="white" style="stroke-width: 0.5px;"></circle>
-  <path d="M 16 0.476 L 26.818 19.272 L 16 13.633 L 5.182 19.272 L 16 0.476 Z" fill="#4285F4" stroke="white" style="stroke-width: 0.5px;"></path>
+<svg class="h-full w-full navigation-arrow" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="16.058" cy="23.799" r="6.189" fill="#4285F4" style="stroke: rgb(255, 0, 0);"></circle>
+  <path d="M 21.182 0 L 32 18.796 L 10.364 18.796 L 21.182 0 Z" style="transform-box: fill-box; transform-origin: 50% 50%;" fill="#4285F4" transform="matrix(-1, 0, 0, -1, 0.000004, 0)"></path>
+  <path d="M 10.818 0 L 21.636 18.796 L 0 18.796 L 10.818 0 Z" style="transform-origin: 10.818px 9.398px;" fill="#4285F4" transform="matrix(-1, 0, 0, -1, 0, 0)"></path>
+  <path d="M 15.972 9.74 L 21.223 18.864 L 10.72 18.864 L 15.972 9.74 Z" style="fill: rgb(192, 244, 66); transform-origin: 15.972px 14.302px;"></path>
 </svg>
     `;
     markerElementRef.current = markerEl;

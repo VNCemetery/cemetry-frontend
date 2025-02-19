@@ -101,8 +101,9 @@ export default function HeaderMegaMenu() {
               <Button
                 key={item.href}
                 variant="default"
+                radius={"xl"}
                 component="a"
-                href={item.href}
+                onClick={() => navigate(item.href)}
               >
                 {item.label}
               </Button>
@@ -111,8 +112,9 @@ export default function HeaderMegaMenu() {
           <Group visibleFrom="sm">
             <Button
               variant="filled"
+              radius={"xl"}
               component="a"
-              href="/map"
+              onClick={() => navigate("/map")}
               rightSection={<FiMap />}
             >
               Đi tới bản đồ

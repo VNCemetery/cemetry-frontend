@@ -4,6 +4,7 @@ import App from "./App";
 import "./index.css";
 import { createTheme, MantineProvider } from "@mantine/core";
 import "@mantine/core/styles.css";
+import "@mantine/carousel/styles.css";
 
 const theme = createTheme({
   fontFamily: "Manrope, sans-serif",

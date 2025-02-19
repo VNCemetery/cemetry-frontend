@@ -15,7 +15,7 @@ export const AppDrawer = ({ opened, toggleDrawer, closeDrawer }) => {
     <Drawer
       opened={opened}
       onClose={closeDrawer}
-      size="100%"
+      size={{ base: "100%", sm: 300 }}
       padding="md"
       zIndex={1000000}
     >

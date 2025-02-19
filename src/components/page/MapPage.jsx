@@ -1,3 +1,7 @@
+import { Carousel } from "@mantine/carousel";
+import CarouselImage from "../ui/CarouselImage";
+import MatyrSearch from "../ui/MatyrSearch";
+
 import {
   Container,
   Title,
@@ -11,6 +15,9 @@ import {
   Group,
   Stack,
   Badge,
+  Input,
+  Modal,
+  ScrollArea,
 } from "@mantine/core";
 import {
   FaMonument,
@@ -29,6 +36,8 @@ import {
 import { GiTempleDoor, GiLotus } from "react-icons/gi";
 import { useDisclosure } from "@mantine/hooks";
 import classes from "./MapPage.module.css";
+import { BiSearch } from "react-icons/bi";
+import { FiSearch } from "react-icons/fi";
 
 export default function MapPage() {
   const [drawerOpened, { toggle: toggleDrawer }] = useDisclosure(false);
@@ -67,15 +76,98 @@ export default function MapPage() {
     { bg: "pink.0", border: "pink.3", icon: "pink.6", text: "pink.9" },
     { bg: "orange.0", border: "orange.3", icon: "orange.6", text: "orange.9" },
   ];
+  const [opened, { open, close }] = useDisclosure(true);
 
   return (
     <>
+      <Modal.Root
+        opened={false}
+        onClose={close}
+        className="z-[99999] fixed"
+        fullScreen
+        radius={0}
+        transitionProps={{ transition: "fade", duration: 200 }}
+      >
+        <Modal.Overlay />
+        <Modal.Content className="w-full">
+          <div className="flex flex-col h-full bg-red-900 w-full">
+            <div className=" bg-blue-900 h-full">
+              <ScrollArea className="h-full">
+                orem Ipsum is simply dummy text of the printing and typesetting
+                industry. Lorem Ipsum has been the industry's standard dummy
+                text ever since the 1500s, when an unknown printer took a galley
+                of type and scrambled it to make a type specimen book. It has
+                survived not only five centuries, but also the leap into
+                electronic typesetting, remaining essentially unchanged. It was
+                popularised in the 1960s with the release of Letraset sheets
+                containing Lorem Ipsum passages, and more recently with desktop
+                publishing software like Aldus PageMaker including versions of
+                Lorem Ipsum. Why do we use it? It is a long established fact
+                that a reader will be distracted by the readable content of a
+                page when looking at its layout. The point of using Lorem Ipsum
+                is that it has a more-or-less normal distribution of letters, as
+                opposed to using 'Content here, content here', making it look
+                like readable English. Many desktop publishing packages and web
+                page editors now use Lorem Ipsum as their default model text,
+                and a search for 'lorem ipsum' will uncover many web sites still
+                in their infancy. Various versions have evolved over the years,
+                sometimes by accident, sometimes on purpose (injected humour and
+                the like). Where does it come from? Contrary to popular belief,
+                Lorem Ipsum is not simply random text. It has roots in a piece
+                of classical Latin literature from 45 BC, making it over 2000
+                years old. Richard McClintock, a Latin professor at
+                Hampden-Sydney College in Virginia, looked up one of the more
+                obscure Latin words, consectetur, from a Lorem Ipsum passage,
+                and going through the cites of the word in classical literature,
+                discovered the undoubtable source. Lorem Ipsum comes from
+                sections 1.10.32 and 1.10.33 of "de Finibus Bonorum et Malorum"
+                (The Extremes of Good and Evil) by Cicero, written in 45 BC.
+                This book is a treatise on the theory of ethics, very popular
+                during the Renaissance. The first line of Lorem Ipsum, "Lorem
+                ipsum dolor sit amet..", comes from a line in section 1.10.32.
+                The standard chunk of Lorem Ipsum used since the 1500s is
+                reproduced below for those interested. Sections 1.10.32 and
+                1.10.33 from "de Finibus Bonorum et Malorum" by Cicero are also
+                reproduced in their exact original form, accompanied by English
+                versions from the 1914 translation by H. Rackham. Where can I
+                get some? There are many variations of passages of Lorem Ipsum
+                available, but the majority have suffered alteration in some
+                form, by injected humour, or randomised words which don't look
+                even slightly believable. If you are going to use a passage of
+                Lorem Ipsum, you need to be sure there isn't anything
+                embarrassing hidden in the middle of text. All the Lorem Ipsum
+                generators on the Internet tend to repeat predefined chunks as
+                necessary, making this the first true generator on the Internet.
+                It uses a dictionary of over 200 Latin words, combined with a
+                handful of model sentence structures, to generate Lorem Ipsum
+                which looks reasonable. The generated Lorem Ipsum is therefor
+              </ScrollArea>
+            </div>
+          </div>
+        </Modal.Content>
+      </Modal.Root>
+
       <div className={classes.hero}>
         <Container size="xl">
           <Title className={classes.heroTitle}>
             Nghĩa Trang Liệt Sĩ Tỉnh Đồng Tháp
           </Title>
-          <Text className={classes.heroDescription}>
+          <Input
+            size="xl"
+            radius={"xl"}
+            placeholder="Tìm kiếm liệt sĩ"
+            leftSection={<BiSearch className="text-[1.5rem]" />}
+            styles={(theme) => ({
+              input: {
+                "&::placeholder": {
+                  color: theme.colors.red[6],
+                  opacity: 1,
+                },
+              },
+            })}
+          />
+
+          <Text className={classes.heroDescription} mt={24}>
             Di tích lịch sử văn hóa cấp tỉnh <br /> Nơi tưởng nhớ và tri ân các
             anh hùng liệt sĩ
           </Text>
@@ -137,8 +229,12 @@ export default function MapPage() {
             </Grid.Col>
           ))}
         </Grid>
-
-        {/* Information Accordion */}
+        <div className="text-center">
+          <Title className={classes.heroTitle} c={"blue.6"} pb={20}>
+            Hình ảnh Nghĩa trang
+          </Title>{" "}
+          <CarouselImage />
+        </div>
         <Accordion
           multiple
           variant="separated"
@@ -197,9 +293,6 @@ export default function MapPage() {
                           <Text ml={10} size="md">
                             6:00 - 17:30 hàng ngày
                           </Text>
-                          <Text ml={10} size="xs" c="dimmed">
-                            Mở cửa tất cả các ngày trong năm
-                          </Text>
                         </List.Item>
                         <List.Item
                           icon={
@@ -215,9 +308,6 @@ export default function MapPage() {
                           <Text ml={10} size="md">
                             Chiều mát (15:30 - 17:00)
                           </Text>
-                          <Text ml={10} size="xs" c="dimmed">
-                            Tránh thời điểm nắng gắt
-                          </Text>
                         </List.Item>
                         <List.Item
                           icon={
@@ -229,9 +319,6 @@ export default function MapPage() {
                           <Text fw={500}>Thời lượng đề xuất:</Text>
                           <Text ml={10} size="md">
                             1-2 giờ để tham quan đầy đủ
-                          </Text>
-                          <Text ml={10} size="xs" c="dimmed">
-                            Bao gồm thời gian dâng hương
                           </Text>
                         </List.Item>
                       </List>
@@ -272,12 +359,6 @@ export default function MapPage() {
                           <Text ml={10} size="md">
                             Lịch sự, trang nghiêm
                           </Text>
-                          <Text ml={10} size="xs" c="dimmed">
-                            Không mặc quần đùi, áo ba lỗ
-                          </Text>
-                          <Text ml={10} size="xs" c="dimmed">
-                            Tránh trang phục quá sặc sỡ
-                          </Text>
                         </List.Item>
                         <List.Item
                           icon={
@@ -293,9 +374,6 @@ export default function MapPage() {
                           <Text ml={10} size="md">
                             Không gây ồn ào, nói chuyện lớn tiếng
                           </Text>
-                          <Text ml={10} size="xs" c="dimmed">
-                            Tôn trọng không gian thiêng liêng
-                          </Text>
                         </List.Item>
                         <List.Item
                           icon={
@@ -310,9 +388,6 @@ export default function MapPage() {
                           </Text>
                           <Text ml={10} size="md">
                             Không hút thuốc trong khuôn viên
-                          </Text>
-                          <Text ml={10} size="xs" c="dimmed">
-                            Không chụp ảnh phản cảm
                           </Text>
                         </List.Item>
                       </List>
@@ -356,9 +431,6 @@ export default function MapPage() {
                           <Text ml={10} size="md">
                             Nhà tưởng niệm
                           </Text>
-                          <Text ml={10} size="xs" c="dimmed">
-                            Khu tượng đài tưởng niệm
-                          </Text>
                         </List.Item>
                         <List.Item
                           icon={
@@ -370,15 +442,6 @@ export default function MapPage() {
                           <Text fw={500}>Cơ sở vật chất:</Text>
                           <Text ml={10} size="md">
                             Bãi đỗ xe rộng rãi, miễn phí
-                          </Text>
-                          <Text ml={10} size="md">
-                            Nhà vệ sinh sạch sẽ
-                          </Text>
-                          <Text ml={10} size="md">
-                            Ghế nghỉ trong khuôn viên
-                          </Text>
-                          <Text ml={10} size="xs" c="dimmed">
-                            Khu vực che nắng, mưa
                           </Text>
                         </List.Item>
                         <List.Item
@@ -397,9 +460,6 @@ export default function MapPage() {
                           </Text>
                           <Text ml={10} size="md">
                             Sơ cứu y tế
-                          </Text>
-                          <Text ml={10} size="xs" c="dimmed">
-                            Hỗ trợ người khuyết tật
                           </Text>
                         </List.Item>
                       </List>

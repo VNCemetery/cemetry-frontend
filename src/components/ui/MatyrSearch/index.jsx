@@ -64,13 +64,14 @@ const MatyrSearch = ({
   const [opened, { open: openSearchPopup, close: closeSearchPopup }] =
     useDisclosure(false);
   const [searchResults, setSearchResults] = useState(null);
-  const [showAutoSuggestions, setShowAutoSuggestions] = useState(false);
   const [isLoadingSearchResults, setIsLoadingSearchResults] = useState(false);
   const loadMartyrs = useMatyrStore((state) => state.loadMartyrs);
   const clearMartrys = useMatyrStore((state) => state.clearMartrys);
   const [currentPage, setCurrentPage] = useState(0);
   const [showRoutingOptions, setShowRoutingOptions] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
+  const [showAutoSuggestions, setShowAutoSuggestions] = useState(false);
+  const [autoSuggestions, setAutoSuggestions] = useState([]);
 
   const handleSearch = async ({
     name = "",
@@ -80,7 +81,6 @@ const MatyrSearch = ({
   }) => {
     try {
       setFilterQuery(filters);
-      setShowAutoSuggestions(false);
       setIsLoadingSearchResults(true);
       setSearchResults(null);
 
@@ -113,41 +113,6 @@ const MatyrSearch = ({
     { open: openMartyrDetail, close: closeMartyrDetail },
   ] = useDisclosure(false);
 
-  const [autoSuggestions, setAutoSuggestions] = useState([]);
-  const [isLoadingAutoSuggestions, setIsLoadingAutoSuggestions] =
-    useState(false);
-
-  const handleAutoSuggest = async (searchKey) => {
-    try {
-      setIsLoadingAutoSuggestions(true);
-      const results = await getMatyrs(searchKey, 0, DEFAULT_AUTO_SUGGEST_SIZE);
-      const content = results.content;
-      // If content is null
-      if (!content) {
-        setAutoSuggestions([]);
-        setShowAutoSuggestions(true);
-        // Throw error
-        throw new Error("No content found");
-      }
-      setShowAutoSuggestions(true);
-      setIsLoadingAutoSuggestions(false);
-      setAutoSuggestions(content);
-    } catch (error) {
-      console.error("Lỗi khi tìm kiếm:", error);
-      setAutoSuggestions([]);
-      setIsLoadingAutoSuggestions(false);
-    }
-  };
-
-  useEffect(() => {
-    if (searchKey.length > 0) {
-      handleAutoSuggest(searchKey);
-    } else {
-      setAutoSuggestions([]);
-    }
-  }, [searchKey]);
-
-  // Filters
   const [filters, setFilters] = useState({
     graveRow: {
       areaName: "",
@@ -355,7 +320,7 @@ const MatyrSearch = ({
                     onChange={(e) => {
                       setSearchKey(e.target.value);
                     }}
-                    radius="lg"
+                    radius="xl"
                     style={{
                       border: "none",
                       outline: "none",
@@ -398,7 +363,6 @@ const MatyrSearch = ({
         <SearchPopupModal
           offSetHeight={offsetHeight}
           filters={filters}
-          autoSuggestions={autoSuggestions}
           setFilters={setFilters}
           grave_rows={grave_rows}
           clearMartrys={clearMartrys}
@@ -406,27 +370,17 @@ const MatyrSearch = ({
           currentPage={currentPage}
           handleSearch={handleSearch}
           filterForm={filterForm}
-          setSearchKey={(value) => setSearchKey(value)}
-          isLoadingSearchResults={isLoadingSearchResults}
-          showFilterSetting={showFilterSetting}
-          closeFilterSetting={closeFilterSetting}
-          isLoadingAutoSuggestions={isLoadingAutoSuggestions}
+          setSearchKey={setSearchKey}
           showAutoSuggestions={showAutoSuggestions}
-          searchKey={searchKey}
           setShowAutoSuggestions={setShowAutoSuggestions}
+          searchKey={searchKey}
+          autoSuggestions={autoSuggestions}
           setAutoSuggestions={setAutoSuggestions}
-          openFilterSetting={openFilterSetting}
-          selectMartyr={selectMartyr}
-          openMartyrDetail={openMartyrDetail}
-          openSearchPopup={openSearchPopup}
-          closeSearchPopup={closeSearchPopup}
-          setFilterQuery={setFilterQuery}
           filterQuery={filterQuery}
           searchResults={searchResults}
           onSelectMartyrHandler={(martyr) => {
             closeSearchPopup();
             selectMartyr(martyr);
-            // Update URL without page reload
             const newUrl = new URL(window.location);
             newUrl.searchParams.set("martyrId", martyr.id);
             window.history.pushState({}, "", newUrl);
