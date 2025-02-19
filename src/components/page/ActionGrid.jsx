@@ -82,7 +82,7 @@ export function ActionGrid() {
   ));
 
   return (
-    <Card withBorder radius="md" className={classes.card}>
+    <Card withborder radius="md" className={classes.card}>
       <Group justify="space-between">
         <Text className={classes.title}>Liên kết</Text>
         <Anchor

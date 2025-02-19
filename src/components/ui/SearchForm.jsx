@@ -66,7 +66,7 @@ export default function SearchForm({ onSearch }) {
           mb="sm"
         />
 
-        <Button type="submit" fullWidth loading={loading}>
+        <Button radius={"xl"} type="submit" fullWidth loading={loading}>
           Tìm kiếm
         </Button>
       </form>

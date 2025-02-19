@@ -5,7 +5,7 @@ import { findPath, provideFeedback } from "../../services/pathFindingService";
 import { useInfoStore } from "../../store/useInfoStore";
 import { useMatyrStore } from "../../store/useMatyrStore";
 import { useMapStore } from "../../store/useMapStore";
-import { Paper, ActionIcon, Text, Modal, Button } from "@mantine/core";
+import { Paper, ActionIcon, Text, Modal, Button, Drawer } from "@mantine/core";
 import { FaThumbsUp, FaThumbsDown } from "react-icons/fa";
 import { MdLocationOff } from "react-icons/md"; // Add this import
 import { notifications } from "@mantine/notifications";
@@ -155,7 +155,7 @@ export default function RoutingPage() {
           5,
           1, // Reduced from 1.5
           18,
-          6, // Reduced from 8
+          8, // Reduced from 8
         ],
       },
     });
@@ -171,12 +171,12 @@ export default function RoutingPage() {
       paint: {
         "line-width": [
           "interpolate",
-          ["exponential", 1.5],
+          ["exponential", 1.75],
           ["zoom"],
           5,
           0.5, // Reduced from 1
           18,
-          1.5, // Reduced from 2
+          3, // Reduced from 2
         ],
         "line-color": "#0a11d8", // Changed to darker blue
         "line-gap-width": [
@@ -186,7 +186,7 @@ export default function RoutingPage() {
           5,
           1, // Reduced from 1.5
           18,
-          5, // Reduced from 10
+          8, // Reduced from 10
         ],
       },
     });
@@ -326,8 +326,11 @@ export default function RoutingPage() {
 
   return (
     <div className="h-full relative">
-      <AppDrawer opened={openedDrawer} closeDrawer={closeDrawer} />
-
+      <AppDrawer
+        opened={openedDrawer}
+        closeDrawer={closeDrawer}
+        title="Authentication"
+      />
       <Modal
         opened={showErrorModal}
         onClose={() => setShowErrorModal(false)}
@@ -389,8 +392,9 @@ export default function RoutingPage() {
       </Modal>
 
       <MatyrSearch
-        openDrawer={openDrawer}
-        closeDrawer={closeDrawer}
+        openDrawer={() => {
+          openDrawer();
+        }}
         openedDrawer={openedDrawer}
         onClearRoute={() => {
           setShowLocationMarker(false);

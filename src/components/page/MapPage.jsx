@@ -1,3 +1,7 @@
+import { Carousel } from "@mantine/carousel";
+import CarouselImage from "../ui/CarouselImage";
+import MatyrSearch from "../ui/MatyrSearch";
+
 import {
   Container,
   Title,
@@ -11,6 +15,11 @@ import {
   Group,
   Stack,
   Badge,
+  Input,
+  Modal,
+  ScrollArea,
+  CloseIcon,
+  ActionIcon,
 } from "@mantine/core";
 import {
   FaMonument,
@@ -29,6 +38,13 @@ import {
 import { GiTempleDoor, GiLotus } from "react-icons/gi";
 import { useDisclosure } from "@mantine/hooks";
 import classes from "./MapPage.module.css";
+import { BiSearch } from "react-icons/bi";
+import { FiSearch } from "react-icons/fi";
+import { useSearchMartyrStore } from "../../store/useSearchMartyrStore";
+import SearchPopupModal from "../ui/MatyrSearch/SearchPopupModal";
+import { useEffect, useRef, useState } from "react";
+import { DEFAULT_SEARCH_SIZE } from "../../utils/constants";
+import { BsArrowLeft } from "react-icons/bs";
 
 export default function MapPage() {
   const [drawerOpened, { toggle: toggleDrawer }] = useDisclosure(false);
@@ -67,15 +83,252 @@ export default function MapPage() {
     { bg: "pink.0", border: "pink.3", icon: "pink.6", text: "pink.9" },
     { bg: "orange.0", border: "orange.3", icon: "orange.6", text: "orange.9" },
   ];
+  const [opened, { open, close }] = useDisclosure(true);
+
+  const {
+    filters,
+    setFilters,
+    searchKey,
+    setSearchKey,
+    searchResults,
+    setSearchResults,
+    currentPage,
+    setCurrentPage,
+    setAutoSuggestions,
+    autoSuggestions,
+    filterQuery,
+    handleSearch,
+    showAutoSuggestions,
+    setShowAutoSuggestions,
+  } = useSearchMartyrStore();
+
+  const headerRef = useRef(null);
+  const searchInputRef = useRef(null);
+
+  const [offSetHeight, setOffSetHeight] = useState(0);
+  const [showSearchModal, setShowSearchModal] = useState(false);
+
+  useEffect(() => {
+    if (headerRef?.current?.offsetHeight === 0) {
+      return;
+    }
+    searchInputRef.current.focus();
+
+    setOffSetHeight(headerRef.current.offsetHeight);
+  }, [headerRef?.current?.offSetHeight, showSearchModal]);
 
   return (
     <>
+      <div
+        className={`fixed top-0 left-0  transition-all duration-300 ease-in-out min-h-screen overflow-auto bottom-0 right-0 z-[99999] ${
+          showSearchModal ? "" : "hidden"
+        }`}
+      >
+        <div className={`h-full relative`}>
+          <div className="  z-[4]">
+            <div
+              ref={headerRef}
+              className={`fixed top-0  left-0 ${
+                !showSearchModal ? "transparent" : "bg-white"
+              } right-0 z-[4]`}
+            >
+              <div className="flex w-full items-center">
+                <div className="w-full items-center flex gap-1 bg-white py-1">
+                  <div className="flex items-center w-full text-gray-600   w-full p-1 gap-1">
+                    <ActionIcon
+                      variant="filled"
+                      size={"lg"}
+                      radius={"xl"}
+                      color="blue"
+                      aria-label="Settings"
+                      onClick={() => {
+                        if (
+                          showAutoSuggestions &&
+                          searchResults?.content?.length > 0
+                        ) {
+                          setAutoSuggestions([]);
+                          setShowAutoSuggestions(false);
+                        } else {
+                          setShowSearchModal(false);
+                          setSearchKey("");
+                          setShowAutoSuggestions(false);
+                          setSearchResults(null);
+                        }
+                      }}
+                    >
+                      <BsArrowLeft
+                        style={{ width: "70%", height: "70%" }}
+                        stroke={1.5}
+                      />
+                    </ActionIcon>
+                    <Input
+                      value={searchKey}
+                      ref={searchInputRef}
+                      onClick={() => {
+                        if (!showSearchModal) {
+                          openSearchPopup();
+                          searchInputRef.current.focus();
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          setCurrentPage(0);
+                          setAutoSuggestions([]);
+                          setShowAutoSuggestions(false);
+                          handleSearch({
+                            name: e.target.value,
+                            page: 0,
+                            size: DEFAULT_SEARCH_SIZE,
+                            ...filters,
+                          });
+                        }
+                      }}
+                      rightSectionPointerEvents="all"
+                      onChange={(e) => {
+                        setSearchKey(e.target.value);
+                      }}
+                      radius="xl"
+                      style={{
+                        border: "none",
+                        outline: "none",
+                        boxShadow: "none",
+                      }}
+                      size="md"
+                      className="w-full  border-none text-[2rem]"
+                      placeholder="Nhập tên liệt sĩ"
+                      rightSection={
+                        <CloseIcon
+                          aria-label="Clear input"
+                          className="mr-2"
+                          onClick={() => {
+                            setSearchKey("");
+                            searchInputRef.current.focus();
+                          }}
+                          style={{ display: searchKey ? undefined : "none" }}
+                        />
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <SearchPopupModal
+            offSetHeight={offSetHeight}
+            filters={filters} // move to store
+            setFilters={setFilters} // move to store
+            setCurrentPage={setCurrentPage} // move to store
+            currentPage={currentPage} // move to store
+            handleSearch={handleSearch} // move to store
+            setSearchKey={setSearchKey} // move to store
+            showAutoSuggestions={showAutoSuggestions} // move to store
+            setShowAutoSuggestions={setShowAutoSuggestions} // move to store
+            searchKey={searchKey} // move to store
+            autoSuggestions={autoSuggestions} // move to store
+            setAutoSuggestions={setAutoSuggestions} // move to store
+            filterQuery={filterQuery} // move to store
+            searchResults={searchResults} // move to store
+            onSelectMartyrHandler={(martyr) => {
+              let newUrlPath = `/map?martyrId=${martyr.id}`;
+              window.location = newUrlPath;
+            }}
+          />
+        </div>
+      </div>
+      <Modal.Root
+        opened={false}
+        onClose={close}
+        className="z-[99999] fixed"
+        fullScreen
+        radius={0}
+        transitionProps={{ transition: "fade", duration: 200 }}
+      >
+        <Modal.Overlay />
+        <Modal.Content className="w-full">
+          <div className="flex flex-col h-full bg-red-900 w-full">
+            <div className=" bg-blue-900 h-full">
+              <ScrollArea className="h-full">
+                orem Ipsum is simply dummy text of the printing and typesetting
+                industry. Lorem Ipsum has been the industry's standard dummy
+                text ever since the 1500s, when an unknown printer took a galley
+                of type and scrambled it to make a type specimen book. It has
+                survived not only five centuries, but also the leap into
+                electronic typesetting, remaining essentially unchanged. It was
+                popularised in the 1960s with the release of Letraset sheets
+                containing Lorem Ipsum passages, and more recently with desktop
+                publishing software like Aldus PageMaker including versions of
+                Lorem Ipsum. Why do we use it? It is a long established fact
+                that a reader will be distracted by the readable content of a
+                page when looking at its layout. The point of using Lorem Ipsum
+                is that it has a more-or-less normal distribution of letters, as
+                opposed to using 'Content here, content here', making it look
+                like readable English. Many desktop publishing packages and web
+                page editors now use Lorem Ipsum as their default model text,
+                and a search for 'lorem ipsum' will uncover many web sites still
+                in their infancy. Various versions have evolved over the years,
+                sometimes by accident, sometimes on purpose (injected humour and
+                the like). Where does it come from? Contrary to popular belief,
+                Lorem Ipsum is not simply random text. It has roots in a piece
+                of classical Latin literature from 45 BC, making it over 2000
+                years old. Richard McClintock, a Latin professor at
+                Hampden-Sydney College in Virginia, looked up one of the more
+                obscure Latin words, consectetur, from a Lorem Ipsum passage,
+                and going through the cites of the word in classical literature,
+                discovered the undoubtable source. Lorem Ipsum comes from
+                sections 1.10.32 and 1.10.33 of "de Finibus Bonorum et Malorum"
+                (The Extremes of Good and Evil) by Cicero, written in 45 BC.
+                This book is a treatise on the theory of ethics, very popular
+                during the Renaissance. The first line of Lorem Ipsum, "Lorem
+                ipsum dolor sit amet..", comes from a line in section 1.10.32.
+                The standard chunk of Lorem Ipsum used since the 1500s is
+                reproduced below for those interested. Sections 1.10.32 and
+                1.10.33 from "de Finibus Bonorum et Malorum" by Cicero are also
+                reproduced in their exact original form, accompanied by English
+                versions from the 1914 translation by H. Rackham. Where can I
+                get some? There are many variations of passages of Lorem Ipsum
+                available, but the majority have suffered alteration in some
+                form, by injected humour, or randomised words which don't look
+                even slightly believable. If you are going to use a passage of
+                Lorem Ipsum, you need to be sure there isn't anything
+                embarrassing hidden in the middle of text. All the Lorem Ipsum
+                generators on the Internet tend to repeat predefined chunks as
+                necessary, making this the first true generator on the Internet.
+                It uses a dictionary of over 200 Latin words, combined with a
+                handful of model sentence structures, to generate Lorem Ipsum
+                which looks reasonable. The generated Lorem Ipsum is therefor
+              </ScrollArea>
+            </div>
+          </div>
+        </Modal.Content>
+      </Modal.Root>
+
       <div className={classes.hero}>
         <Container size="xl">
           <Title className={classes.heroTitle}>
             Nghĩa Trang Liệt Sĩ Tỉnh Đồng Tháp
           </Title>
-          <Text className={classes.heroDescription}>
+          <Input
+            size="xl"
+            onClick={() => {
+              searchInputRef?.current?.focus();
+              setShowSearchModal(true);
+            }}
+            value={searchKey}
+            radius={"xl"}
+            placeholder="Tìm kiếm liệt sĩ"
+            leftSection={<BiSearch className="text-[1.5rem]" />}
+            styles={(theme) => ({
+              input: {
+                "&::placeholder": {
+                  color: theme.colors.red[6],
+                  opacity: 1,
+                },
+              },
+            })}
+          />
+
+          <Text className={classes.heroDescription} mt={24} size="xl">
             Di tích lịch sử văn hóa cấp tỉnh <br /> Nơi tưởng nhớ và tri ân các
             anh hùng liệt sĩ
           </Text>
@@ -90,7 +343,7 @@ export default function MapPage() {
               <Card
                 className={classes.statCard}
                 bg={cardColors[index % cardColors.length].bg}
-                withBorder
+                withborder
                 styles={{
                   root: {
                     borderColor: `var(--mantine-color-${
@@ -125,20 +378,36 @@ export default function MapPage() {
                 </div>
                 <Text
                   className={classes.statValue}
+                  style={{
+                    fontSize: "clamp(2.5rem, 4vw, 2.5rem)",
+
+                    width: "100%",
+                    textAlign: "center",
+                    wordBreak: "break-word",
+                  }}
                   mt={45}
                   c={cardColors[index % cardColors.length].text}
                 >
                   {stat.value}
                 </Text>
-                <Text size="lg" c="dimmed" mt={5}>
+                <Text
+                  size="sm"
+                  c="dimmed"
+                  mt={5}
+                  style={{ fontSize: "1.1rem" }}
+                >
                   {stat.label}
                 </Text>
               </Card>
             </Grid.Col>
           ))}
         </Grid>
-
-        {/* Information Accordion */}
+        <div className="text-center">
+          <Title className={classes.heroTitle} c={"blue.6"} pb={20}>
+            Hình ảnh Nghĩa trang
+          </Title>{" "}
+          <CarouselImage />
+        </div>
         <Accordion
           multiple
           variant="separated"
@@ -156,7 +425,7 @@ export default function MapPage() {
                   <Text fw={600} size="lg">
                     Hướng dẫn thăm quan
                   </Text>
-                  <Text size="sm" c="dimmed">
+                  <Text size="sm" c="dimmed" style={{ fontSize: "1.1rem" }}>
                     Thông tin chi tiết về thời gian, quy định và tiện ích
                   </Text>
                 </div>
@@ -166,7 +435,7 @@ export default function MapPage() {
               <Grid>
                 <Grid.Col span={{ base: 12, md: 4 }}>
                   <Card
-                    withBorder
+                    withborder
                     radius="md"
                     padding="lg"
                     className={classes.infoCard}
@@ -185,7 +454,7 @@ export default function MapPage() {
                           Thời gian tham quan
                         </Text>
                       </Group>
-                      <List spacing="sm" size="sm" ml={10}>
+                      <List spacing="sm" size="md" ml={10}>
                         <List.Item
                           icon={
                             <ThemeIcon color="blue" size={24} variant="light">
@@ -193,12 +462,11 @@ export default function MapPage() {
                             </ThemeIcon>
                           }
                         >
-                          <Text fw={500}>Giờ mở cửa:</Text>
+                          <Text fw={500} size="lg">
+                            Giờ mở cửa:
+                          </Text>
                           <Text ml={10} size="md">
                             6:00 - 17:30 hàng ngày
-                          </Text>
-                          <Text ml={10} size="xs" c="dimmed">
-                            Mở cửa tất cả các ngày trong năm
                           </Text>
                         </List.Item>
                         <List.Item
@@ -208,15 +476,14 @@ export default function MapPage() {
                             </ThemeIcon>
                           }
                         >
-                          <Text fw={500}>Thời gian lý tưởng:</Text>
+                          <Text fw={500} size="lg">
+                            Thời gian lý tưởng:
+                          </Text>
                           <Text ml={10} size="md">
                             Sáng sớm (6:00 - 8:00)
                           </Text>
                           <Text ml={10} size="md">
                             Chiều mát (15:30 - 17:00)
-                          </Text>
-                          <Text ml={10} size="xs" c="dimmed">
-                            Tránh thời điểm nắng gắt
                           </Text>
                         </List.Item>
                         <List.Item
@@ -226,12 +493,11 @@ export default function MapPage() {
                             </ThemeIcon>
                           }
                         >
-                          <Text fw={500}>Thời lượng đề xuất:</Text>
+                          <Text fw={500} size="lg">
+                            Thời lượng đề xuất:
+                          </Text>
                           <Text ml={10} size="md">
                             1-2 giờ để tham quan đầy đủ
-                          </Text>
-                          <Text ml={10} size="xs" c="dimmed">
-                            Bao gồm thời gian dâng hương
                           </Text>
                         </List.Item>
                       </List>
@@ -241,7 +507,7 @@ export default function MapPage() {
 
                 <Grid.Col span={{ base: 12, md: 4 }}>
                   <Card
-                    withBorder
+                    withborder
                     radius="md"
                     padding="lg"
                     className={classes.infoCard}
@@ -268,15 +534,15 @@ export default function MapPage() {
                             </ThemeIcon>
                           }
                         >
-                          <Text fw={500}>Trang phục:</Text>
-                          <Text ml={10} size="md">
+                          <Text fw={500} size="lg">
+                            Trang phục:
+                          </Text>
+                          <Text
+                            ml={10}
+                            size="md"
+                            style={{ fontSize: "1.1rem" }}
+                          >
                             Lịch sự, trang nghiêm
-                          </Text>
-                          <Text ml={10} size="xs" c="dimmed">
-                            Không mặc quần đùi, áo ba lỗ
-                          </Text>
-                          <Text ml={10} size="xs" c="dimmed">
-                            Tránh trang phục quá sặc sỡ
                           </Text>
                         </List.Item>
                         <List.Item
@@ -286,15 +552,22 @@ export default function MapPage() {
                             </ThemeIcon>
                           }
                         >
-                          <Text fw={500}>Ứng xử:</Text>
-                          <Text ml={10} size="md">
+                          <Text fw={500} size="lg">
+                            Ứng xử:
+                          </Text>
+                          <Text
+                            ml={10}
+                            size="md"
+                            style={{ fontSize: "1.1rem" }}
+                          >
                             Giữ yên lặng, trang nghiêm
                           </Text>
-                          <Text ml={10} size="md">
+                          <Text
+                            ml={10}
+                            size="md"
+                            style={{ fontSize: "1.1rem" }}
+                          >
                             Không gây ồn ào, nói chuyện lớn tiếng
-                          </Text>
-                          <Text ml={10} size="xs" c="dimmed">
-                            Tôn trọng không gian thiêng liêng
                           </Text>
                         </List.Item>
                         <List.Item
@@ -304,15 +577,22 @@ export default function MapPage() {
                             </ThemeIcon>
                           }
                         >
-                          <Text fw={500}>Lưu ý:</Text>
-                          <Text ml={10} size="md">
+                          <Text fw={500} size="lg">
+                            Lưu ý:
+                          </Text>
+                          <Text
+                            ml={10}
+                            size="md"
+                            style={{ fontSize: "1.1rem" }}
+                          >
                             Không mang đồ ăn, thức uống
                           </Text>
-                          <Text ml={10} size="md">
+                          <Text
+                            ml={10}
+                            size="md"
+                            style={{ fontSize: "1.1rem" }}
+                          >
                             Không hút thuốc trong khuôn viên
-                          </Text>
-                          <Text ml={10} size="xs" c="dimmed">
-                            Không chụp ảnh phản cảm
                           </Text>
                         </List.Item>
                       </List>
@@ -322,7 +602,7 @@ export default function MapPage() {
 
                 <Grid.Col span={{ base: 12, md: 4 }}>
                   <Card
-                    withBorder
+                    withborder
                     radius="md"
                     padding="lg"
                     className={classes.infoCard}
@@ -349,15 +629,14 @@ export default function MapPage() {
                             </ThemeIcon>
                           }
                         >
-                          <Text fw={500}>Khu vực tâm linh:</Text>
+                          <Text fw={500} size="lg">
+                            Khu vực tâm linh:
+                          </Text>
                           <Text ml={10} size="md">
                             Khu đặt hoa, thắp hương
                           </Text>
                           <Text ml={10} size="md">
                             Nhà tưởng niệm
-                          </Text>
-                          <Text ml={10} size="xs" c="dimmed">
-                            Khu tượng đài tưởng niệm
                           </Text>
                         </List.Item>
                         <List.Item
@@ -367,18 +646,11 @@ export default function MapPage() {
                             </ThemeIcon>
                           }
                         >
-                          <Text fw={500}>Cơ sở vật chất:</Text>
+                          <Text fw={500} size="lg">
+                            Cơ sở vật chất:
+                          </Text>
                           <Text ml={10} size="md">
                             Bãi đỗ xe rộng rãi, miễn phí
-                          </Text>
-                          <Text ml={10} size="md">
-                            Nhà vệ sinh sạch sẽ
-                          </Text>
-                          <Text ml={10} size="md">
-                            Ghế nghỉ trong khuôn viên
-                          </Text>
-                          <Text ml={10} size="xs" c="dimmed">
-                            Khu vực che nắng, mưa
                           </Text>
                         </List.Item>
                         <List.Item
@@ -388,7 +660,9 @@ export default function MapPage() {
                             </ThemeIcon>
                           }
                         >
-                          <Text fw={500}>Hỗ trợ:</Text>
+                          <Text fw={500} size="lg">
+                            Hỗ trợ:
+                          </Text>
                           <Text ml={10} size="md">
                             Hướng dẫn viên miễn phí
                           </Text>
@@ -397,9 +671,6 @@ export default function MapPage() {
                           </Text>
                           <Text ml={10} size="md">
                             Sơ cứu y tế
-                          </Text>
-                          <Text ml={10} size="xs" c="dimmed">
-                            Hỗ trợ người khuyết tật
                           </Text>
                         </List.Item>
                       </List>
@@ -430,7 +701,7 @@ export default function MapPage() {
               <Grid>
                 <Grid.Col span={{ base: 12, md: 8 }}>
                   <Card
-                    withBorder
+                    withborder
                     radius="md"
                     padding="lg"
                     className={classes.infoCard}
@@ -449,13 +720,19 @@ export default function MapPage() {
                           Giới thiệu chung
                         </Text>
                       </Group>
-                      <Text size="md">
+                      <Text
+                        size="md"
+                        style={{ fontSize: "1.1rem", lineHeight: "1.6" }}
+                      >
                         Nghĩa trang liệt sĩ tỉnh Đồng Tháp được khởi công xây
                         dựng vào năm 1980 với diện tích hơn 3,5 héc ta và khánh
                         thành vào ngày 26/7/1984. Hiện nay nơi đây đã quy tập
                         được gần 2.500 liệt sĩ có danh tính.
                       </Text>
-                      <Text size="md">
+                      <Text
+                        size="md"
+                        style={{ fontSize: "1.1rem", lineHeight: "1.6" }}
+                      >
                         Với công trình kiến trúc gồm phía trước là tượng đài
                         người lính, ngực đính huân chương, trầm mặc cầm đóa sen
                         đến thăm đồng đội. Tất cả mộ chí đều được phủ màu xanh
@@ -464,7 +741,10 @@ export default function MapPage() {
                         chân tượng đài là hoa văn trống đồng Ngọc Lũ và ba bức
                         phù điêu minh họa các thời kỳ lịch sử trong tỉnh.
                       </Text>
-                      <Text size="md">
+                      <Text
+                        size="md"
+                        style={{ fontSize: "1.1rem", lineHeight: "1.6" }}
+                      >
                         Nhìn từ trên xuống, nghĩa trang như một bông sen đang nở
                         xòe mà nhụy hoa là hồ nước ở giữa, mỗi bên là ba cánh
                         sen. Trên các cánh sen là nơi an nghỉ của hơn 3.000 liệt
@@ -472,7 +752,10 @@ export default function MapPage() {
                         thể kiến trúc này khiến cho nơi đây được xem là một
                         trong những nghĩa trang đẹp nhất ở miền Tây Nam bộ.
                       </Text>
-                      <Text size="md">
+                      <Text
+                        size="md"
+                        style={{ fontSize: "1.1rem", lineHeight: "1.6" }}
+                      >
                         Nơi đây được Ủy ban Nhân dân tỉnh Đồng Tháp ra quyết
                         định xếp hạng và công nhận di tích lịch sử lưu niệm cấp
                         tỉnh vào ngày 10/4/2003.
@@ -491,7 +774,7 @@ export default function MapPage() {
 
                 <Grid.Col span={{ base: 12, md: 4 }}>
                   <Card
-                    withBorder
+                    withborder
                     radius="md"
                     padding="lg"
                     className={classes.infoCard}
@@ -549,7 +832,7 @@ export default function MapPage() {
         <Grid mt={60} mb={60}>
           <Grid.Col span={12}>
             <Card
-              withBorder
+              withborder
               padding="xl"
               radius="md"
               className={classes.infoCard}
@@ -596,7 +879,7 @@ export default function MapPage() {
                       }
                     >
                       <Card
-                        withBorder
+                        withborder
                         mt="sm"
                         radius="md"
                         padding="md"
@@ -608,19 +891,31 @@ export default function MapPage() {
                             {item.description}
                           </Text>
                           {index === 0 && (
-                            <Text size="sm" c="dimmed" italic>
+                            <Text
+                              size="sm"
+                              c="dimmed"
+                              style={{ fontSize: "1.1rem" }}
+                            >
                               Khởi công xây dựng trên khu đất rộng hơn 3,5 héc
                               ta, với sự đóng góp của nhân dân trong tỉnh
                             </Text>
                           )}
                           {index === 1 && (
-                            <Text size="sm" c="dimmed" italic>
+                            <Text
+                              size="sm"
+                              c="dimmed"
+                              style={{ fontSize: "1.1rem" }}
+                            >
                               Khánh thành và đưa vào sử dụng với sự tham dự của
                               lãnh đạo tỉnh và đông đảo nhân dân
                             </Text>
                           )}
                           {index === 2 && (
-                            <Text size="sm" c="dimmed" italic>
+                            <Text
+                              size="sm"
+                              c="dimmed"
+                              style={{ fontSize: "1.1rem" }}
+                            >
                               Được Bộ Văn hóa - Thông tin công nhận là di tích
                               lịch sử văn hóa cấp tỉnh
                             </Text>

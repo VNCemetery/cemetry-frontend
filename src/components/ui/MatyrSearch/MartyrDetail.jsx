@@ -83,12 +83,14 @@ export default function MartyrDetail({ martyr, onRoute }) {
             onClick={() => onRoute()}
             rightSection={<FaDirections size={24} />}
             size="xl"
+            radius={"xl"}
             className="py-4 w-full"
           >
             CHỈ ĐƯỜNG
           </Button>
           <Button
             size="xl"
+            radius={"xl"}
             color="green"
             className="py-4 w-full"
             rightSection={<FaShare size={24} />}
@@ -120,7 +122,7 @@ export default function MartyrDetail({ martyr, onRoute }) {
                 </Text>
               </Group>
               <Table
-                withBorder
+                withborder
                 withColumnBorders
                 styles={{
                   th: {
