@@ -8,11 +8,28 @@ export const useSearchMartyrStore = create((set, get) => ({
   isLoadingSearchResults: false,
   showSearchResults: false,
   filterQuery: [],
+  currentPage: 0,
+  filters: {
+    graveRow: {
+      areaName: "",
+      rowName: "",
+    },
+  },
+  searchKey: "",
+  showAutoSuggestions: false,
+  autoSuggestions: [],
+
+  // Setters
   setFilterQuery: (filters) => set({ filterQuery: filters }),
   setSearchResults: (results) => set({ searchResults: results }),
   setIsLoadingSearchResults: (isLoading) =>
     set({ isLoadingSearchResults: isLoading }),
   setShowSearchResults: (show) => set({ showSearchResults: show }),
+  setCurrentPage: (page) => set({ currentPage: page }),
+  setFilters: (filters) => set({ filters }),
+  setSearchKey: (key) => set({ searchKey: key }),
+  setShowAutoSuggestions: (show) => set({ showAutoSuggestions: show }),
+  setAutoSuggestions: (suggestions) => set({ autoSuggestions: suggestions }),
 
   handleSearch: async ({
     name = "",

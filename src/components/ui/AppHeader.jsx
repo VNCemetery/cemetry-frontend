@@ -91,9 +91,17 @@ export default function HeaderMegaMenu() {
     <Box className="sticky top-0 w-full bg-white z-[9999]">
       <header className={classes.header}>
         <Group justify="space-between" h="100%">
+          <Burger
+            opened={drawerOpened}
+            onClick={toggleDrawer}
+            hiddenFrom="sm"
+          />{" "}
           <div
             className="p-2 transition-all ease-in-out duration-150 hover:cursor-pointer  hover:bg-gray-100 rounded-xl flex gap-2 items-center justify-center"
-            onClick={() => navigate("/")}
+            onClick={() => {
+              navigate("/");
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
           >
             <Avatar src={LOGO} alt="Logo" radius="xl" />
           </div>
@@ -116,11 +124,6 @@ export default function HeaderMegaMenu() {
             ))}
           </Group>
           <Group visibleFrom="sm"></Group>
-          <Burger
-            opened={drawerOpened}
-            onClick={toggleDrawer}
-            hiddenFrom="sm"
-          />
         </Group>
       </header>
 

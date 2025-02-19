@@ -155,7 +155,7 @@ export default function RoutingPage() {
           5,
           1, // Reduced from 1.5
           18,
-          6, // Reduced from 8
+          8, // Reduced from 8
         ],
       },
     });
@@ -171,12 +171,12 @@ export default function RoutingPage() {
       paint: {
         "line-width": [
           "interpolate",
-          ["exponential", 1.5],
+          ["exponential", 1.75],
           ["zoom"],
           5,
           0.5, // Reduced from 1
           18,
-          1.5, // Reduced from 2
+          3, // Reduced from 2
         ],
         "line-color": "#0a11d8", // Changed to darker blue
         "line-gap-width": [
@@ -186,7 +186,7 @@ export default function RoutingPage() {
           5,
           1, // Reduced from 1.5
           18,
-          5, // Reduced from 10
+          8, // Reduced from 10
         ],
       },
     });

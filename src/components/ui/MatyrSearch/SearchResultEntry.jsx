@@ -23,10 +23,10 @@ export default function SearchResultEntry({ item, selectItem }) {
         </Text>
 
         <Flex gap={2}>
-          <Badge variant="dot" color="blue" size="xl" radius="md">
+          <Badge size="xl" radius="lg">
             Hàng mộ: {item.graveRow.rowName}
           </Badge>
-          <Badge variant="dot" color="red" size="xl" radius="md">
+          <Badge size="xl" radius="lg">
             Khu mộ: {item.graveRow.areaName}
           </Badge>
         </Flex>

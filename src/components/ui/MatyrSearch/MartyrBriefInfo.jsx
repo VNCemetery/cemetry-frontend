@@ -40,9 +40,9 @@ const MartyrBriefInfo = ({
             </ActionIcon>
           </div>
 
-          <table className="w-full mb-0 border-collapse">
+          <table className="rounded-xl w-full mb-0 border-collapse">
             <tr>
-              <td className="border-2 p-3 text-center">
+              <td className="border-2 p-3 text-center ">
                 <Text size="20px" fw={600} c="dark" className="tracking-wide">
                   KHU {martyr.graveRow?.areaName || "---"}
                 </Text>
@@ -64,6 +64,7 @@ const MartyrBriefInfo = ({
         <Group grow spacing="sm">
           <Button
             size="lg"
+            radius={"xl"}
             variant="filled"
             leftSection={<BiSolidInfoCircle size={24} />}
             onClick={onViewDetail}
@@ -72,6 +73,7 @@ const MartyrBriefInfo = ({
           </Button>
           <Button
             size="lg"
+            radius={"xl"}
             color="green"
             leftSection={<MdDirections size={24} />}
             onClick={openRoutingHandlerPopup}

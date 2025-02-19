@@ -61,15 +61,19 @@ export default function MapViewPage({
 
     // Create marker element
     const markerEl = document.createElement("div");
-    markerEl.className = "bg-transparent w-12 scale-[1.01] h-12";
+    markerEl.className = "bg-transparent w-12  scale-300 h-12";
     markerEl.innerHTML = `
-<svg class="h-full w-full navigation-arrow" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="16.058" cy="23.799" r="6.189" fill="#4285F4" style="stroke: rgb(255, 0, 0);"></circle>
-  <path d="M 21.182 0 L 32 18.796 L 10.364 18.796 L 21.182 0 Z" style="transform-box: fill-box; transform-origin: 50% 50%;" fill="#4285F4" transform="matrix(-1, 0, 0, -1, 0.000004, 0)"></path>
-  <path d="M 10.818 0 L 21.636 18.796 L 0 18.796 L 10.818 0 Z" style="transform-origin: 10.818px 9.398px;" fill="#4285F4" transform="matrix(-1, 0, 0, -1, 0, 0)"></path>
-  <path d="M 15.972 9.74 L 21.223 18.864 L 10.72 18.864 L 15.972 9.74 Z" style="fill: rgb(192, 244, 66); transform-origin: 15.972px 14.302px;"></path>
-</svg>
-    `;
+<svg class="navigation-arrow" viewBox="0 0 36 48" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient gradientUnits="userSpaceOnUse" x1="32" y1="0" x2="32" y2="49.836" id="gradient-0" gradientTransform="matrix(0.593665, 0, 0, 0.549534, -0.994057, -0.80968)">
+      <stop offset="0" style="stop-color: rgb(66, 133, 244); stop-opacity: 0.2;"></stop>
+      <stop offset="1" style="stop-color: rgb(66, 133, 244); stop-opacity: 0.8;"></stop>
+    </linearGradient>
+  </defs>
+  <path d="M -0.691 -0.807 L 36.691 -0.807 L 24.481 26.578 C 24.484 26.508 24.484 26.438 24.484 26.368 C 24.484 22.925 21.583 20.136 18.002 20.136 C 14.422 20.136 11.518 22.925 11.518 26.368 C 11.518 26.438 11.519 26.508 11.521 26.578 L -0.691 -0.807 Z" style="fill: url(#gradient-0);"></path>
+  <circle cx="18" cy="24" r="7.295" fill="#4285F4" style="stroke: rgb(255, 255, 255);"></circle>
+</svg>`;
+
     markerElementRef.current = markerEl;
 
     // Create marker
@@ -227,7 +231,8 @@ export default function MapViewPage({
         {`
           .navigation-arrow {
             width: 32px;
-            height: 32px;
+            scale: 1.98;
+            height: 48px;
             transform-origin: center;
             transition: transform 0.3s ease;
             will-change: transform;
@@ -271,7 +276,7 @@ export default function MapViewPage({
               <button
                 onClick={onCancelSelection}
                 className="w-full md:w-auto px-4 py-3 md:py-2.5 
-                  bg-red-50 hover:bg-red-100 text-red-600 
+                  bg-red-100 hover:bg-red-100 text-red-600 
                   rounded-lg text-base font-medium md:font-semibold
                   transition-all focus:outline-none focus:ring-2 
                   focus:ring-red-400 active:scale-98 touch-manipulation"

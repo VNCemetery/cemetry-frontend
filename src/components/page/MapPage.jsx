@@ -18,6 +18,8 @@ import {
   Input,
   Modal,
   ScrollArea,
+  CloseIcon,
+  ActionIcon,
 } from "@mantine/core";
 import {
   FaMonument,
@@ -38,6 +40,11 @@ import { useDisclosure } from "@mantine/hooks";
 import classes from "./MapPage.module.css";
 import { BiSearch } from "react-icons/bi";
 import { FiSearch } from "react-icons/fi";
+import { useSearchMartyrStore } from "../../store/useSearchMartyrStore";
+import SearchPopupModal from "../ui/MatyrSearch/SearchPopupModal";
+import { useEffect, useRef, useState } from "react";
+import { DEFAULT_SEARCH_SIZE } from "../../utils/constants";
+import { BsArrowLeft } from "react-icons/bs";
 
 export default function MapPage() {
   const [drawerOpened, { toggle: toggleDrawer }] = useDisclosure(false);
@@ -78,8 +85,157 @@ export default function MapPage() {
   ];
   const [opened, { open, close }] = useDisclosure(true);
 
+  const {
+    filters,
+    setFilters,
+    searchKey,
+    setSearchKey,
+    searchResults,
+    setSearchResults,
+    currentPage,
+    setCurrentPage,
+    setAutoSuggestions,
+    autoSuggestions,
+    filterQuery,
+    handleSearch,
+    showAutoSuggestions,
+    setShowAutoSuggestions,
+  } = useSearchMartyrStore();
+
+  const headerRef = useRef(null);
+  const searchInputRef = useRef(null);
+
+  const [offSetHeight, setOffSetHeight] = useState(0);
+  const [showSearchModal, setShowSearchModal] = useState(false);
+
+  useEffect(() => {
+    if (headerRef?.current?.offsetHeight === 0) {
+      return;
+    }
+    searchInputRef.current.focus();
+
+    setOffSetHeight(headerRef.current.offsetHeight);
+  }, [headerRef?.current?.offSetHeight, showSearchModal]);
+
   return (
     <>
+      <div
+        className={`fixed top-0 left-0  transition-all duration-300 ease-in-out min-h-screen overflow-auto bottom-0 right-0 z-[99999] ${
+          showSearchModal ? "" : "hidden"
+        }`}
+      >
+        <div className={`h-full relative`}>
+          <div className="  z-[4]">
+            <div
+              ref={headerRef}
+              className={`fixed top-0  left-0 ${
+                !showSearchModal ? "transparent" : "bg-white"
+              } right-0 z-[4]`}
+            >
+              <div className="flex w-full items-center">
+                <div className="w-full items-center flex gap-1 bg-white py-1">
+                  <div className="flex items-center w-full text-gray-600   w-full p-1 gap-1">
+                    <ActionIcon
+                      variant="filled"
+                      size={"lg"}
+                      radius={"xl"}
+                      color="blue"
+                      aria-label="Settings"
+                      onClick={() => {
+                        if (
+                          showAutoSuggestions &&
+                          searchResults?.content?.length > 0
+                        ) {
+                          setAutoSuggestions([]);
+                          setShowAutoSuggestions(false);
+                        } else {
+                          setShowSearchModal(false);
+                          setSearchKey("");
+                          setShowAutoSuggestions(false);
+                          setSearchResults(null);
+                        }
+                      }}
+                    >
+                      <BsArrowLeft
+                        style={{ width: "70%", height: "70%" }}
+                        stroke={1.5}
+                      />
+                    </ActionIcon>
+                    <Input
+                      value={searchKey}
+                      ref={searchInputRef}
+                      onClick={() => {
+                        if (!showSearchModal) {
+                          openSearchPopup();
+                          searchInputRef.current.focus();
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          setCurrentPage(0);
+                          setAutoSuggestions([]);
+                          setShowAutoSuggestions(false);
+                          handleSearch({
+                            name: e.target.value,
+                            page: 0,
+                            size: DEFAULT_SEARCH_SIZE,
+                            ...filters,
+                          });
+                        }
+                      }}
+                      rightSectionPointerEvents="all"
+                      onChange={(e) => {
+                        setSearchKey(e.target.value);
+                      }}
+                      radius="xl"
+                      style={{
+                        border: "none",
+                        outline: "none",
+                        boxShadow: "none",
+                      }}
+                      size="md"
+                      className="w-full  border-none text-[2rem]"
+                      placeholder="Nhập tên liệt sĩ"
+                      rightSection={
+                        <CloseIcon
+                          aria-label="Clear input"
+                          className="mr-2"
+                          onClick={() => {
+                            setSearchKey("");
+                            searchInputRef.current.focus();
+                          }}
+                          style={{ display: searchKey ? undefined : "none" }}
+                        />
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <SearchPopupModal
+            offSetHeight={offSetHeight}
+            filters={filters} // move to store
+            setFilters={setFilters} // move to store
+            setCurrentPage={setCurrentPage} // move to store
+            currentPage={currentPage} // move to store
+            handleSearch={handleSearch} // move to store
+            setSearchKey={setSearchKey} // move to store
+            showAutoSuggestions={showAutoSuggestions} // move to store
+            setShowAutoSuggestions={setShowAutoSuggestions} // move to store
+            searchKey={searchKey} // move to store
+            autoSuggestions={autoSuggestions} // move to store
+            setAutoSuggestions={setAutoSuggestions} // move to store
+            filterQuery={filterQuery} // move to store
+            searchResults={searchResults} // move to store
+            onSelectMartyrHandler={(martyr) => {
+              let newUrlPath = `/map?martyrId=${martyr.id}`;
+              window.location = newUrlPath;
+            }}
+          />
+        </div>
+      </div>
       <Modal.Root
         opened={false}
         onClose={close}
@@ -154,6 +310,11 @@ export default function MapPage() {
           </Title>
           <Input
             size="xl"
+            onClick={() => {
+              searchInputRef?.current?.focus();
+              setShowSearchModal(true);
+            }}
+            value={searchKey}
             radius={"xl"}
             placeholder="Tìm kiếm liệt sĩ"
             leftSection={<BiSearch className="text-[1.5rem]" />}
@@ -167,7 +328,7 @@ export default function MapPage() {
             })}
           />
 
-          <Text className={classes.heroDescription} mt={24}>
+          <Text className={classes.heroDescription} mt={24} size="xl">
             Di tích lịch sử văn hóa cấp tỉnh <br /> Nơi tưởng nhớ và tri ân các
             anh hùng liệt sĩ
           </Text>
@@ -217,12 +378,24 @@ export default function MapPage() {
                 </div>
                 <Text
                   className={classes.statValue}
+                  style={{
+                    fontSize: "clamp(2.5rem, 4vw, 2.5rem)",
+
+                    width: "100%",
+                    textAlign: "center",
+                    wordBreak: "break-word",
+                  }}
                   mt={45}
                   c={cardColors[index % cardColors.length].text}
                 >
                   {stat.value}
                 </Text>
-                <Text size="lg" c="dimmed" mt={5}>
+                <Text
+                  size="sm"
+                  c="dimmed"
+                  mt={5}
+                  style={{ fontSize: "1.1rem" }}
+                >
                   {stat.label}
                 </Text>
               </Card>
@@ -252,7 +425,7 @@ export default function MapPage() {
                   <Text fw={600} size="lg">
                     Hướng dẫn thăm quan
                   </Text>
-                  <Text size="sm" c="dimmed">
+                  <Text size="sm" c="dimmed" style={{ fontSize: "1.1rem" }}>
                     Thông tin chi tiết về thời gian, quy định và tiện ích
                   </Text>
                 </div>
@@ -281,7 +454,7 @@ export default function MapPage() {
                           Thời gian tham quan
                         </Text>
                       </Group>
-                      <List spacing="sm" size="sm" ml={10}>
+                      <List spacing="sm" size="md" ml={10}>
                         <List.Item
                           icon={
                             <ThemeIcon color="blue" size={24} variant="light">
@@ -289,7 +462,9 @@ export default function MapPage() {
                             </ThemeIcon>
                           }
                         >
-                          <Text fw={500}>Giờ mở cửa:</Text>
+                          <Text fw={500} size="lg">
+                            Giờ mở cửa:
+                          </Text>
                           <Text ml={10} size="md">
                             6:00 - 17:30 hàng ngày
                           </Text>
@@ -301,7 +476,9 @@ export default function MapPage() {
                             </ThemeIcon>
                           }
                         >
-                          <Text fw={500}>Thời gian lý tưởng:</Text>
+                          <Text fw={500} size="lg">
+                            Thời gian lý tưởng:
+                          </Text>
                           <Text ml={10} size="md">
                             Sáng sớm (6:00 - 8:00)
                           </Text>
@@ -316,7 +493,9 @@ export default function MapPage() {
                             </ThemeIcon>
                           }
                         >
-                          <Text fw={500}>Thời lượng đề xuất:</Text>
+                          <Text fw={500} size="lg">
+                            Thời lượng đề xuất:
+                          </Text>
                           <Text ml={10} size="md">
                             1-2 giờ để tham quan đầy đủ
                           </Text>
@@ -355,8 +534,14 @@ export default function MapPage() {
                             </ThemeIcon>
                           }
                         >
-                          <Text fw={500}>Trang phục:</Text>
-                          <Text ml={10} size="md">
+                          <Text fw={500} size="lg">
+                            Trang phục:
+                          </Text>
+                          <Text
+                            ml={10}
+                            size="md"
+                            style={{ fontSize: "1.1rem" }}
+                          >
                             Lịch sự, trang nghiêm
                           </Text>
                         </List.Item>
@@ -367,11 +552,21 @@ export default function MapPage() {
                             </ThemeIcon>
                           }
                         >
-                          <Text fw={500}>Ứng xử:</Text>
-                          <Text ml={10} size="md">
+                          <Text fw={500} size="lg">
+                            Ứng xử:
+                          </Text>
+                          <Text
+                            ml={10}
+                            size="md"
+                            style={{ fontSize: "1.1rem" }}
+                          >
                             Giữ yên lặng, trang nghiêm
                           </Text>
-                          <Text ml={10} size="md">
+                          <Text
+                            ml={10}
+                            size="md"
+                            style={{ fontSize: "1.1rem" }}
+                          >
                             Không gây ồn ào, nói chuyện lớn tiếng
                           </Text>
                         </List.Item>
@@ -382,11 +577,21 @@ export default function MapPage() {
                             </ThemeIcon>
                           }
                         >
-                          <Text fw={500}>Lưu ý:</Text>
-                          <Text ml={10} size="md">
+                          <Text fw={500} size="lg">
+                            Lưu ý:
+                          </Text>
+                          <Text
+                            ml={10}
+                            size="md"
+                            style={{ fontSize: "1.1rem" }}
+                          >
                             Không mang đồ ăn, thức uống
                           </Text>
-                          <Text ml={10} size="md">
+                          <Text
+                            ml={10}
+                            size="md"
+                            style={{ fontSize: "1.1rem" }}
+                          >
                             Không hút thuốc trong khuôn viên
                           </Text>
                         </List.Item>
@@ -424,7 +629,9 @@ export default function MapPage() {
                             </ThemeIcon>
                           }
                         >
-                          <Text fw={500}>Khu vực tâm linh:</Text>
+                          <Text fw={500} size="lg">
+                            Khu vực tâm linh:
+                          </Text>
                           <Text ml={10} size="md">
                             Khu đặt hoa, thắp hương
                           </Text>
@@ -439,7 +646,9 @@ export default function MapPage() {
                             </ThemeIcon>
                           }
                         >
-                          <Text fw={500}>Cơ sở vật chất:</Text>
+                          <Text fw={500} size="lg">
+                            Cơ sở vật chất:
+                          </Text>
                           <Text ml={10} size="md">
                             Bãi đỗ xe rộng rãi, miễn phí
                           </Text>
@@ -451,7 +660,9 @@ export default function MapPage() {
                             </ThemeIcon>
                           }
                         >
-                          <Text fw={500}>Hỗ trợ:</Text>
+                          <Text fw={500} size="lg">
+                            Hỗ trợ:
+                          </Text>
                           <Text ml={10} size="md">
                             Hướng dẫn viên miễn phí
                           </Text>
@@ -509,13 +720,19 @@ export default function MapPage() {
                           Giới thiệu chung
                         </Text>
                       </Group>
-                      <Text size="md">
+                      <Text
+                        size="md"
+                        style={{ fontSize: "1.1rem", lineHeight: "1.6" }}
+                      >
                         Nghĩa trang liệt sĩ tỉnh Đồng Tháp được khởi công xây
                         dựng vào năm 1980 với diện tích hơn 3,5 héc ta và khánh
                         thành vào ngày 26/7/1984. Hiện nay nơi đây đã quy tập
                         được gần 2.500 liệt sĩ có danh tính.
                       </Text>
-                      <Text size="md">
+                      <Text
+                        size="md"
+                        style={{ fontSize: "1.1rem", lineHeight: "1.6" }}
+                      >
                         Với công trình kiến trúc gồm phía trước là tượng đài
                         người lính, ngực đính huân chương, trầm mặc cầm đóa sen
                         đến thăm đồng đội. Tất cả mộ chí đều được phủ màu xanh
@@ -524,7 +741,10 @@ export default function MapPage() {
                         chân tượng đài là hoa văn trống đồng Ngọc Lũ và ba bức
                         phù điêu minh họa các thời kỳ lịch sử trong tỉnh.
                       </Text>
-                      <Text size="md">
+                      <Text
+                        size="md"
+                        style={{ fontSize: "1.1rem", lineHeight: "1.6" }}
+                      >
                         Nhìn từ trên xuống, nghĩa trang như một bông sen đang nở
                         xòe mà nhụy hoa là hồ nước ở giữa, mỗi bên là ba cánh
                         sen. Trên các cánh sen là nơi an nghỉ của hơn 3.000 liệt
@@ -532,7 +752,10 @@ export default function MapPage() {
                         thể kiến trúc này khiến cho nơi đây được xem là một
                         trong những nghĩa trang đẹp nhất ở miền Tây Nam bộ.
                       </Text>
-                      <Text size="md">
+                      <Text
+                        size="md"
+                        style={{ fontSize: "1.1rem", lineHeight: "1.6" }}
+                      >
                         Nơi đây được Ủy ban Nhân dân tỉnh Đồng Tháp ra quyết
                         định xếp hạng và công nhận di tích lịch sử lưu niệm cấp
                         tỉnh vào ngày 10/4/2003.
@@ -668,19 +891,31 @@ export default function MapPage() {
                             {item.description}
                           </Text>
                           {index === 0 && (
-                            <Text size="sm" c="dimmed">
+                            <Text
+                              size="sm"
+                              c="dimmed"
+                              style={{ fontSize: "1.1rem" }}
+                            >
                               Khởi công xây dựng trên khu đất rộng hơn 3,5 héc
                               ta, với sự đóng góp của nhân dân trong tỉnh
                             </Text>
                           )}
                           {index === 1 && (
-                            <Text size="sm" c="dimmed">
+                            <Text
+                              size="sm"
+                              c="dimmed"
+                              style={{ fontSize: "1.1rem" }}
+                            >
                               Khánh thành và đưa vào sử dụng với sự tham dự của
                               lãnh đạo tỉnh và đông đảo nhân dân
                             </Text>
                           )}
                           {index === 2 && (
-                            <Text size="sm" c="dimmed">
+                            <Text
+                              size="sm"
+                              c="dimmed"
+                              style={{ fontSize: "1.1rem" }}
+                            >
                               Được Bộ Văn hóa - Thông tin công nhận là di tích
                               lịch sử văn hóa cấp tỉnh
                             </Text>

@@ -28,15 +28,15 @@ import { useDisclosure } from "@mantine/hooks";
 import { getMatyrs } from "../../../services/martyrManagementService";
 import { useForm } from "@mantine/form";
 import { useSearchMartyrStore } from "../../../store/useSearchMartyrStore";
+import { useInfoStore } from "../../../store/useInfoStore";
 
 const SearchPopupModal = ({
   searchKey,
   filters,
   setFilters,
-  grave_rows,
   setSearchKey,
   searchResults,
-  clearMartrys,
+
   setCurrentPage,
   handleSearch,
   currentPage,
@@ -51,6 +51,8 @@ const SearchPopupModal = ({
   const filterForm = useForm({
     mode: "uncontrolled",
   });
+
+  const { grave_rows } = useInfoStore();
 
   const [isLoadingAutoSuggestions, setIsLoadingAutoSuggestions] =
     useState(false);
@@ -91,13 +93,14 @@ const SearchPopupModal = ({
   ] = useDisclosure(false);
   return (
     <div
-      className="h-screen z-[3] bg-white relative top-0 w-full"
+      className="overflow-auto h-screen z-[9999] bg-white relative top-0 w-full"
       style={{
         marginTop: offSetHeight.toString() + "px",
       }}
     >
       {/* Filter modal */}
       <Modal
+        className="fixed z-[9999999] top-0 left-0 rigth-0 bottom-0 "
         opened={showFilterSetting}
         onClose={closeFilterSetting}
         title={
@@ -118,7 +121,6 @@ const SearchPopupModal = ({
             };
 
             const filters_query = buildFilterFormQuery(queryData);
-            clearMartrys();
             setCurrentPage(0);
             handleSearch({
               name: searchKey,
@@ -243,10 +245,7 @@ const SearchPopupModal = ({
           <div className="border-t border-gray-200 flex gap-4 justify-end px-6 fixed bottom-0 py-6 bg-white w-full left-0">
             <Button
               onClick={() => {
-                // Reset filterForm
                 filterForm.reset();
-                // Clear cache
-                clearMartrys();
                 setCurrentPage(1);
                 handleSearch({
                   name: searchKey,

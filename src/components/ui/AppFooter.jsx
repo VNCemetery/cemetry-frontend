@@ -8,30 +8,10 @@ import { FaFacebook, FaYoutube } from "react-icons/fa";
 
 const data = [
   {
-    title: "About",
+    title: "Liên kết",
     links: [
-      { label: "Features", link: "#" },
-      { label: "Pricing", link: "#" },
-      { label: "Support", link: "#" },
-      { label: "Forums", link: "#" },
-    ],
-  },
-  {
-    title: "Project",
-    links: [
-      { label: "Contribute", link: "#" },
-      { label: "Media assets", link: "#" },
-      { label: "Changelog", link: "#" },
-      { label: "Releases", link: "#" },
-    ],
-  },
-  {
-    title: "Community",
-    links: [
-      { label: "Join Discord", link: "#" },
-      { label: "Follow on Twitter", link: "#" },
-      { label: "Email newsletter", link: "#" },
-      { label: "GitHub discussions", link: "#" },
+      { label: "Cổng thông tin", link: "https://dongthap.gov.vn/" },
+      { label: "Tỉnh Đoàn Đồng Tháp", link: "http://tinhdoandongthap.org.vn/" },
     ],
   },
 ];
@@ -71,7 +51,7 @@ export default function AppFooter() {
       </Container>
       <Container className={classes.afterFooter}>
         <Text c="dimmed" size="sm">
-          © 2020 mantine.dev. All rights reserved.
+          @ 2025 Bản quyền thuộc về Đoàn Trường Đại Học Sư Phạm Kỹ Thuật TP.HCM
         </Text>
 
         <Group
@@ -81,10 +61,7 @@ export default function AppFooter() {
           wrap="nowrap"
         >
           <ActionIcon size="lg" color="gray" variant="subtle">
-            <FaFacebook className="text-red-400" size={18} stroke={1.5} />
-          </ActionIcon>
-          <ActionIcon size="lg" color="gray" variant="subtle">
-            <FaYoutube size={18} stroke={1.5} />
+            <FaFacebook size={18} stroke={1.5} />
           </ActionIcon>
         </Group>
       </Container>
