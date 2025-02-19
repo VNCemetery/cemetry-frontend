@@ -18,7 +18,7 @@ const MartyrBriefInfo = ({
       shadow="sm"
       p="sm"
       pt={"xl"}
-      withBorder
+      withborder
     >
       <Stack spacing="md">
         <div>

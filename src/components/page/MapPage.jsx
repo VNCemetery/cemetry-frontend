@@ -182,7 +182,7 @@ export default function MapPage() {
               <Card
                 className={classes.statCard}
                 bg={cardColors[index % cardColors.length].bg}
-                withBorder
+                withborder
                 styles={{
                   root: {
                     borderColor: `var(--mantine-color-${
@@ -262,7 +262,7 @@ export default function MapPage() {
               <Grid>
                 <Grid.Col span={{ base: 12, md: 4 }}>
                   <Card
-                    withBorder
+                    withborder
                     radius="md"
                     padding="lg"
                     className={classes.infoCard}
@@ -328,7 +328,7 @@ export default function MapPage() {
 
                 <Grid.Col span={{ base: 12, md: 4 }}>
                   <Card
-                    withBorder
+                    withborder
                     radius="md"
                     padding="lg"
                     className={classes.infoCard}
@@ -397,7 +397,7 @@ export default function MapPage() {
 
                 <Grid.Col span={{ base: 12, md: 4 }}>
                   <Card
-                    withBorder
+                    withborder
                     radius="md"
                     padding="lg"
                     className={classes.infoCard}
@@ -490,7 +490,7 @@ export default function MapPage() {
               <Grid>
                 <Grid.Col span={{ base: 12, md: 8 }}>
                   <Card
-                    withBorder
+                    withborder
                     radius="md"
                     padding="lg"
                     className={classes.infoCard}
@@ -551,7 +551,7 @@ export default function MapPage() {
 
                 <Grid.Col span={{ base: 12, md: 4 }}>
                   <Card
-                    withBorder
+                    withborder
                     radius="md"
                     padding="lg"
                     className={classes.infoCard}
@@ -609,7 +609,7 @@ export default function MapPage() {
         <Grid mt={60} mb={60}>
           <Grid.Col span={12}>
             <Card
-              withBorder
+              withborder
               padding="xl"
               radius="md"
               className={classes.infoCard}
@@ -656,7 +656,7 @@ export default function MapPage() {
                       }
                     >
                       <Card
-                        withBorder
+                        withborder
                         mt="sm"
                         radius="md"
                         padding="md"
@@ -668,19 +668,19 @@ export default function MapPage() {
                             {item.description}
                           </Text>
                           {index === 0 && (
-                            <Text size="sm" c="dimmed" italic>
+                            <Text size="sm" c="dimmed">
                               Khởi công xây dựng trên khu đất rộng hơn 3,5 héc
                               ta, với sự đóng góp của nhân dân trong tỉnh
                             </Text>
                           )}
                           {index === 1 && (
-                            <Text size="sm" c="dimmed" italic>
+                            <Text size="sm" c="dimmed">
                               Khánh thành và đưa vào sử dụng với sự tham dự của
                               lãnh đạo tỉnh và đông đảo nhân dân
                             </Text>
                           )}
                           {index === 2 && (
-                            <Text size="sm" c="dimmed" italic>
+                            <Text size="sm" c="dimmed">
                               Được Bộ Văn hóa - Thông tin công nhận là di tích
                               lịch sử văn hóa cấp tỉnh
                             </Text>

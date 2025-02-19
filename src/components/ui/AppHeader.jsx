@@ -26,7 +26,7 @@ import {
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import classes from "./AppHeader.module.css";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const mockdata = [
   {
@@ -85,6 +85,7 @@ export default function HeaderMegaMenu() {
     </UnstyledButton>
   ));
 
+  const pathname = useLocation().pathname;
   const navigate = useNavigate();
   return (
     <Box className="sticky top-0 w-full bg-white z-[9999]">
@@ -97,29 +98,24 @@ export default function HeaderMegaMenu() {
             <Avatar src={LOGO} alt="Logo" radius="xl" />
           </div>
           <Group h="100%" gap={4} visibleFrom="sm">
-            {[navigationItems[0], navigationItems[2]].map((item) => (
+            {navigationItems.map((item) => (
               <Button
                 key={item.href}
-                variant="default"
+                variant={pathname === item.href ? "filled" : "default"}
                 radius={"xl"}
+                rightSection={item.icon}
                 component="a"
-                onClick={() => navigate(item.href)}
+                onClick={() => {
+                  navigate(item.href);
+                  // Smooth scroll to top
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
               >
                 {item.label}
               </Button>
             ))}
           </Group>
-          <Group visibleFrom="sm">
-            <Button
-              variant="filled"
-              radius={"xl"}
-              component="a"
-              onClick={() => navigate("/map")}
-              rightSection={<FiMap />}
-            >
-              Đi tới bản đồ
-            </Button>
-          </Group>
+          <Group visibleFrom="sm"></Group>
           <Burger
             opened={drawerOpened}
             onClick={toggleDrawer}

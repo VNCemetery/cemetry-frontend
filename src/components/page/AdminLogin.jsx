@@ -50,7 +50,7 @@ export default function AdminLogin() {
       <div className="h-screen flex items-center bg-black bg-opacity-50">
         <Paper
           className="w-full md:w-1/2 lg:w-1/4 mx-auto"
-          withBorder
+          withborder
           shadow="xl"
           p={30}
           radius="md"

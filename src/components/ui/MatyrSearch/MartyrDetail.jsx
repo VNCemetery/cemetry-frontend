@@ -120,7 +120,7 @@ export default function MartyrDetail({ martyr, onRoute }) {
                 </Text>
               </Group>
               <Table
-                withBorder
+                withborder
                 withColumnBorders
                 styles={{
                   th: {

@@ -27,11 +27,11 @@ import {
 } from "../../../services/martyrManagementService";
 import { useInfoStore } from "../../../store/useInfoStore";
 import { useMatyrStore } from "../../../store/useMatyrStore";
-import { useForm } from "@mantine/form";
 import { FiHome, FiMap } from "react-icons/fi"; // Add this import
 import SearchPopupModal from "./SearchPopupModal";
 import MartyrBriefInfo from "./MartyrBriefInfo";
 import { useLocation } from "react-router-dom";
+import { useSearchMartyrStore } from "../../../store/useSearchMartyrStore";
 
 const MatyrSearch = ({
   onClearRoute,
@@ -63,50 +63,15 @@ const MatyrSearch = ({
   const [searchKey, setSearchKey] = useState("");
   const [opened, { open: openSearchPopup, close: closeSearchPopup }] =
     useDisclosure(false);
-  const [searchResults, setSearchResults] = useState(null);
-  const [isLoadingSearchResults, setIsLoadingSearchResults] = useState(false);
-  const loadMartyrs = useMatyrStore((state) => state.loadMartyrs);
   const clearMartrys = useMatyrStore((state) => state.clearMartrys);
   const [currentPage, setCurrentPage] = useState(0);
-  const [showRoutingOptions, setShowRoutingOptions] = useState(false);
-  const [showSearchResults, setShowSearchResults] = useState(false);
   const [showAutoSuggestions, setShowAutoSuggestions] = useState(false);
   const [autoSuggestions, setAutoSuggestions] = useState([]);
 
-  const handleSearch = async ({
-    name = "",
-    page = 0,
-    size = DEFAULT_SEARCH_SIZE,
-    filters = [],
-  }) => {
-    try {
-      setFilterQuery(filters);
-      setIsLoadingSearchResults(true);
-      setSearchResults(null);
-
-      const results = await loadMartyrs(name, page, size, filters);
-      if (!results) {
-        setSearchResults(null);
-        throw new Error("No result found");
-      }
-      setSearchResults(results);
-      console.log("Kết quả tìm kiếm:", results);
-      setShowSearchResults(true);
-      setIsLoadingSearchResults(false);
-    } catch (error) {
-      console.error("Lỗi khi tìm kiếm:", error);
-      setSearchResults(null);
-      setShowSearchResults(false);
-      setIsLoadingSearchResults(false);
-    }
-  };
+  const { searchResults, setSearchResults, filterQuery, handleSearch } =
+    useSearchMartyrStore();
 
   const { grave_rows } = useInfoStore();
-  const [filterQuery, setFilterQuery] = useState({});
-  const [
-    showFilterSetting,
-    { open: openFilterSetting, close: closeFilterSetting },
-  ] = useDisclosure(false);
 
   const [
     showMartyrDetail,
@@ -122,10 +87,6 @@ const MatyrSearch = ({
 
   const [showReturnToSearch, setShowReturnToSearch] = useState(false);
   const { selectedMartyr, selectMartyr } = useMatyrStore();
-
-  const filterForm = useForm({
-    mode: "uncontrolled",
-  });
 
   const [offsetHeight, setOffsetHeight] = useState(0);
   useEffect(() => {
@@ -283,7 +244,6 @@ const MatyrSearch = ({
                           setShowAutoSuggestions(false);
                           setSearchResults(null);
                           closeSearchPopup();
-                          close_record_modal();
                         }
                       }}
                     >
@@ -369,7 +329,6 @@ const MatyrSearch = ({
           setCurrentPage={setCurrentPage}
           currentPage={currentPage}
           handleSearch={handleSearch}
-          filterForm={filterForm}
           setSearchKey={setSearchKey}
           showAutoSuggestions={showAutoSuggestions}
           setShowAutoSuggestions={setShowAutoSuggestions}

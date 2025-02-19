@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 
-import FloatingSelector from "../FloatingSelector";
-import MartyrDetail from "./MartyrDetail";
 import {
   DEFAULT_AUTO_SUGGEST_SIZE,
   DEFAULT_SEARCH_SIZE,
@@ -9,10 +7,7 @@ import {
 import { flattenObject } from "../../../utils/objectUtil";
 import { SelectDropdownSearch } from "../SelectDropdownSearch";
 import {
-  CloseIcon,
-  Drawer,
   Flex,
-  Group,
   Input,
   Loader,
   Modal,
@@ -30,14 +25,12 @@ import SearchResultEntry from "./SearchResultEntry";
 import { buildFilterFormQuery } from "../../../utils/queryBuilder";
 import Loading from "../Loading";
 import { useDisclosure } from "@mantine/hooks";
-import {
-  getMartyrById,
-  getMatyrs,
-} from "../../../services/martyrManagementService";
+import { getMatyrs } from "../../../services/martyrManagementService";
+import { useForm } from "@mantine/form";
+import { useSearchMartyrStore } from "../../../store/useSearchMartyrStore";
 
 const SearchPopupModal = ({
   searchKey,
-  filterForm,
   filters,
   setFilters,
   grave_rows,
@@ -55,9 +48,14 @@ const SearchPopupModal = ({
   autoSuggestions,
   setAutoSuggestions,
 }) => {
+  const filterForm = useForm({
+    mode: "uncontrolled",
+  });
+
   const [isLoadingAutoSuggestions, setIsLoadingAutoSuggestions] =
     useState(false);
-  const [isLoadingSearchResults, setIsLoadingSearchResults] = useState(false);
+
+  const { isLoadingSearchResults } = useSearchMartyrStore();
 
   const handleAutoSuggest = async (searchKey) => {
     try {
@@ -271,13 +269,7 @@ const SearchPopupModal = ({
             >
               Xóa bộ lọc
             </Button>
-            <Button
-              size="xl"
-              type="submit"
-              radius="xl"
-              className="flex-1"
-              leftIcon={<HiCheck size={20} />}
-            >
+            <Button size="xl" type="submit" radius="xl" className="flex-1">
               Áp dụng
             </Button>
           </div>

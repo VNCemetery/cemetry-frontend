@@ -42,8 +42,8 @@ export default function CardsCarousel() {
 
   const autoplay = useRef(Autoplay({ delay: 2000 }));
   const mobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
-  const slides = data.map((item) => (
-    <Carousel.Slide key={item.title}>
+  const slides = data.map((item, i) => (
+    <Carousel.Slide key={item.title + "_" + i}>
       <Card {...item} />
     </Carousel.Slide>
   ));
