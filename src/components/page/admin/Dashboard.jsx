@@ -58,7 +58,7 @@ export default function Dashboard() {
 // StatsCard component (if not already defined elsewhere)
 function StatsCard({ title, value, description, icon, color }) {
   return (
-    <Paper withBorder p="md" radius="md">
+    <Paper withborder p="md" radius="md">
       <Group justify="space-between">
         <Stack gap={0}>
           <Text size="xs" c="dimmed">

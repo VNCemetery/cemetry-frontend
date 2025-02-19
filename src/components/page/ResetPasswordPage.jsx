@@ -69,7 +69,7 @@ export default function ResetPasswordPage() {
       >
         <Container size={420}>
           <Paper
-            withBorder
+            withborder
             shadow="xl"
             p={30}
             radius="md"

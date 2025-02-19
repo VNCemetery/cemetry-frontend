@@ -1,7 +1,5 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
-import FloatingSelector from "../FloatingSelector";
-import MartyrDetail from "./MartyrDetail";
 import {
   DEFAULT_AUTO_SUGGEST_SIZE,
   DEFAULT_SEARCH_SIZE,
@@ -9,10 +7,7 @@ import {
 import { flattenObject } from "../../../utils/objectUtil";
 import { SelectDropdownSearch } from "../SelectDropdownSearch";
 import {
-  CloseIcon,
-  Drawer,
   Flex,
-  Group,
   Input,
   Loader,
   Modal,
@@ -30,47 +25,82 @@ import SearchResultEntry from "./SearchResultEntry";
 import { buildFilterFormQuery } from "../../../utils/queryBuilder";
 import Loading from "../Loading";
 import { useDisclosure } from "@mantine/hooks";
-import { getMartyrById } from "../../../services/martyrManagementService";
+import { getMatyrs } from "../../../services/martyrManagementService";
+import { useForm } from "@mantine/form";
+import { useSearchMartyrStore } from "../../../store/useSearchMartyrStore";
+import { useInfoStore } from "../../../store/useInfoStore";
 
 const SearchPopupModal = ({
-  showAutoSuggestions,
   searchKey,
-  filterForm,
   filters,
   setFilters,
-  grave_rows,
-  selectMartyr,
-  openMartyrDetail,
-  closeSearchPopup,
   setSearchKey,
-  isLoadingAutoSuggestions,
-  isLoadingSearchResults,
   searchResults,
-  clearMartrys,
+
   setCurrentPage,
   handleSearch,
-  autoSuggestions,
   currentPage,
-  setShowAutoSuggestions,
-  setAutoSuggestions,
   offSetHeight,
   filterQuery,
-  openRoutingHandlerPopup,
   onSelectMartyrHandler,
+  showAutoSuggestions,
+  setShowAutoSuggestions,
+  autoSuggestions,
+  setAutoSuggestions,
 }) => {
+  const filterForm = useForm({
+    mode: "uncontrolled",
+  });
+
+  const { grave_rows } = useInfoStore();
+
+  const [isLoadingAutoSuggestions, setIsLoadingAutoSuggestions] =
+    useState(false);
+
+  const { isLoadingSearchResults } = useSearchMartyrStore();
+
+  const handleAutoSuggest = async (searchKey) => {
+    try {
+      setIsLoadingAutoSuggestions(true);
+      const results = await getMatyrs(searchKey, 0, DEFAULT_AUTO_SUGGEST_SIZE);
+      const content = results.content;
+      if (!content) {
+        setAutoSuggestions([]);
+        setShowAutoSuggestions(true);
+        throw new Error("No content found");
+      }
+      setShowAutoSuggestions(true);
+      setIsLoadingAutoSuggestions(false);
+      setAutoSuggestions(content);
+    } catch (error) {
+      console.error("Lỗi khi tìm kiếm:", error);
+      setAutoSuggestions([]);
+      setIsLoadingAutoSuggestions(false);
+    }
+  };
+
+  useEffect(() => {
+    if (searchKey.length > 0) {
+      handleAutoSuggest(searchKey);
+    } else {
+      setAutoSuggestions([]);
+    }
+  }, [searchKey]);
+
   const [
     showFilterSetting,
     { open: openFilterSetting, close: closeFilterSetting },
   ] = useDisclosure(false);
   return (
     <div
-      className="h-screen z-[3] bg-white relative top-0 w-full"
+      className="overflow-auto h-screen z-[9999] bg-white relative top-0 w-full"
       style={{
         marginTop: offSetHeight.toString() + "px",
       }}
     >
       {/* Filter modal */}
       <Modal
+        className="fixed z-[9999999] top-0 left-0 rigth-0 bottom-0 "
         opened={showFilterSetting}
         onClose={closeFilterSetting}
         title={
@@ -91,7 +121,6 @@ const SearchPopupModal = ({
             };
 
             const filters_query = buildFilterFormQuery(queryData);
-            clearMartrys();
             setCurrentPage(0);
             handleSearch({
               name: searchKey,
@@ -120,7 +149,7 @@ const SearchPopupModal = ({
                       {...filterForm.getInputProps("yearOfBirth")}
                       min={1800}
                       max={2024}
-                      radius="md"
+                      radius="xl"
                       placeholder="Năm sinh"
                       label="Năm sinh"
                       className="flex-1"
@@ -131,7 +160,7 @@ const SearchPopupModal = ({
                       max={2024}
                       key={filterForm.key("dateOfDeath")}
                       {...filterForm.getInputProps("dateOfDeath")}
-                      radius="md"
+                      radius="xl"
                       placeholder="Năm mất"
                       label="Năm mất"
                       className="flex-1"
@@ -144,7 +173,7 @@ const SearchPopupModal = ({
                     </Text>
                     <Input
                       size="xl"
-                      radius="md"
+                      radius="xl"
                       key={filterForm.key("homeTown")}
                       {...filterForm.getInputProps("homeTown")}
                       placeholder="Ví dụ: Đồng Tháp"
@@ -216,10 +245,7 @@ const SearchPopupModal = ({
           <div className="border-t border-gray-200 flex gap-4 justify-end px-6 fixed bottom-0 py-6 bg-white w-full left-0">
             <Button
               onClick={() => {
-                // Reset filterForm
                 filterForm.reset();
-                // Clear cache
-                clearMartrys();
                 setCurrentPage(1);
                 handleSearch({
                   name: searchKey,
@@ -237,18 +263,12 @@ const SearchPopupModal = ({
               }}
               variant="light"
               size="xl"
-              radius="md"
+              radius="xl"
               className="flex-1"
             >
               Xóa bộ lọc
             </Button>
-            <Button
-              size="xl"
-              type="submit"
-              radius="md"
-              className="flex-1"
-              leftIcon={<HiCheck size={20} />}
-            >
+            <Button size="xl" type="submit" radius="xl" className="flex-1">
               Áp dụng
             </Button>
           </div>
@@ -261,7 +281,8 @@ const SearchPopupModal = ({
         <div className="overflow-auto  absolute top-0 h-screen   z-[9999] w-full">
           <div className="px-2 pt-2">
             <Button
-              size="xl"
+              size="md"
+              radius={"xl"}
               className="w-full"
               onClick={() => {
                 setAutoSuggestions([]);
@@ -292,6 +313,7 @@ const SearchPopupModal = ({
                   selectItem={() => {
                     onSelectMartyrHandler(item);
                   }}
+                  key={item.id}
                 />
               ))}
             </div>
@@ -319,6 +341,7 @@ const SearchPopupModal = ({
                     <div className="flex justify-start gap-2">
                       <Button
                         className="text-xl"
+                        radius={"xl"}
                         onClick={() => {
                           openFilterSetting();
                         }}
@@ -361,7 +384,7 @@ const SearchPopupModal = ({
                         }}
                         total={searchResults?.totalPages}
                         size="md"
-                        radius="md"
+                        radius="xl"
                         siblings={1}
                       />
                     </div>
@@ -382,7 +405,7 @@ const SearchPopupModal = ({
                                 openFilterSetting();
                               }}
                               size="xl"
-                              radius="md"
+                              radius="xl"
                               leftSection={<HiAdjustments size={20} />}
                               className="shadow-md"
                             >
@@ -390,7 +413,7 @@ const SearchPopupModal = ({
                             </Button>
                             <Button
                               color="green"
-                              radius={"md"}
+                              radius={"xl"}
                               size="xl"
                               onClick={() => {
                                 setAutoSuggestions([]);
@@ -425,7 +448,7 @@ const SearchPopupModal = ({
               openFilterSetting();
             }}
             size="xl"
-            radius="md"
+            radius="xl"
             leftSection={<HiAdjustments size={20} />}
             className="shadow-md"
           >

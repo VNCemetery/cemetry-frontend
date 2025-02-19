@@ -1,8 +1,14 @@
-import { Paper, Text, Title, Group } from '@mantine/core';
+import { Paper, Text, Title, Group } from "@mantine/core";
 
-export default function StatsCard({ title, value, description, icon, color = 'blue' }) {
+export default function StatsCard({
+  title,
+  value,
+  description,
+  icon,
+  color = "blue",
+}) {
   return (
-    <Paper withBorder p="md" radius="md">
+    <Paper withborder p="md" radius="md">
       <Group justify="space-between" mb="xs">
         <Text size="xs" c="dimmed" tt="uppercase">
           {title}
@@ -19,4 +25,4 @@ export default function StatsCard({ title, value, description, icon, color = 'bl
       </Text>
     </Paper>
   );
-} 
+}

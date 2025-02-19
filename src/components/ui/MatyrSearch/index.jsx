@@ -27,20 +27,19 @@ import {
 } from "../../../services/martyrManagementService";
 import { useInfoStore } from "../../../store/useInfoStore";
 import { useMatyrStore } from "../../../store/useMatyrStore";
-import { useForm } from "@mantine/form";
 import { FiHome, FiMap } from "react-icons/fi"; // Add this import
 import SearchPopupModal from "./SearchPopupModal";
 import MartyrBriefInfo from "./MartyrBriefInfo";
 import { useLocation } from "react-router-dom";
-import { AppDrawer } from "../AppDrawer";
+import { useSearchMartyrStore } from "../../../store/useSearchMartyrStore";
 
 const MatyrSearch = ({
   onClearRoute,
   onRouteFromCurrentLocation,
   onSelectLocationOnMap,
+  closeDrawer,
   openedDrawer,
   openDrawer,
-  closeDrawer,
 }) => {
   const { history } = useLocation();
   const location = useLocation();
@@ -61,107 +60,33 @@ const MatyrSearch = ({
 
   const searchInputRef = useRef(null);
   const headerRef = useRef(null);
-  const [searchKey, setSearchKey] = useState("");
   const [opened, { open: openSearchPopup, close: closeSearchPopup }] =
     useDisclosure(false);
-  const [searchResults, setSearchResults] = useState(null);
-  const [showAutoSuggestions, setShowAutoSuggestions] = useState(false);
-  const [isLoadingSearchResults, setIsLoadingSearchResults] = useState(false);
-  const loadMartyrs = useMatyrStore((state) => state.loadMartyrs);
-  const clearMartrys = useMatyrStore((state) => state.clearMartrys);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [showRoutingOptions, setShowRoutingOptions] = useState(false);
-  const [showSearchResults, setShowSearchResults] = useState(false);
 
-  const handleSearch = async ({
-    name = "",
-    page = 0,
-    size = DEFAULT_SEARCH_SIZE,
-    filters = [],
-  }) => {
-    try {
-      setFilterQuery(filters);
-      setShowAutoSuggestions(false);
-      setIsLoadingSearchResults(true);
-      setSearchResults(null);
-
-      const results = await loadMartyrs(name, page, size, filters);
-      if (!results) {
-        setSearchResults(null);
-        throw new Error("No result found");
-      }
-      setSearchResults(results);
-      console.log("Kết quả tìm kiếm:", results);
-      setShowSearchResults(true);
-      setIsLoadingSearchResults(false);
-    } catch (error) {
-      console.error("Lỗi khi tìm kiếm:", error);
-      setSearchResults(null);
-      setShowSearchResults(false);
-      setIsLoadingSearchResults(false);
-    }
-  };
-
-  const { grave_rows } = useInfoStore();
-  const [filterQuery, setFilterQuery] = useState({});
-  const [
-    showFilterSetting,
-    { open: openFilterSetting, close: closeFilterSetting },
-  ] = useDisclosure(false);
+  const {
+    filters,
+    setFilters,
+    searchKey,
+    setSearchKey,
+    searchResults,
+    setSearchResults,
+    currentPage,
+    setCurrentPage,
+    setAutoSuggestions,
+    autoSuggestions,
+    filterQuery,
+    handleSearch,
+    showAutoSuggestions,
+    setShowAutoSuggestions,
+  } = useSearchMartyrStore();
 
   const [
     showMartyrDetail,
     { open: openMartyrDetail, close: closeMartyrDetail },
   ] = useDisclosure(false);
 
-  const [autoSuggestions, setAutoSuggestions] = useState([]);
-  const [isLoadingAutoSuggestions, setIsLoadingAutoSuggestions] =
-    useState(false);
-
-  const handleAutoSuggest = async (searchKey) => {
-    try {
-      setIsLoadingAutoSuggestions(true);
-      const results = await getMatyrs(searchKey, 0, DEFAULT_AUTO_SUGGEST_SIZE);
-      const content = results.content;
-      // If content is null
-      if (!content) {
-        setAutoSuggestions([]);
-        setShowAutoSuggestions(true);
-        // Throw error
-        throw new Error("No content found");
-      }
-      setShowAutoSuggestions(true);
-      setIsLoadingAutoSuggestions(false);
-      setAutoSuggestions(content);
-    } catch (error) {
-      console.error("Lỗi khi tìm kiếm:", error);
-      setAutoSuggestions([]);
-      setIsLoadingAutoSuggestions(false);
-    }
-  };
-
-  useEffect(() => {
-    if (searchKey.length > 0) {
-      handleAutoSuggest(searchKey);
-    } else {
-      setAutoSuggestions([]);
-    }
-  }, [searchKey]);
-
-  // Filters
-  const [filters, setFilters] = useState({
-    graveRow: {
-      areaName: "",
-      rowName: "",
-    },
-  });
-
   const [showReturnToSearch, setShowReturnToSearch] = useState(false);
   const { selectedMartyr, selectMartyr } = useMatyrStore();
-
-  const filterForm = useForm({
-    mode: "uncontrolled",
-  });
 
   const [offsetHeight, setOffsetHeight] = useState(0);
   useEffect(() => {
@@ -206,11 +131,10 @@ const MatyrSearch = ({
             size="xl"
             variant="filled"
             color="blue"
-            radius="md"
+            radius="xl"
             className="py-4"
             leftSection={<FiMap size={28} />}
             onClick={() => {
-              setShowRoutingOptions(false);
               closeRoutingHandlerPopup();
               onRouteFromCurrentLocation();
             }}
@@ -220,7 +144,7 @@ const MatyrSearch = ({
           <Button
             size="xl"
             variant="filled"
-            radius="md"
+            radius="xl"
             fullWidth
             className="py-4"
             color="gray"
@@ -228,7 +152,6 @@ const MatyrSearch = ({
             onClick={() => {
               closeRoutingHandlerPopup();
               onSelectLocationOnMap();
-              setShowRoutingOptions(false);
             }}
           >
             <span className="text-lg">Chọn vị trí khác</span>
@@ -247,7 +170,6 @@ const MatyrSearch = ({
           martyr={selectedMartyr}
           onRoute={() => {
             closeMartyrDetail();
-            setShowRoutingOptions(true);
             openRoutingHandlerPopup();
           }}
         />
@@ -269,6 +191,7 @@ const MatyrSearch = ({
               <div className="rounded-xl m-2 p-2">
                 <Button
                   size="lg"
+                  radius={"xl"}
                   onClick={() => {
                     selectMartyr(null);
                     clearMartyrIdFromUrl();
@@ -289,10 +212,8 @@ const MatyrSearch = ({
               <div className="w-full items-center flex gap-1 bg-white py-1">
                 <div className="flex items-center w-full text-gray-600   w-full p-1 gap-1">
                   {!opened ? (
-                    <div className="flex flex-col items-center justify-center">
+                    <div className="m-1 flex flex-col items-center justify-center">
                       <Burger
-                        lineSize={3}
-                        size="md"
                         opened={openedDrawer}
                         onClick={openDrawer}
                         aria-label="Toggle navigation"
@@ -319,7 +240,6 @@ const MatyrSearch = ({
                           setShowAutoSuggestions(false);
                           setSearchResults(null);
                           closeSearchPopup();
-                          close_record_modal();
                         }
                       }}
                     >
@@ -356,7 +276,7 @@ const MatyrSearch = ({
                     onChange={(e) => {
                       setSearchKey(e.target.value);
                     }}
-                    radius="lg"
+                    radius="xl"
                     style={{
                       border: "none",
                       outline: "none",
@@ -398,36 +318,22 @@ const MatyrSearch = ({
       {opened && (
         <SearchPopupModal
           offSetHeight={offsetHeight}
-          filters={filters}
-          autoSuggestions={autoSuggestions}
-          setFilters={setFilters}
-          grave_rows={grave_rows}
-          clearMartrys={clearMartrys}
-          setCurrentPage={setCurrentPage}
-          currentPage={currentPage}
-          handleSearch={handleSearch}
-          filterForm={filterForm}
-          setSearchKey={(value) => setSearchKey(value)}
-          isLoadingSearchResults={isLoadingSearchResults}
-          showFilterSetting={showFilterSetting}
-          closeFilterSetting={closeFilterSetting}
-          isLoadingAutoSuggestions={isLoadingAutoSuggestions}
-          showAutoSuggestions={showAutoSuggestions}
-          searchKey={searchKey}
-          setShowAutoSuggestions={setShowAutoSuggestions}
-          setAutoSuggestions={setAutoSuggestions}
-          openFilterSetting={openFilterSetting}
-          selectMartyr={selectMartyr}
-          openMartyrDetail={openMartyrDetail}
-          openSearchPopup={openSearchPopup}
-          closeSearchPopup={closeSearchPopup}
-          setFilterQuery={setFilterQuery}
-          filterQuery={filterQuery}
-          searchResults={searchResults}
+          filters={filters} // move to store
+          setFilters={setFilters} // move to store
+          setCurrentPage={setCurrentPage} // move to store
+          currentPage={currentPage} // move to store
+          handleSearch={handleSearch} // move to store
+          setSearchKey={setSearchKey} // move to store
+          showAutoSuggestions={showAutoSuggestions} // move to store
+          setShowAutoSuggestions={setShowAutoSuggestions} // move to store
+          searchKey={searchKey} // move to store
+          autoSuggestions={autoSuggestions} // move to store
+          setAutoSuggestions={setAutoSuggestions} // move to store
+          filterQuery={filterQuery} // move to store
+          searchResults={searchResults} // move to store
           onSelectMartyrHandler={(martyr) => {
             closeSearchPopup();
             selectMartyr(martyr);
-            // Update URL without page reload
             const newUrl = new URL(window.location);
             newUrl.searchParams.set("martyrId", martyr.id);
             window.history.pushState({}, "", newUrl);

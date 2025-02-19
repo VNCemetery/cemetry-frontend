@@ -26,7 +26,7 @@ import {
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import classes from "./AppHeader.module.css";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const mockdata = [
   {
@@ -85,44 +85,45 @@ export default function HeaderMegaMenu() {
     </UnstyledButton>
   ));
 
+  const pathname = useLocation().pathname;
   const navigate = useNavigate();
   return (
     <Box className="sticky top-0 w-full bg-white z-[9999]">
       <header className={classes.header}>
         <Group justify="space-between" h="100%">
+          <Burger
+            opened={drawerOpened}
+            onClick={toggleDrawer}
+            hiddenFrom="sm"
+          />{" "}
           <div
             className="p-2 transition-all ease-in-out duration-150 hover:cursor-pointer  hover:bg-gray-100 rounded-xl flex gap-2 items-center justify-center"
-            onClick={() => navigate("/")}
+            onClick={() => {
+              navigate("/");
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
           >
             <Avatar src={LOGO} alt="Logo" radius="xl" />
           </div>
           <Group h="100%" gap={4} visibleFrom="sm">
-            {[navigationItems[0], navigationItems[2]].map((item) => (
+            {navigationItems.map((item) => (
               <Button
                 key={item.href}
-                variant="default"
+                variant={pathname === item.href ? "filled" : "default"}
+                radius={"xl"}
+                rightSection={item.icon}
                 component="a"
-                href={item.href}
+                onClick={() => {
+                  navigate(item.href);
+                  // Smooth scroll to top
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
               >
                 {item.label}
               </Button>
             ))}
           </Group>
-          <Group visibleFrom="sm">
-            <Button
-              variant="filled"
-              component="a"
-              href="/map"
-              rightSection={<FiMap />}
-            >
-              Đi tới bản đồ
-            </Button>
-          </Group>
-          <Burger
-            opened={drawerOpened}
-            onClick={toggleDrawer}
-            hiddenFrom="sm"
-          />
+          <Group visibleFrom="sm"></Group>
         </Group>
       </header>
 

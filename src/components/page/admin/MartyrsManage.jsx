@@ -42,16 +42,24 @@ import { useInfoStore } from "../../../store/useInfoStore";
 import { HiCheck } from "react-icons/hi";
 import { flattenObject } from "../../../utils/objectUtil";
 import { buildFilterFormQuery } from "../../../utils/queryBuilder";
-import { DEFAULT_AUTO_SUGGEST_SIZE, DEFAULT_PAGE, DEFAULT_SEARCH_SIZE } from "../../../utils/constants";
+import {
+  DEFAULT_AUTO_SUGGEST_SIZE,
+  DEFAULT_PAGE,
+  DEFAULT_SEARCH_SIZE,
+} from "../../../utils/constants";
 import Loading from "../../ui/Loading";
-
 
 export default function MartyrsManage() {
   const navigate = useNavigate();
   const { grave_rows } = useInfoStore();
-  const { loadMartyrs, loading, error, totalPages, matyrs, deleteMartyrInStore } = useMatyrStore(
-    (state) => state
-  );
+  const {
+    loadMartyrs,
+    loading,
+    error,
+    totalPages,
+    matyrs,
+    deleteMartyrInStore,
+  } = useMatyrStore((state) => state);
   const martyrs = matyrs?.content || []; // Use store data directly
 
   const [search, setSearch] = useState("");
@@ -76,7 +84,8 @@ export default function MartyrsManage() {
     page = currentPage || 0,
     size = DEFAULT_SEARCH_SIZE,
     query_filters = []
-  ) => {   setIsUpdating(true);
+  ) => {
+    setIsUpdating(true);
     try {
       const response = await loadMartyrs(
         debouncedSearch,
@@ -86,8 +95,11 @@ export default function MartyrsManage() {
       );
 
       if (response?.content) {
-        if (!debouncedSearch && !Object.values(query_filters).some((val) => val)) {
-          setCurrentPage(page+1);
+        if (
+          !debouncedSearch &&
+          !Object.values(query_filters).some((val) => val)
+        ) {
+          setCurrentPage(page + 1);
         }
       } else {
         console.error("Invalid response format:", response);
@@ -129,9 +141,9 @@ export default function MartyrsManage() {
       setIsUpdating(true);
       try {
         await deleteMartyr(id);
-        
+
         const result = deleteMartyrInStore(id);
-        
+
         if (result.success) {
           if (result.needsReload) {
             // Load the previous page
@@ -165,7 +177,7 @@ export default function MartyrsManage() {
 
   const handleSaveSuccess = () => {
     close();
-    // loadData(currentPage);   
+    // loadData(currentPage);
   };
 
   const handleApplyFilters = () => {
@@ -335,16 +347,22 @@ export default function MartyrsManage() {
 
           <Grid.Col span={4}>
             <Group position="apart">
-              <Button variant="light" onClick={handleClearFilters}>
+              <Button
+                variant="light"
+                radius={"xl"}
+                onClick={handleClearFilters}
+              >
                 Xóa bộ lọc
               </Button>
-              <Button onClick={handleApplyFilters}>Áp dụng</Button>
+              <Button radius={"xl"} onClick={handleApplyFilters}>
+                Áp dụng
+              </Button>
             </Group>
           </Grid.Col>
         </Grid>
       </Flex>
       {loading || isUpdating ? (
-        <div style={{ position: 'relative', minHeight: '200px' }}>
+        <div style={{ position: "relative", minHeight: "200px" }}>
           <Loading />
         </div>
       ) : error ? (
@@ -512,12 +530,11 @@ export default function MartyrsManage() {
           {totalPages > 1 && (
             <Group justify="center" mt="xl">
               <Pagination
-                        value={currentPage == 0 ? 1 : currentPage}
+                value={currentPage == 0 ? 1 : currentPage}
                 onChange={(value) => {
-                  setCurrentPage(value)
-                  loadData(value-1)
-                }
-                }
+                  setCurrentPage(value);
+                  loadData(value - 1);
+                }}
                 total={totalPages}
               />
             </Group>
