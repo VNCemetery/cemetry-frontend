@@ -66,7 +66,7 @@ export default function MapViewPage({
 <svg class="navigation-arrow" viewBox="0 0 36 48" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient gradientUnits="userSpaceOnUse" x1="32" y1="0" x2="32" y2="49.836" id="gradient-0" gradientTransform="matrix(0.593665, 0, 0, 0.549534, -0.994057, -0.80968)">
-      <stop offset="0" style="stop-color: rgb(66, 133, 244); stop-opacity: 0.2;"></stop>
+      <stop offset="0" style="stop-color: rgb(66, 133, 244); stop-opacity:0.1;"></stop>
       <stop offset="1" style="stop-color: rgb(66, 133, 244); stop-opacity: 0.8;"></stop>
     </linearGradient>
   </defs>
@@ -231,7 +231,7 @@ export default function MapViewPage({
         {`
           .navigation-arrow {
             width: 32px;
-            scale: 1.98;
+            scale: 2;
             height: 48px;
             transform-origin: center;
             transition: transform 0.3s ease;

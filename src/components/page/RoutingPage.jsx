@@ -209,10 +209,11 @@ export default function RoutingPage() {
       type: "circle",
       source: "start-point",
       paint: {
-        "circle-radius": 8,
-        "circle-color": "#25b058", // Changed to green
-        "circle-stroke-width": 3,
-        "circle-stroke-color": "#4de373", // Changed to lighter green
+        "circle-radius": 8, // Increased size
+        "circle-color": "#2470ff", // Bright blue
+        "circle-stroke-width": 4, // Thicker border
+        "circle-stroke-color": "#FFFFFF", // Dark blue border for contrast
+        "circle-opacity": 1,
       },
     });
 
@@ -234,10 +235,11 @@ export default function RoutingPage() {
       type: "circle",
       source: "end-point",
       paint: {
-        "circle-radius": 8,
-        "circle-color": "#FF0000", // Changed to red
-        "circle-stroke-width": 3,
-        "circle-stroke-color": "#FF4444", // Changed to lighter red
+        "circle-radius": 8, // Increased size
+        "circle-color": "#08cc5d", // Bright blue
+        "circle-stroke-width": 4, // Thicker border
+        "circle-stroke-color": "#FFFFFF", // Dark blue border for contrast
+        "circle-opacity": 1,
       },
     });
   };
