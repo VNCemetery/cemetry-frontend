@@ -193,10 +193,11 @@ const MatyrSearch = ({
                   size="lg"
                   radius={"xl"}
                   onClick={() => {
+                    // onClearRoute();
                     selectMartyr(null);
                     clearMartyrIdFromUrl();
                     openSearchPopup();
-                    searchInputRef.current.focus();
+                    searchInputRef?.current?.focus();
                   }}
                   variant="filled"
                   leftSection={<BsArrowLeft size={24} />}
@@ -208,9 +209,20 @@ const MatyrSearch = ({
           )}
 
           {!showReturnToSearch && (
-            <div className="flex w-full items-center">
-              <div className="w-full items-center flex gap-1 bg-white py-1">
-                <div className="flex items-center w-full text-gray-600   w-full p-1 gap-1">
+            <div
+              className={`
+                w-full transition-all duration-300  
+                ${
+                  opened ? "md:w-full" : " md:w-1/3"
+                } flex rounded-xl bg-transparent items-center`}
+            >
+              <div
+                className="w-full m-1 items-center flex gap-1 bg-white py-1 px-1"
+                style={{
+                  borderRadius: "1.5rem",
+                }}
+              >
+                <div className="flex items-center w-full text-gray-600   w-full gap-1">
                   {!opened ? (
                     <div className="m-1 flex flex-col items-center justify-center">
                       <Burger

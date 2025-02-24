@@ -11,6 +11,7 @@ import { MdLocationOff } from "react-icons/md"; // Add this import
 import { notifications } from "@mantine/notifications";
 import { useDisclosure } from "@mantine/hooks";
 import { AppDrawer } from "../ui/AppDrawer";
+import { Marker, Popup } from "maplibre-gl";
 export default function RoutingPage() {
   const mapContainer = useRef(null);
   const map = useRef(null);
@@ -18,6 +19,7 @@ export default function RoutingPage() {
   const markerElementRef = useRef(null);
   const previousRotationRef = useRef(0);
   const totalRotationRef = useRef(0);
+  const popupRef = useRef(null);
 
   const mapInstance = useRef(null);
   const [isSelectingLocation, setIsSelectingLocation] = useState(false);
@@ -96,6 +98,9 @@ export default function RoutingPage() {
 
   const showRoute = (start, end, coordinates = [], data = null) => {
     // Define all route-related layers
+    if (popupRef.current) {
+      popupRef.current.remove();
+    }
 
     const routeLayers = ["route", "route-case", "route-start", "route-end"];
     if (data?.features[0].properties.pathId) {
@@ -272,6 +277,11 @@ export default function RoutingPage() {
   } = useMapStore((state) => state);
 
   const handleRouteFromCurrentLocation = async () => {
+    // Clear previous popup
+    if (popupRef.current) {
+      popupRef.current.remove();
+    }
+
     setShowLocationMarker(false);
     if (!mapInstance.current || !selectedMartyr) return;
 
@@ -298,6 +308,25 @@ export default function RoutingPage() {
         padding: 50,
         duration: 1000,
       });
+
+      // Add popup after showing route
+      popupRef.current = new Popup({
+        closeButton: false,
+        closeOnClick: false,
+        className: "custom-popup",
+      })
+        .setLngLat(end)
+        .setHTML(
+          `
+          <div style="padding: 10px; text-align: center;">
+            <strong style="font-size: 16px; color: #333;">Vị trí mộ của liệt sĩ</strong>
+            <p style="margin: 5px 0; color: #666;">${
+              selectedMartyr?.name || "Không có tên"
+            }</p>
+          </div>
+        `
+        )
+        .addTo(map.current);
     } catch (error) {
       if (error.response?.data?.code === 400) {
         setErrorMessage(
@@ -306,6 +335,113 @@ export default function RoutingPage() {
         setShowErrorModal(true);
       }
     }
+  };
+
+  const onClearRouteHandler = () => {
+    setShowLocationMarker(false);
+    setCurrentPath(null);
+    setShowFeedback(false);
+    // Clear route on mapInstance
+    // Clean up existing layers
+    ["route", "route-case", "route-start", "route-end"].forEach((layer) => {
+      if (map.current.getLayer(layer)) {
+        map.current.removeLayer(layer);
+      }
+    });
+
+    // Clean up existing sources
+    ["route", "start-point", "end-point"].forEach((source) => {
+      if (map.current.getSource(source)) {
+        map.current.removeSource(source);
+      }
+    });
+  };
+
+  const renderMarker = (coordinates) => {
+    onClearRouteHandler();
+    // Clear previous popup if exists
+    if (popupRef.current) {
+      popupRef.current.remove();
+    }
+
+    // Clear previous layers/sources
+    if (map.current.getLayer("route-end-t")) {
+      map.current.removeLayer("route-end-t");
+    }
+    if (map.current.getSource("end-point-t")) {
+      map.current.removeSource("end-point-t");
+    }
+
+    // Create and set popup
+    popupRef.current = new Popup({
+      closeButton: false,
+      closeOnClick: false,
+      className: "custom-popup",
+    })
+      .setLngLat(coordinates)
+      .setHTML(
+        `
+        <div style="
+        font-family: 'Manrope', sans-serif;
+        padding: 10px; text-align: center;">
+          <strong style="font-size: 16px; color: #333;">Vị trí mộ của liệt sĩ</strong>
+          <p style="margin: 5px 0; color: #666; font-weight: 900">LIỆT SĨ: ${
+            selectedMartyr?.fullName || "Không có tên"
+          }</p>
+        </div>
+      `
+      )
+      .addTo(map.current);
+
+    // Add end point marker source
+    map.current.addSource("end-point-t", {
+      type: "geojson",
+      data: {
+        type: "Feature",
+        properties: {},
+        geometry: {
+          type: "Point",
+          coordinates: coordinates,
+        },
+      },
+    });
+
+    // Add the main marker layer
+    map.current.addLayer({
+      id: "route-end-t",
+      type: "circle",
+      source: "end-point-t",
+      paint: {
+        "circle-radius": 8,
+        "circle-color": "#FF0000",
+        "circle-stroke-width": 4,
+        "circle-stroke-color": "#FFFFFF",
+        "circle-opacity": 1,
+      },
+    });
+
+    // Create blinking effect
+    let isVisible = true;
+    const blink = () => {
+      if (!map.current) return;
+
+      if (isVisible) {
+        map.current.setPaintProperty(
+          "route-end-t",
+          "circle-stroke-opacity",
+          0.9
+        );
+        map.current.setPaintProperty("route-end-t", "circle-opacity", 0.9);
+      } else {
+        map.current.setPaintProperty("route-end-t", "circle-opacity", 1);
+        map.current.setPaintProperty("route-end-t", "circle-stroke-opacity", 1);
+      }
+      isVisible = !isVisible;
+
+      setTimeout(blink, 900); // Blink every 500ms
+    };
+
+    blink();
   };
 
   const handleMapLoad = (map) => {
@@ -323,8 +459,46 @@ export default function RoutingPage() {
       }
     );
   }, []);
+  useEffect(() => {
+    return () => {
+      if (popupRef.current) {
+        popupRef.current.remove();
+      }
+    };
+  }, []);
   const [openedDrawer, { open: openDrawer, close: closeDrawer }] =
     useDisclosure(false);
+
+  const getMartyrGraveLocation = async () => {
+    // Get the root element of the marker
+    let ROOT_NODE = {
+      latitude: 10.461771589942,
+      longitude: 105.645034002399,
+    };
+    let graveRowId =
+      selectedMartyr.graveRow.id ||
+      findGraveRowIdByName(selectedMartyr.rowName, selectedMartyr.areaName);
+
+    let data = await findPath(ROOT_NODE, graveRowId);
+
+    let coordinates = data?.features[0].geometry.coordinates;
+    let end = coordinates[coordinates.length - 1];
+    renderMarker(end);
+  };
+
+  useEffect(() => {
+    map.current.on("load", () => {
+      if (selectedMartyr) {
+        getMartyrGraveLocation();
+      }
+    });
+  }, [map.current]);
+
+  useEffect(() => {
+    if (map.current && selectedMartyr) {
+      getMartyrGraveLocation();
+    }
+  }, [selectedMartyr]);
 
   return (
     <div className="h-full relative">
@@ -398,27 +572,7 @@ export default function RoutingPage() {
           openDrawer();
         }}
         openedDrawer={openedDrawer}
-        onClearRoute={() => {
-          setShowLocationMarker(false);
-          setCurrentPath(null);
-          setShowFeedback(false);
-          // Clear route on mapInstance
-          // Clean up existing layers
-          ["route", "route-case", "route-start", "route-end"].forEach(
-            (layer) => {
-              if (map.current.getLayer(layer)) {
-                map.current.removeLayer(layer);
-              }
-            }
-          );
-
-          // Clean up existing sources
-          ["route", "start-point", "end-point"].forEach((source) => {
-            if (map.current.getSource(source)) {
-              map.current.removeSource(source);
-            }
-          });
-        }}
+        onClearRoute={onClearRouteHandler}
         onRouteFromCurrentLocation={handleRouteFromCurrentLocation}
         onSelectLocationOnMap={handleStartLocationSelection}
       />
