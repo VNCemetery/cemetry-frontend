@@ -388,15 +388,20 @@ export default function RoutingPage() {
     }
 
     // Clear previous layers/sources
-    if (map.current.getLayer("route-end-t")) {
-      map.current.removeLayer("route-end-t");
-    }
-    if (map.current.getSource("end-point-t")) {
-      map.current.removeSource("end-point-t");
+    if (map.current) {
+      if (map.current.getLayer("route-end-t")) {
+        map.current.removeLayer("route-end-t");
+      }
+      if (map.current.getSource("end-point-t")) {
+        map.current.removeSource("end-point-t");
+      }
     }
   };
 
   const renderMarker = (coordinates) => {
+    // Keep track of the blinking interval
+    let blinkInterval;
+
     onClearRouteHandler();
     clearPopupMartyr();
 
@@ -448,25 +453,44 @@ export default function RoutingPage() {
     // Create blinking effect
     let isVisible = true;
     const blink = () => {
-      if (!map.current) return;
-
-      if (isVisible) {
-        map.current.setPaintProperty(
-          "route-end-t",
-          "circle-stroke-opacity",
-          0.9
-        );
-        map.current.setPaintProperty("route-end-t", "circle-opacity", 0.9);
-      } else {
-        map.current.setPaintProperty("route-end-t", "circle-opacity", 1);
-        map.current.setPaintProperty("route-end-t", "circle-stroke-opacity", 1);
+      if (!map.current || !map.current.getLayer("route-end-t")) {
+        // Clean up interval if layer no longer exists
+        clearInterval(blinkInterval);
+        return;
       }
-      isVisible = !isVisible;
 
-      setTimeout(blink, 900); // Blink every 500ms
+      try {
+        if (isVisible) {
+          map.current.setPaintProperty(
+            "route-end-t",
+            "circle-stroke-opacity",
+            0.9
+          );
+          map.current.setPaintProperty("route-end-t", "circle-opacity", 0.9);
+        } else {
+          map.current.setPaintProperty("route-end-t", "circle-opacity", 1);
+          map.current.setPaintProperty(
+            "route-end-t",
+            "circle-stroke-opacity",
+            1
+          );
+        }
+        isVisible = !isVisible;
+      } catch (error) {
+        // If there's an error, clean up the interval
+        clearInterval(blinkInterval);
+      }
     };
 
-    blink();
+    // Start blinking and store interval ID
+    blinkInterval = setInterval(blink, 900);
+
+    // Clean up on unmount
+    return () => {
+      if (blinkInterval) {
+        clearInterval(blinkInterval);
+      }
+    };
   };
 
   const handleMapLoad = (map) => {
