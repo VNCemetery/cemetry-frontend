@@ -25,7 +25,9 @@ export default function AppFooter() {
         className={classes.link}
         component="a"
         href={link.link}
-        onClick={(event) => event.preventDefault()}
+        onClick={(event) => {
+          window.open(link.link, "_blank");
+        }}
       >
         {link.label}
       </Text>
@@ -46,17 +48,14 @@ export default function AppFooter() {
           <img src={SUPPORT_LOGO} alt="Trường ĐH Sư Phjam Kỹ Thuật TP.HCM" />
           <Text
             size="sm"
+            // No break word
+
             ta="center"
             mt={24}
             c="dimmed"
             className={classes.description}
           >
-            <Anchor
-              href="https://www.facebook.com/dhspkt.hcmute"
-              target="_blank"
-            >
-              Trường ĐH Sư Phạm Kỹ Thuật TP.HCM
-            </Anchor>{" "}
+            Trường ĐH Sư Phạm Kỹ Thuật TP. HCM
           </Text>
         </div>
         <div className={classes.logo}>
@@ -68,9 +67,7 @@ export default function AppFooter() {
             c="dimmed"
             className={classes.description}
           >
-            <Anchor href="http://tinhdoandongthap.org.vn/" target="_blank">
-              Tỉnh Đồng Tháp
-            </Anchor>{" "}
+            Tỉnh Đồng Tháp
           </Text>
         </div>
         <div className={classes.groups}>{groups}</div>
