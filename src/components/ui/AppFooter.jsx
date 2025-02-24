@@ -47,7 +47,7 @@ export default function AppFooter() {
         <div className={classes.logo} style={{ marginBottom: "1rem" }}>
           <img
             src={SUPPORT_LOGO}
-            alt="Trường Đại Học Sư Phjam Kỹ Thuật TP.HCM"
+            alt="Trường Đại Học Sư Phạm Kỹ Thuật TP.HCM"
           />
           <Text
             size="sm"

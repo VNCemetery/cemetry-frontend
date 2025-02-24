@@ -1,7 +1,4 @@
-import { Carousel } from "@mantine/carousel";
 import CarouselImage from "../ui/CarouselImage";
-import MatyrSearch from "../ui/MatyrSearch";
-import BANNER from "../../assets/BANNER.png";
 
 import {
   Container,

@@ -1,7 +1,16 @@
-import { Button, Drawer, Flex, ScrollArea, Text } from "@mantine/core";
+import {
+  Button,
+  Drawer,
+  Flex,
+  Image,
+  ScrollArea,
+  Text,
+  CloseButton,
+} from "@mantine/core";
 import React from "react";
 import { FiHome, FiInfo, FiMap } from "react-icons/fi";
 import { useLocation, useNavigate } from "react-router-dom";
+import BANNER from "../../assets/BANNER.jpg";
 
 export const navigationItems = [
   { label: "Trang chủ", href: "/", icon: <FiHome /> },
@@ -15,15 +24,25 @@ export const AppDrawer = ({ opened, toggleDrawer, closeDrawer }) => {
   return (
     <Drawer
       opened={opened}
+      withCloseButton={false}
       onClose={closeDrawer}
       size={{ base: "100%", sm: 300 }}
-      padding="md"
+      padding="0"
       zIndex={1000000}
     >
-      <Text className="w-full text-center text-2xl font-extrabold">
-        NGHĨA TRANG LIỆT SĨ ĐỒNG THÁP
-      </Text>
-      <ScrollArea h="calc(100vh - 80px" mx="-md">
+      {/* Make a div w */}
+      <Image src={BANNER} />
+      <CloseButton
+        onClick={closeDrawer}
+        style={{
+          position: "absolute",
+          top: "10px",
+          right: "10px",
+          backgroundColor: "white",
+          borderRadius: "50%",
+        }}
+      />
+      <ScrollArea h="calc(100vh - 80px)" className="px-4 pt-8" mx="-md">
         <Flex className="w-full flex-col gap-2 p-4">
           {navigationItems.map((item) => (
             <Button
