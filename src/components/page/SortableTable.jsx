@@ -1,9 +1,7 @@
-import { useState } from "react";
-
+import { useState, useEffect } from "react";
 import {
   Center,
   Group,
-  keys,
   ScrollArea,
   Table,
   Text,
@@ -39,70 +37,40 @@ function Th({ children, reversed, sorted, onSort, sortable = true }) {
 }
 
 function filterData(data, search) {
+  if (!search || !data?.length) return data;
+
   const query = search.toLowerCase().trim();
   return data.filter((item) =>
-    keys(data[0]).some((key) =>
+    Object.keys(item).some((key) =>
       item[key]?.toString().toLowerCase().includes(query)
     )
   );
 }
 
-function sortData(data, payload, customSort) {
-  const { sortBy } = payload;
-
-  if (!sortBy) {
-    return filterData(data, payload.search);
-  }
-
-  return filterData(
-    [...data].sort((a, b) => {
-      if (customSort) {
-        return payload.reversed
-          ? customSort(b[sortBy], a[sortBy])
-          : customSort(a[sortBy], b[sortBy]);
-      }
-
-      if (payload.reversed) {
-        return b[sortBy].toString().localeCompare(a[sortBy].toString());
-      }
-
-      return a[sortBy].toString().localeCompare(b[sortBy].toString());
-    }),
-    payload.search
-  );
-}
-
-export default function SortableTable({ data, columns, customSort }) {
+export default function SortableTable({
+  data,
+  columns,
+  renderCell,
+  onSort,
+  sortConfig,
+}) {
   const [search, setSearch] = useState("");
-  const [sortedData, setSortedData] = useState(data);
-  const [sortBy, setSortBy] = useState(null);
-  const [reverseSortDirection, setReverseSortDirection] = useState(false);
+  const [filteredData, setFilteredData] = useState(data);
 
-  const setSorting = (field) => {
-    const reversed = field === sortBy ? !reverseSortDirection : false;
-    setReverseSortDirection(reversed);
-    setSortBy(field);
-    setSortedData(
-      sortData(data, { sortBy: field, reversed, search }, customSort)
-    );
-  };
+  useEffect(() => {
+    setFilteredData(filterData(data, search));
+  }, [data, search]);
 
   const handleSearchChange = (event) => {
-    const { value } = event.currentTarget;
-    setSearch(value);
-    setSortedData(
-      sortData(
-        data,
-        { sortBy, reversed: reverseSortDirection, search: value },
-        customSort
-      )
-    );
+    setSearch(event.currentTarget.value);
   };
 
-  const rows = sortedData.map((row, index) => (
+  const rows = filteredData.map((row, index) => (
     <Table.Tr key={index}>
       {columns.map((column) => (
-        <Table.Td key={column.key}>{row[column.key]}</Table.Td>
+        <Table.Td key={column.key}>
+          {renderCell ? renderCell(column.key, row) : row[column.key]}
+        </Table.Td>
       ))}
     </Table.Tr>
   ));
@@ -127,11 +95,9 @@ export default function SortableTable({ data, columns, customSort }) {
             {columns.map((column) => (
               <Th
                 key={column.key}
-                sorted={sortBy === column.key}
-                reversed={reverseSortDirection}
-                onSort={() =>
-                  column.sortable !== false && setSorting(column.key)
-                }
+                sorted={sortConfig?.key === column.key}
+                reversed={sortConfig?.direction === "desc"}
+                onSort={() => column.sortable !== false && onSort(column.key)}
                 sortable={column.sortable !== false}
               >
                 {column.label}

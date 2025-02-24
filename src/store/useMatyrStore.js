@@ -13,64 +13,77 @@ export const useMatyrStore = create((set, get) => ({
   updateMartyrInStore: (id, newMartyrData) => {
     const currentMatyrs = get().matyrs;
     if (!currentMatyrs || !currentMatyrs.content) return;
-    
+
     const updatedContent = currentMatyrs.content.map((martyr) => {
       if (martyr.id === id) {
         // Preserve the graveRow data from the original martyr
         return { ...martyr, ...newMartyrData };
       }
+
       return martyr;
     });
 
-    set({ 
-      matyrs: { 
+    set({
+      matyrs: {
         ...currentMatyrs,
-        content: updatedContent 
-      } 
+        content: updatedContent,
+      },
     });
   },
   deleteMartyrInStore: (id) => {
     const currentMatyrs = get().matyrs;
     if (!currentMatyrs || !currentMatyrs.content) return { success: false };
-    
+
     const currentContent = currentMatyrs.content;
     const isLastPage = currentMatyrs.number === currentMatyrs.totalPages - 1;
     const isLastItemOnPage = currentContent.length === 1;
-    
+
     // If this is the last item on the last page
     if (isLastPage && isLastItemOnPage) {
-      return { 
-        success: true, 
+      return {
+        success: true,
         needsReload: true,
-        previousPage: Math.max(0, currentMatyrs.number - 1)
+        previousPage: Math.max(0, currentMatyrs.number - 1),
       };
     }
-    
+
     // Normal deletion flow
-    const updatedContent = currentContent.filter(martyr => martyr.id !== id);
+    const updatedContent = currentContent.filter((martyr) => martyr.id !== id);
     const wasDeleted = updatedContent.length < currentContent.length;
-    
+
     if (wasDeleted) {
       const newTotalElements = currentMatyrs.totalElements - 1;
       const pageSize = currentMatyrs.size || 10;
       const newTotalPages = Math.max(1, Math.ceil(newTotalElements / pageSize));
-      
-      set({ 
-        matyrs: { 
+
+      set({
+        matyrs: {
           ...currentMatyrs,
           content: updatedContent,
           totalElements: newTotalElements,
-          totalPages: newTotalPages
+          totalPages: newTotalPages,
         },
-        totalPages: newTotalPages
+        totalPages: newTotalPages,
       });
     }
-    
+
     return { success: wasDeleted, needsReload: false };
   },
   loadMartyrs: async (name, page = 0, size, filters, sorts = []) => {
     try {
-      const response = await getMatyrs(name, page, size, filters, sorts);
+      // Ensure sorts are in the correct format
+      const formattedSorts = sorts.map((sort) => ({
+        key: sort.key,
+        direction: sort.direction,
+      }));
+
+      const response = await getMatyrs(
+        name,
+        page,
+        size,
+        filters,
+        formattedSorts
+      );
       set({
         matyrs: response,
         totalPages: response.totalPages,

@@ -18,7 +18,7 @@ import {
   Modal,
   Flex,
 } from "@mantine/core";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { notifications } from "@mantine/notifications";
 import { deleteMartyr } from "../../../services/martyrManagementService";
@@ -61,7 +61,6 @@ export default function MartyrsManage() {
     matyrs,
     deleteMartyrInStore,
   } = useMatyrStore((state) => state);
-  const martyrs = matyrs?.content || []; // Use store data directly
 
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(DEFAULT_PAGE);
@@ -80,11 +79,29 @@ export default function MartyrsManage() {
   const [selectedMartyr, setSelectedMartyr] = useState(null);
   const [opened, { open, close }] = useDisclosure(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
+
+  const handleSort = (key) => {
+    let direction =
+      sortConfig.key === key && sortConfig.direction === "ASC" ? "DESC" : "ASC";
+    setSortConfig({ key, direction });
+
+    // Load data with new sort parameters
+    const sorts = [
+      {
+        key,
+        direction,
+      },
+    ];
+
+    loadData(currentPage - 1, DEFAULT_SEARCH_SIZE, [], sorts);
+  };
 
   const loadData = async (
     page = currentPage || 0,
     size = DEFAULT_SEARCH_SIZE,
-    query_filters = []
+    query_filters = [],
+    sorts = []
   ) => {
     setIsUpdating(true);
     try {
@@ -92,7 +109,8 @@ export default function MartyrsManage() {
         debouncedSearch,
         page,
         pageSize || size,
-        query_filters
+        query_filters,
+        sorts // Pass sorts to loadMartyrs
       );
 
       if (response?.content) {
@@ -178,7 +196,6 @@ export default function MartyrsManage() {
 
   const handleSaveSuccess = () => {
     close();
-    // loadData(currentPage);
   };
 
   const handleApplyFilters = () => {
@@ -218,13 +235,99 @@ export default function MartyrsManage() {
     { key: "actions", label: "Thao tác", sortable: false },
   ];
 
+  const renderCell = (key, martyr) => {
+    switch (key) {
+      case "image":
+        return (
+          <div style={{ padding: "8px" }}>
+            {martyr.image ? (
+              <div style={{ position: "relative" }}>
+                <Image
+                  src={getImageUrl(martyr.image)}
+                  alt={martyr.fullName}
+                  width={60}
+                  height={60}
+                  radius="md"
+                  fit="cover"
+                  style={{ cursor: "pointer" }}
+                  onClick={() => {
+                    window.open(getImageUrl(martyr.image), "_blank");
+                  }}
+                />
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: "rgba(0,0,0,0.1)",
+                    opacity: 0,
+                    transition: "opacity 0.2s",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                  onMouseEnter={(e) => (e.target.style.opacity = 1)}
+                  onMouseLeave={(e) => (e.target.style.opacity = 0)}
+                >
+                  <FiEye size={20} color="white" />
+                </div>
+              </div>
+            ) : (
+              <Center w={60} h={60} bg="gray.1" style={{ borderRadius: "8px" }}>
+                <FiImage size={24} color="gray" />
+              </Center>
+            )}
+          </div>
+        );
+      case "status":
+        return martyr.hidden ? (
+          <Badge color="red">Đã ẩn</Badge>
+        ) : (
+          <Badge color="green">Hiển thị</Badge>
+        );
+      case "actions":
+        return (
+          <Menu shadow="md" width={200}>
+            <Menu.Target>
+              <ActionIcon variant="subtle" color="gray">
+                <FiMoreVertical size={16} />
+              </ActionIcon>
+            </Menu.Target>
+            <Menu.Dropdown>
+              <Menu.Item
+                leftSection={<FiEdit size={14} />}
+                onClick={() => handleEdit(martyr)}
+              >
+                Chỉnh sửa
+              </Menu.Item>
+              <Menu.Item
+                color="red"
+                leftSection={<FiTrash2 size={14} />}
+                onClick={() => handleDelete(martyr.id)}
+              >
+                Xóa
+              </Menu.Item>
+              <Menu.Item
+                leftSection={
+                  martyr.hidden ? <FiEye size={14} /> : <FiEyeOff size={14} />
+                }
+                onClick={() => handleVisibilityToggle(martyr)}
+              >
+                {martyr.hidden ? "Hiển thị" : "Ẩn"}
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
+        );
+      default:
+        return martyr[key];
+    }
+  };
+
   return (
     <>
-      <SortableTable
-        data={martyrs}
-        columns={tableColumns}
-        customSort={(a, b) => String(a).localeCompare(String(b))}
-      />
       <Modal
         opened={opened}
         onClose={close}
@@ -387,162 +490,13 @@ export default function MartyrsManage() {
         </Text>
       ) : (
         <>
-          <Table striped highlightOnHover withTableBorder>
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th style={{ width: 80 }}>Ảnh</Table.Th>
-                <Table.Th>Họ và tên</Table.Th>
-                <Table.Th>Bí danh</Table.Th>
-                <Table.Th>Năm sinh</Table.Th>
-                <Table.Th>Ngày hy sinh</Table.Th>
-                <Table.Th>Quê quán</Table.Th>
-                <Table.Th className="text-center">Hàng mộ</Table.Th>
-                <Table.Th>Trạng thái</Table.Th>
-                <Table.Th style={{ width: 80 }}>Thao tác</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {martyrs.map((martyr) => (
-                <Table.Tr key={martyr.id}>
-                  <Table.Td style={{ padding: "8px" }}>
-                    {martyr.image ? (
-                      <div style={{ position: "relative" }}>
-                        <Image
-                          src={getImageUrl(martyr.image)}
-                          alt={martyr.fullName}
-                          width={60}
-                          height={60}
-                          radius="md"
-                          fit="cover"
-                          style={{ cursor: "pointer" }}
-                          onClick={() => {
-                            window.open(getImageUrl(martyr.image), "_blank");
-                          }}
-                        />
-                        <div
-                          style={{
-                            position: "absolute",
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            background: "rgba(0,0,0,0.1)",
-                            opacity: 0,
-                            transition: "opacity 0.2s",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                          }}
-                          onMouseEnter={(e) => (e.target.style.opacity = 1)}
-                          onMouseLeave={(e) => (e.target.style.opacity = 0)}
-                        >
-                          <FiEye size={20} color="white" />
-                        </div>
-                      </div>
-                    ) : (
-                      <Center
-                        w={60}
-                        h={60}
-                        bg="gray.1"
-                        style={{ borderRadius: "8px" }}
-                      >
-                        <FiImage size={24} color="gray" />
-                      </Center>
-                    )}
-                  </Table.Td>
-                  <Table.Td>
-                    <Group>
-                      <Text size="sm" fw={500}>
-                        {martyr.fullName}
-                      </Text>
-                    </Group>
-                  </Table.Td>
-                  <Table.Td>{martyr.codeName}</Table.Td>
-                  <Table.Td>{martyr.yearOfBirth}</Table.Td>
-                  <Table.Td>{martyr.dateOfDeath || ""}</Table.Td>
-                  <Table.Td>
-                    {(() => {
-                      const location = [];
-                      if (martyr.homeTown) location.push(martyr.homeTown);
-                      if (martyr.commune) location.push(martyr.commune);
-                      if (martyr.district) location.push(martyr.district);
-
-                      return location.length > 0 ? (
-                        location.join(" - ")
-                      ) : (
-                        <Text c="dimmed" fs="italic">
-                          Chưa cập nhật
-                        </Text>
-                      );
-                    })()}
-                  </Table.Td>
-                  <Table.Td>
-                    <Group>
-                      {martyr && martyr.rowName && martyr.areaName && (
-                        <>
-                          <Badge color="blue">{martyr.rowName}</Badge>
-                          <Badge color="blue">{martyr.areaName}</Badge>
-                        </>
-                      )}
-                    </Group>
-                  </Table.Td>
-                  <Table.Td>
-                    {martyr.hidden ? (
-                      <Badge color="red">Đã ẩn</Badge>
-                    ) : (
-                      <Badge color="green">Hiển thị</Badge>
-                    )}
-                  </Table.Td>
-                  <Table.Td>
-                    <Menu shadow="md" width={200}>
-                      <Menu.Target>
-                        <ActionIcon variant="subtle" color="gray">
-                          <FiMoreVertical size={16} />
-                        </ActionIcon>
-                      </Menu.Target>
-
-                      <Menu.Dropdown>
-                        <Menu.Item
-                          leftSection={<FiEdit size={14} />}
-                          onClick={() => handleEdit(martyr)}
-                        >
-                          Chỉnh sửa
-                        </Menu.Item>
-                        <Menu.Item
-                          color="red"
-                          leftSection={<FiTrash2 size={14} />}
-                          onClick={() => handleDelete(martyr.id)}
-                        >
-                          Xóa
-                        </Menu.Item>
-                        <Menu.Item
-                          leftSection={
-                            martyr.hidden ? (
-                              <FiEye size={14} />
-                            ) : (
-                              <FiEyeOff size={14} />
-                            )
-                          }
-                          onClick={() => {
-                            setMartyrs(
-                              martyrs.map((m) =>
-                                m.id === martyr.id
-                                  ? { ...m, hidden: !m.hidden }
-                                  : m
-                              )
-                            );
-                          }}
-                        >
-                          {martyr.hidden ? "Hiển thị" : "Ẩn"}
-                        </Menu.Item>
-                      </Menu.Dropdown>
-                    </Menu>
-                  </Table.Td>
-                </Table.Tr>
-              ))}
-            </Table.Tbody>
-          </Table>
+          <SortableTable
+            data={matyrs?.content || []} // Use direct API response instead of sortedData
+            columns={tableColumns}
+            onSort={handleSort}
+            sortConfig={sortConfig}
+            renderCell={renderCell}
+          />
           {totalPages > 1 && (
             <Group justify="center" mt="xl">
               <Pagination

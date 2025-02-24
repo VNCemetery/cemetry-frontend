@@ -24,10 +24,10 @@ export default function SearchResultEntry({ item, selectItem }) {
 
         <Flex gap={2}>
           <Badge size="xl" radius="lg">
-            Hàng mộ: {item.graveRow.rowName}
+            Hàng: {item.graveRow.rowName}
           </Badge>
           <Badge size="xl" radius="lg">
-            Khu mộ: {item.graveRow.areaName}
+            Khu: {item.graveRow.areaName}
           </Badge>
         </Flex>
       </Flex>
