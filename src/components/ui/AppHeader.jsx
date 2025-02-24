@@ -19,6 +19,7 @@ import {
   Flex,
   Group,
   HoverCard,
+  Image,
   Input,
   ScrollArea,
   SimpleGrid,
@@ -248,7 +249,7 @@ export default function HeaderMegaMenu() {
                   window.scrollTo({ top: 0, behavior: "smooth" });
                 }}
               >
-                <Avatar src={LOGO} alt="Logo" />
+                <Image src={LOGO} alt="LOGO" />
               </Group>
               <Flex
                 visibleFrom="md"
