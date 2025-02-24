@@ -96,7 +96,7 @@ export default function SortableTable({
               <Th
                 key={column.key}
                 sorted={sortConfig?.key === column.key}
-                reversed={sortConfig?.direction === "desc"}
+                reversed={sortConfig?.direction === "DESC"}
                 onSort={() => column.sortable !== false && onSort(column.key)}
                 sortable={column.sortable !== false}
               >
