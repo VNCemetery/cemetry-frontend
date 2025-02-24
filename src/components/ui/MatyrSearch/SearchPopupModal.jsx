@@ -443,17 +443,36 @@ const SearchPopupModal = ({
       {/* Empty state when no suggestions or results */}
       {!(showAutoSuggestions || searchResults) && !isLoadingSearchResults && (
         <div className="flex h-full flex-col items-center justify-center text-center">
-          <Button
-            onClick={() => {
-              openFilterSetting();
-            }}
-            size="xl"
-            radius="xl"
-            leftSection={<HiAdjustments size={20} />}
-            className="shadow-md"
-          >
-            Chọn khu vực tìm kiếm
-          </Button>
+          <div className="flex flex-col gap-2">
+            <Button
+              onClick={() => {
+                openFilterSetting();
+              }}
+              size="xl"
+              radius="xl"
+              leftSection={<HiAdjustments size={20} />}
+              className="shadow-md"
+            >
+              Chọn khu vực tìm kiếm
+            </Button>
+            <Button
+              color="green"
+              radius={"xl"}
+              size="xl"
+              onClick={() => {
+                setAutoSuggestions([]);
+                setSearchKey("");
+                setShowAutoSuggestions(false);
+                handleSearch({
+                  name: "",
+                  page: 0,
+                  size: DEFAULT_SEARCH_SIZE,
+                });
+              }}
+            >
+              Hiển thị toàn bộ danh sách
+            </Button>
+          </div>
           <BiSearch size={64} className="text-blue-500 my-8" />
 
           <Text className="text-xl mb-2 font-medium">

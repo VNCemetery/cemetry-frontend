@@ -20,6 +20,10 @@ export default function RoutingPage() {
   const previousRotationRef = useRef(0);
   const totalRotationRef = useRef(0);
   const popupRef = useRef(null);
+  let ROOT_NODE = {
+    latitude: 10.461784428052027,
+    longitude: 105.64503962080443,
+  };
 
   const mapInstance = useRef(null);
   const [isSelectingLocation, setIsSelectingLocation] = useState(false);
@@ -276,24 +280,21 @@ export default function RoutingPage() {
     setCurrentPosition: setCurrentLocation,
   } = useMapStore((state) => state);
 
-  const handleRouteFromCurrentLocation = async () => {
-    // Clear previous popup
+  const handleRoute = async (start, currentCoordinates) => {
     if (popupRef.current) {
       popupRef.current.remove();
     }
-
     setShowLocationMarker(false);
     if (!mapInstance.current || !selectedMartyr) return;
 
     try {
       // Get current position
 
-      const start = [currentLocation.longitude, currentLocation.latitude];
       let graveRowId =
         selectedMartyr.graveRow.id ||
         findGraveRowIdByName(selectedMartyr.rowName, selectedMartyr.areaName);
 
-      let data = await findPath(currentLocation, graveRowId);
+      let data = await findPath(currentCoordinates, graveRowId);
 
       let coordinates = data?.features[0].geometry.coordinates;
       let end = coordinates[coordinates.length - 1];
@@ -335,6 +336,16 @@ export default function RoutingPage() {
         setShowErrorModal(true);
       }
     }
+  };
+
+  const handleRouteFromCurrentLocation = async () => {
+    const start = [currentLocation.longitude, currentLocation.latitude];
+    handleRoute(start, currentLocation);
+  };
+
+  const handleRouteFromGate = async () => {
+    let start = [ROOT_NODE.longitude, ROOT_NODE.latitude];
+    handleRoute(start, ROOT_NODE);
   };
 
   const onClearRouteHandler = () => {
@@ -471,10 +482,7 @@ export default function RoutingPage() {
 
   const getMartyrGraveLocation = async () => {
     // Get the root element of the marker
-    let ROOT_NODE = {
-      latitude: 10.461771589942,
-      longitude: 105.645034002399,
-    };
+
     let graveRowId =
       selectedMartyr.graveRow.id ||
       findGraveRowIdByName(selectedMartyr.rowName, selectedMartyr.areaName);
@@ -574,6 +582,7 @@ export default function RoutingPage() {
         openedDrawer={openedDrawer}
         onClearRoute={onClearRouteHandler}
         onRouteFromCurrentLocation={handleRouteFromCurrentLocation}
+        onRouteFromGate={handleRouteFromGate}
         onSelectLocationOnMap={handleStartLocationSelection}
       />
 

@@ -32,10 +32,12 @@ import SearchPopupModal from "./SearchPopupModal";
 import MartyrBriefInfo from "./MartyrBriefInfo";
 import { useLocation } from "react-router-dom";
 import { useSearchMartyrStore } from "../../../store/useSearchMartyrStore";
+import { GiGate } from "react-icons/gi";
 
 const MatyrSearch = ({
   onClearRoute,
   onRouteFromCurrentLocation,
+  onRouteFromGate,
   onSelectLocationOnMap,
   closeDrawer,
   openedDrawer,
@@ -126,6 +128,21 @@ const MatyrSearch = ({
           <Text size="xl" className="font-extrabold text-2xl text-center">
             VỊ TRÍ XUẤT PHÁT
           </Text>
+          <Button
+            size="xl"
+            variant="filled"
+            radius="xl"
+            fullWidth
+            className="py-4"
+            color="green"
+            leftSection={<GiGate size={28} />}
+            onClick={() => {
+              closeRoutingHandlerPopup();
+              onRouteFromGate();
+            }}
+          >
+            <span className="text-lg">Đi từ cổng chính</span>
+          </Button>
           <Button
             fullWidth
             size="xl"
