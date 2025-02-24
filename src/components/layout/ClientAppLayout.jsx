@@ -2,6 +2,8 @@ import AppHeader from "../ui/AppHeader";
 import AppFooter from "../ui/AppFooter";
 import { Outlet, useLocation } from "react-router";
 import { useState } from "react";
+import BANNER from "../../assets/BANNER.png";
+import { Image } from "@mantine/core";
 
 function ClientAppLayout() {
   const { pathname } = useLocation();
@@ -9,6 +11,8 @@ function ClientAppLayout() {
 
   return (
     <>
+      <Image src={BANNER} about="banner" />
+
       <AppHeader />
       <Outlet />
       <AppFooter />

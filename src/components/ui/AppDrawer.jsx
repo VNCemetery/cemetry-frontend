@@ -5,7 +5,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 export const navigationItems = [
   { label: "Trang chủ", href: "/", icon: <FiHome /> },
-  { label: "Bản đồ", href: "/map", icon: <FiMap /> },
+  { label: "Bản đồ chỉ dẫn phần mộ", href: "/map", icon: <FiMap /> },
   { label: "Liên hệ", href: "/contact", icon: <FiInfo /> },
 ];
 

@@ -242,14 +242,14 @@ export default function HeaderMegaMenu() {
                 hiddenFrom="md"
               />
               <Group
-                className="transition-all ease-in-out cursor-pointer  hover:bg-gray-100 p-1 rounded-xl "
+                className="w-12 transition-all ease-in-out cursor-pointer  hover:bg-gray-100 p-1 rounded-xl "
                 visibleFrom="md" // className="p-2 transition-all ease-in-out duration-150 hover:cursor-pointer  hover:bg-gray-100 rounded-xl flex gap-2 items-center justify-center"
                 onClick={() => {
                   navigate("/");
                   window.scrollTo({ top: 0, behavior: "smooth" });
                 }}
               >
-                <Image src={LOGO} alt="LOGO" />
+                <Image src={LOGO} className="h-full w-full" alt="LOGO" />
               </Group>
               <Flex
                 visibleFrom="md"
