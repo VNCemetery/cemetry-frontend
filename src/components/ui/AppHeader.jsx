@@ -231,13 +231,14 @@ export default function HeaderMegaMenu() {
         <header className={classes.header}>
           <div className="flex items-center h-full gap-4 justify-between w-full ">
             {/* LEFT GROUP */}
-            <div className="flex gap-4">
+            <div className="flex gap-4 ">
               <Burger
                 opened={drawerOpened}
                 onClick={toggleDrawer}
                 hiddenFrom="md"
               />
               <Group
+                className="transition-all ease-in-out cursor-pointer  hover:bg-gray-100 p-1 rounded-xl "
                 visibleFrom="md" // className="p-2 transition-all ease-in-out duration-150 hover:cursor-pointer  hover:bg-gray-100 rounded-xl flex gap-2 items-center justify-center"
                 onClick={() => {
                   navigate("/");

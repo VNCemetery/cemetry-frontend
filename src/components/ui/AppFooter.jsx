@@ -1,5 +1,6 @@
-import { ActionIcon, Container, Group, Text } from "@mantine/core";
+import { ActionIcon, Anchor, Container, Group, Text } from "@mantine/core";
 import SUPPORT_LOGO from "../../assets/SUPPORT_LOGO.png";
+import DONG_THAP_LOGO from "../../assets/DONG_THAP_LOGO.png";
 
 import classes from "./AppFooter.module.css";
 import { FiFacebook, FiTwitch, FiYoutube } from "react-icons/fi";
@@ -41,28 +42,50 @@ export default function AppFooter() {
   return (
     <footer className={classes.footer}>
       <Container className={classes.inner}>
+        <div className={classes.logo} style={{ marginBottom: "1rem" }}>
+          <img src={SUPPORT_LOGO} alt="Trường ĐH Sư Phjam Kỹ Thuật TP.HCM" />
+          <Text
+            size="sm"
+            // No break word
+
+            ta="center"
+            mt={24}
+            c="dimmed"
+            className={classes.description}
+          >
+            Trường ĐH Sư Phạm Kỹ Thuật TP. HCM
+          </Text>
+        </div>
         <div className={classes.logo}>
-          <img src={SUPPORT_LOGO} alt="Mantine logo" />
-          <Text size="md" mt={24} c="dimmed" className={classes.description}>
-            Công trình thanh niên
+          <img src={DONG_THAP_LOGO} alt="Tỉnh Đoàn Đồng Tháp" />
+          <Text
+            size="md"
+            ta="center"
+            mt={24}
+            c="dimmed"
+            className={classes.description}
+          >
+            Tỉnh Đồng Tháp
           </Text>
         </div>
         <div className={classes.groups}>{groups}</div>
       </Container>
       <Container className={classes.afterFooter}>
-        <Text c="dimmed" size="sm">
-          @ 2025 Bản quyền thuộc về Đoàn Trường Đại Học Sư Phạm Kỹ Thuật TP.HCM
-        </Text>
-
-        <Group
-          gap={0}
-          className={classes.social}
-          justify="flex-end"
-          wrap="nowrap"
-        >
-          <ActionIcon size="lg" color="gray" variant="subtle">
-            <FaFacebook size={18} stroke={1.5} />
-          </ActionIcon>
+        <Group className="w-full text-center flex items-center justify-center">
+          <Text ta="center" c="dimmed" size="sm">
+            Công trình thanh niên phối hợp giữa Đoàn trường, Hội Sinh viên
+            Trường ĐH Sư Phạm Kỹ Thuật TP.HCM & <br />
+            Tỉnh đoàn, Hội LHTN Việt Nam tỉnh Đồng Tháp
+          </Text>
+          <Text ta="center" c="dimmed" size="sm">
+            © 2025 Bản quyền thuộc về <a></a>
+            <Anchor
+              href="https://www.facebook.com/dhspkt.hcmute"
+              target="_blank"
+            >
+              Trường ĐH Sư Phạm Kỹ Thuật TP.HCM
+            </Anchor>{" "}
+          </Text>
         </Group>
       </Container>
     </footer>

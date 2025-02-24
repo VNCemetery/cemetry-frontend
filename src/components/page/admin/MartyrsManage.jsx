@@ -1,3 +1,4 @@
+import SortableTable from "../SortableTable";
 import {
   Title,
   Group,
@@ -205,8 +206,25 @@ export default function MartyrsManage() {
     loadData(1, filters_query);
   };
 
+  const tableColumns = [
+    { key: "image", label: "Ảnh", sortable: false },
+    { key: "fullName", label: "Họ và tên" },
+    { key: "codeName", label: "Bí danh" },
+    { key: "yearOfBirth", label: "Năm sinh" },
+    { key: "dateOfDeath", label: "Ngày hy sinh" },
+    { key: "homeTown", label: "Quê quán" },
+    { key: "rowName", label: "Hàng mộ" },
+    { key: "status", label: "Trạng thái", sortable: false },
+    { key: "actions", label: "Thao tác", sortable: false },
+  ];
+
   return (
     <>
+      <SortableTable
+        data={martyrs}
+        columns={tableColumns}
+        customSort={(a, b) => String(a).localeCompare(String(b))}
+      />
       <Modal
         opened={opened}
         onClose={close}
@@ -221,7 +239,6 @@ export default function MartyrsManage() {
           onCancel={close}
         />
       </Modal>
-
       <Group justify="space-between" mb="lg">
         <Title order={2}>Quản lý liệt sĩ</Title>
         <Button
@@ -231,7 +248,6 @@ export default function MartyrsManage() {
           Thêm liệt sĩ
         </Button>
       </Group>
-
       <Grid mb="md">
         <Grid.Col span={12}>
           <TextInput
