@@ -115,6 +115,7 @@ const SearchPopupModal = ({
         <form
           onSubmit={filterForm.onSubmit((values) => {
             let flattenFilters = flattenObject(filters);
+            setSearchKey(searchKey.replace(/\s+/g, " "));
             const queryData = {
               ...values,
               ...flattenFilters,
@@ -288,6 +289,8 @@ const SearchPopupModal = ({
                 setAutoSuggestions([]);
                 setShowAutoSuggestions(false);
                 setCurrentPage(0);
+                // Update searchKey to makesure it will only one space between words
+                setSearchKey(searchKey.replace(/\s+/g, " "));
                 handleSearch({
                   ...filterQuery,
                   name: searchKey,

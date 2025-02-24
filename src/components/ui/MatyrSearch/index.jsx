@@ -293,6 +293,7 @@ const MatyrSearch = ({
                         setCurrentPage(0);
                         setAutoSuggestions([]);
                         setShowAutoSuggestions(false);
+                        setSearchKey(searchKey.replace(/\s+/g, " "));
                         handleSearch({
                           name: e.target.value,
                           page: 0,

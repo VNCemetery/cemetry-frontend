@@ -34,6 +34,7 @@ import { useSearchMartyrStore } from "../../store/useSearchMartyrStore";
 import { useEffect, useRef, useState } from "react";
 import { BsArrowLeft } from "react-icons/bs";
 import SearchPopupModal from "./MatyrSearch/SearchPopupModal";
+import { DEFAULT_SEARCH_SIZE } from "../../utils/constants";
 
 const mockdata = [
   {
@@ -166,6 +167,8 @@ export default function HeaderMegaMenu() {
                           setCurrentPage(0);
                           setAutoSuggestions([]);
                           setShowAutoSuggestions(false);
+                          setSearchKey(searchKey.replace(/\s+/g, " "));
+
                           handleSearch({
                             name: e.target.value,
                             page: 0,
