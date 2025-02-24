@@ -368,8 +368,7 @@ export default function RoutingPage() {
     });
   };
 
-  const renderMarker = (coordinates) => {
-    onClearRouteHandler();
+  const clearPopupMartyr = () => {
     // Clear previous popup if exists
     if (popupRef.current) {
       popupRef.current.remove();
@@ -382,6 +381,11 @@ export default function RoutingPage() {
     if (map.current.getSource("end-point-t")) {
       map.current.removeSource("end-point-t");
     }
+  };
+
+  const renderMarker = (coordinates) => {
+    onClearRouteHandler();
+    clearPopupMartyr();
 
     // Create and set popup
     popupRef.current = new Popup({
@@ -576,6 +580,7 @@ export default function RoutingPage() {
       </Modal>
 
       <MatyrSearch
+        clearPopupMartyr={clearPopupMartyr}
         openDrawer={() => {
           openDrawer();
         }}

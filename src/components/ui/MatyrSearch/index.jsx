@@ -36,6 +36,7 @@ import { GiGate } from "react-icons/gi";
 
 const MatyrSearch = ({
   onClearRoute,
+  clearPopupMartyr,
   onRouteFromCurrentLocation,
   onRouteFromGate,
   onSelectLocationOnMap,
@@ -214,6 +215,8 @@ const MatyrSearch = ({
                     selectMartyr(null);
                     clearMartyrIdFromUrl();
                     openSearchPopup();
+
+                    clearPopupMartyr();
                     searchInputRef?.current?.focus();
                   }}
                   variant="filled"

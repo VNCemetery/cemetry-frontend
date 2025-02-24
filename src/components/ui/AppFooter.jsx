@@ -45,26 +45,29 @@ export default function AppFooter() {
     <footer className={classes.footer}>
       <Container className={classes.inner}>
         <div className={classes.logo} style={{ marginBottom: "1rem" }}>
-          <img src={SUPPORT_LOGO} alt="Trường ĐH Sư Phjam Kỹ Thuật TP.HCM" />
+          <img
+            src={SUPPORT_LOGO}
+            alt="Trường Đại Học Sư Phjam Kỹ Thuật TP.HCM"
+          />
           <Text
             size="sm"
             // No break word
 
             ta="center"
-            mt={24}
-            c="dimmed"
+            mt={10}
+            c="black"
             className={classes.description}
           >
-            Trường ĐH Sư Phạm Kỹ Thuật TP. HCM
+            Trường Đại Học Sư Phạm Kỹ Thuật TP. HCM
           </Text>
         </div>
         <div className={classes.logo}>
           <img src={DONG_THAP_LOGO} alt="Tỉnh Đoàn Đồng Tháp" />
           <Text
-            size="md"
+            size="sm"
             ta="center"
-            mt={24}
-            c="dimmed"
+            mt={10}
+            c="black"
             className={classes.description}
           >
             Tỉnh Đồng Tháp
@@ -75,17 +78,14 @@ export default function AppFooter() {
       <Container className={classes.afterFooter}>
         <Group className="w-full text-center flex items-center justify-center">
           <Text ta="center" c="dimmed" size="sm">
-            Công trình thanh niên phối hợp giữa Đoàn trường, Hội Sinh viên
-            Trường ĐH Sư Phạm Kỹ Thuật TP.HCM & <br />
+            Công trình thanh niên phối hợp giữa Đoàn Trường Đại Học Sư Phạm Kỹ
+            Thuật TP.HCM & <br />
             Tỉnh đoàn, Hội LHTN Việt Nam tỉnh Đồng Tháp
           </Text>
           <Text ta="center" c="dimmed" size="sm">
             © 2025 Bản quyền thuộc về <a></a>
-            <Anchor
-              href="https://www.facebook.com/dhspkt.hcmute"
-              target="_blank"
-            >
-              Trường ĐH Sư Phạm Kỹ Thuật TP.HCM
+            <Anchor href="https://tuoitre.hcmute.edu.vn" target="_blank">
+              Đoàn Trường Đại Học Sư Phạm Kỹ Thuật TP.HCM
             </Anchor>{" "}
           </Text>
         </Group>
