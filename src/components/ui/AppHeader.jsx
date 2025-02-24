@@ -1,6 +1,4 @@
-import { VscBook, VscCode } from "react-icons/vsc";
-import { BiCoin, BiChevronDown, BiPieChartAlt, BiSearch } from "react-icons/bi";
-import { FiBarChart, FiBell, FiHome, FiInfo, FiMap } from "react-icons/fi";
+import { BiSearch } from "react-icons/bi";
 
 import { AppDrawer, navigationItems } from "./AppDrawer";
 import LOGO from "../../assets/LOGO.png";
@@ -13,19 +11,10 @@ import {
   Button,
   Center,
   CloseIcon,
-  Collapse,
-  Divider,
-  Drawer,
   Flex,
   Group,
-  HoverCard,
   Image,
   Input,
-  ScrollArea,
-  SimpleGrid,
-  Text,
-  ThemeIcon,
-  UnstyledButton,
   useMantineTheme,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
@@ -36,39 +25,6 @@ import { useEffect, useRef, useState } from "react";
 import { BsArrowLeft } from "react-icons/bs";
 import SearchPopupModal from "./MatyrSearch/SearchPopupModal";
 import { DEFAULT_SEARCH_SIZE } from "../../utils/constants";
-
-const mockdata = [
-  {
-    icon: VscCode,
-    title: "Open source",
-    description: "This Pokémon’s cry is very loud and distracting",
-  },
-  {
-    icon: BiCoin,
-    title: "Free for everyone",
-    description: "The fluid of Smeargle’s tail secretions changes",
-  },
-  {
-    icon: VscBook,
-    title: "Documentation",
-    description: "Yanma is capable of seeing 360 degrees without",
-  },
-  {
-    icon: FiBarChart,
-    title: "Security",
-    description: "The shell’s rounded shape and the grooves on its.",
-  },
-  {
-    icon: BiPieChartAlt,
-    title: "Analytics",
-    description: "This Pokémon uses its flying ability to quickly chase",
-  },
-  {
-    icon: FiBell,
-    title: "Notifications",
-    description: "Combusken battles with the intensely hot flames it spews",
-  },
-];
 
 export default function HeaderMegaMenu() {
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] =
@@ -190,7 +146,7 @@ export default function HeaderMegaMenu() {
                       }}
                       size="md"
                       className="w-full  border-none text-[2rem]"
-                      placeholder="Nhập tên liệt sĩ"
+                      placeholder="Tìm kiếm liệt sĩ"
                       rightSection={
                         <CloseIcon
                           aria-label="Clear input"

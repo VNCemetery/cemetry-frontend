@@ -7,7 +7,6 @@ import {
   ActionIcon,
   CloseIcon,
   Input,
-  Loader,
   Modal,
   Button,
   Text,
@@ -336,6 +335,13 @@ const MatyrSearch = ({
           )}
         </div>
       </div>
+      <Button
+        className="absolute bottom-0 right-0 z-[1]"
+        size="md"
+        variant="filled"
+      >
+        Click me
+      </Button>
       <MartyrBriefInfo
         closeBrief={() => {
           selectMartyr(null);

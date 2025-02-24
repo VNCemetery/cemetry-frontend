@@ -98,9 +98,22 @@ export default function RoutingPage() {
     setShowLocationMarker(false);
   };
 
+  const flyToMartyr = () => {
+    const lng = 105.645323;
+    const lat = 10.461975;
+    if (map.current) {
+      map.current.flyTo({
+        center: [lng, lat],
+        zoom: 17.3,
+        duration: 1000, // Animation duration in milliseconds
+      });
+    }
+  };
+
   const [currentPath, setCurrentPath] = useState(null);
 
   const showRoute = (start, end, coordinates = [], data = null) => {
+    flyToMartyr();
     // Define all route-related layers
     if (popupRef.current) {
       popupRef.current.remove();
@@ -395,16 +408,13 @@ export default function RoutingPage() {
     })
       .setLngLat(coordinates)
       .setHTML(
-        `
-        <div style="
+        `<div style="
         font-family: 'Manrope', sans-serif;
-        padding: 10px; text-align: center;">
-          <strong style="font-size: 16px; color: #333;">Vị trí mộ của liệt sĩ</strong>
-          <p style="margin: 5px 0; color: #666; font-weight: 900">LIỆT SĨ: ${
+        padding: 1px; text-align: center;">
+          <p style="margin: 1px 0; color: #666; font-weight: 900">LIỆT SĨ: ${
             selectedMartyr?.fullName || "Không có tên"
           }</p>
-        </div>
-      `
+        </div>`
       )
       .addTo(map.current);
 
