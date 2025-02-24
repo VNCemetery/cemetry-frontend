@@ -14,11 +14,11 @@ const menuItems = [
     icon: FiUsers,
     path: "/admin/martyrs",
   },
-  {
-    label: "Người đóng góp",
-    icon: FiUserPlus,
-    path: "/admin/contributors",
-  },
+  // {
+  //   label: "Người đóng góp",
+  //   icon: FiUserPlus,
+  //   path: "/admin/contributors",
+  // },
   {
     label: "Cài đặt",
     icon: FiSettings,
