@@ -26,7 +26,7 @@ export default function SearchResultEntry({ item, selectItem }) {
           <Badge size="xl" radius="lg">
             Hàng: {item.graveRow.rowName}
           </Badge>
-          <Badge size="xl" radius="lg">
+          <Badge size="xl" bg={"green"} radius="lg">
             Khu: {item.graveRow.areaName}
           </Badge>
         </Flex>
