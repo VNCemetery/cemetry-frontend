@@ -1,6 +1,7 @@
 import { Carousel } from "@mantine/carousel";
 import CarouselImage from "../ui/CarouselImage";
 import MatyrSearch from "../ui/MatyrSearch";
+import BANNER from "../../assets/BANNER.png";
 
 import {
   Container,
@@ -8,6 +9,7 @@ import {
   Text,
   Timeline,
   ThemeIcon,
+  Image,
   Grid,
   Card,
   List,
@@ -85,157 +87,8 @@ export default function MapPage() {
   ];
   const [opened, { open, close }] = useDisclosure(true);
 
-  const {
-    filters,
-    setFilters,
-    searchKey,
-    setSearchKey,
-    searchResults,
-    setSearchResults,
-    currentPage,
-    setCurrentPage,
-    setAutoSuggestions,
-    autoSuggestions,
-    filterQuery,
-    handleSearch,
-    showAutoSuggestions,
-    setShowAutoSuggestions,
-  } = useSearchMartyrStore();
-
-  const headerRef = useRef(null);
-  const searchInputRef = useRef(null);
-
-  const [offSetHeight, setOffSetHeight] = useState(0);
-  const [showSearchModal, setShowSearchModal] = useState(false);
-
-  useEffect(() => {
-    if (headerRef?.current?.offsetHeight === 0) {
-      return;
-    }
-    searchInputRef.current.focus();
-
-    setOffSetHeight(headerRef.current.offsetHeight);
-  }, [headerRef?.current?.offSetHeight, showSearchModal]);
-
   return (
     <>
-      <div
-        className={`fixed top-0 left-0  transition-all duration-300 ease-in-out min-h-screen overflow-auto bottom-0 right-0 z-[99999] ${
-          showSearchModal ? "" : "hidden"
-        }`}
-      >
-        <div className={`h-full relative`}>
-          <div className="  z-[4]">
-            <div
-              ref={headerRef}
-              className={`fixed top-0  left-0 ${
-                !showSearchModal ? "transparent" : "bg-white"
-              } right-0 z-[4]`}
-            >
-              <div className="flex w-full items-center">
-                <div className="w-full items-center flex gap-1 bg-white py-1">
-                  <div className="flex items-center w-full text-gray-600   w-full p-1 gap-1">
-                    <ActionIcon
-                      variant="filled"
-                      size={"lg"}
-                      radius={"xl"}
-                      color="blue"
-                      aria-label="Settings"
-                      onClick={() => {
-                        if (
-                          showAutoSuggestions &&
-                          searchResults?.content?.length > 0
-                        ) {
-                          setAutoSuggestions([]);
-                          setShowAutoSuggestions(false);
-                        } else {
-                          setShowSearchModal(false);
-                          setSearchKey("");
-                          setShowAutoSuggestions(false);
-                          setSearchResults(null);
-                        }
-                      }}
-                    >
-                      <BsArrowLeft
-                        style={{ width: "70%", height: "70%" }}
-                        stroke={1.5}
-                      />
-                    </ActionIcon>
-                    <Input
-                      value={searchKey}
-                      ref={searchInputRef}
-                      onClick={() => {
-                        if (!showSearchModal) {
-                          openSearchPopup();
-                          searchInputRef.current.focus();
-                        }
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          setCurrentPage(0);
-                          setAutoSuggestions([]);
-                          setShowAutoSuggestions(false);
-                          handleSearch({
-                            name: e.target.value,
-                            page: 0,
-                            size: DEFAULT_SEARCH_SIZE,
-                            ...filters,
-                          });
-                        }
-                      }}
-                      rightSectionPointerEvents="all"
-                      onChange={(e) => {
-                        setSearchKey(e.target.value);
-                      }}
-                      radius="xl"
-                      style={{
-                        border: "none",
-                        outline: "none",
-                        boxShadow: "none",
-                      }}
-                      size="md"
-                      className="w-full  border-none text-[2rem]"
-                      placeholder="Nhập tên liệt sĩ"
-                      rightSection={
-                        <CloseIcon
-                          aria-label="Clear input"
-                          className="mr-2"
-                          onClick={() => {
-                            setSearchKey("");
-                            searchInputRef.current.focus();
-                          }}
-                          style={{ display: searchKey ? undefined : "none" }}
-                        />
-                      }
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <SearchPopupModal
-            offSetHeight={offSetHeight}
-            filters={filters} // move to store
-            setFilters={setFilters} // move to store
-            setCurrentPage={setCurrentPage} // move to store
-            currentPage={currentPage} // move to store
-            handleSearch={handleSearch} // move to store
-            setSearchKey={setSearchKey} // move to store
-            showAutoSuggestions={showAutoSuggestions} // move to store
-            setShowAutoSuggestions={setShowAutoSuggestions} // move to store
-            searchKey={searchKey} // move to store
-            autoSuggestions={autoSuggestions} // move to store
-            setAutoSuggestions={setAutoSuggestions} // move to store
-            filterQuery={filterQuery} // move to store
-            searchResults={searchResults} // move to store
-            onSelectMartyrHandler={(martyr) => {
-              let newUrlPath = `/map?martyrId=${martyr.id}`;
-              window.location = newUrlPath;
-            }}
-          />
-        </div>
-      </div>
       <Modal.Root
         opened={false}
         onClose={close}
@@ -303,37 +156,11 @@ export default function MapPage() {
         </Modal.Content>
       </Modal.Root>
 
-      <div className={classes.hero}>
-        <Container size="xl">
-          <Title className={classes.heroTitle}>
-            Nghĩa Trang Liệt Sĩ Tỉnh Đồng Tháp
-          </Title>
-          <Input
-            size="xl"
-            onClick={() => {
-              searchInputRef?.current?.focus();
-              setShowSearchModal(true);
-            }}
-            value={searchKey}
-            radius={"xl"}
-            placeholder="Tìm kiếm liệt sĩ"
-            leftSection={<BiSearch className="text-[1.5rem]" />}
-            styles={(theme) => ({
-              input: {
-                "&::placeholder": {
-                  color: theme.colors.red[6],
-                  opacity: 1,
-                },
-              },
-            })}
-          />
+      <Image src={BANNER} about="banner" />
 
-          <Text className={classes.heroDescription} mt={24} size="xl">
-            Di tích lịch sử văn hóa cấp tỉnh <br /> Nơi tưởng nhớ và tri ân các
-            anh hùng liệt sĩ
-          </Text>
-        </Container>
-      </div>
+      {/* <div className={classes.hero}>
+        <Container size="xl"></Container>
+      </div> */}
 
       <Container size="xl" className={classes.wrapper}>
         {/* Stats Grid */}
