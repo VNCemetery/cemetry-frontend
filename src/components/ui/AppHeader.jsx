@@ -248,7 +248,7 @@ export default function HeaderMegaMenu() {
                   window.scrollTo({ top: 0, behavior: "smooth" });
                 }}
               >
-                <Avatar src={LOGO} alt="Logo" radius="xl" />
+                <Avatar src={LOGO} alt="Logo" />
               </Group>
               <Flex
                 visibleFrom="md"
