@@ -93,55 +93,47 @@ export default function MapViewPage({
     };
   }, [map.current]);
 
-  // Handle heading updates
-  useEffect(() => {
-    const handleOrientation = (event) => {
-      let heading = event.webkitCompassHeading || Math.abs(event.alpha - 360);
-      // Calculate continuous rotation
-      const previousRotation = previousRotationRef.current;
-      let deltaRotation = heading - (previousRotation % 360);
-      // Adjust for crossing 0/360 boundary
-      if (deltaRotation > 180) {
-        deltaRotation -= 360;
-      } else if (deltaRotation < -180) {
-        deltaRotation += 360;
+  const handleOrientation = (event) => {
+    let heading = event.webkitCompassHeading || Math.abs(event.alpha - 360);
+    // Calculate continuous rotation
+    const previousRotation = previousRotationRef.current;
+    let deltaRotation = heading - (previousRotation % 360);
+    // Adjust for crossing 0/360 boundary
+    if (deltaRotation > 180) {
+      deltaRotation -= 360;
+    } else if (deltaRotation < -180) {
+      deltaRotation += 360;
+    }
+
+    // Update total rotation
+    totalRotationRef.current += deltaRotation;
+    previousRotationRef.current = heading;
+
+    setCurrentHeading(heading);
+    // Update marker rotation with continuous value
+    if (markerElementRef.current) {
+      const arrow = markerElementRef.current.querySelector(".navigation-arrow");
+      if (arrow) {
+        arrow.style.transform = `rotate(${totalRotationRef.current}deg)`;
       }
+    }
+  };
 
-      // Update total rotation
-      totalRotationRef.current += deltaRotation;
-      previousRotationRef.current = heading;
-
-      setCurrentHeading(heading);
-      // Update marker rotation with continuous value
-      if (markerElementRef.current) {
-        const arrow =
-          markerElementRef.current.querySelector(".navigation-arrow");
-        if (arrow) {
-          arrow.style.transform = `rotate(${totalRotationRef.current}deg)`;
-        }
-      }
-    };
-
+  const startCompass = async () => {
     const isIOS =
       navigator.userAgent.match(/(iPod|iPhone|iPad)/) &&
       navigator.userAgent.match(/AppleWebKit/);
+
     if (isIOS) {
-      let isSupported =
-        typeof window.DeviceOrientationEvent.requestPermission != "undefined";
-      if (isSupported) {
-        DeviceOrientationEvent.requestPermission()
-          .then((response) => {
-            if (response === "granted") {
-              window.addEventListener(
-                "deviceorientation",
-                handleOrientation,
-                true
-              );
-            } else {
-            }
-          })
-          .catch(() => {});
-      } else {
+      try {
+        const response = await DeviceOrientationEvent.requestPermission();
+        if (response === "granted") {
+          window.addEventListener("deviceorientation", handleOrientation, true);
+        } else {
+          console.warn("Compass not supported");
+        }
+      } catch (error) {
+        console.warn("Compass not supported");
       }
     } else {
       window.addEventListener(
@@ -150,6 +142,10 @@ export default function MapViewPage({
         true
       );
     }
+  };
+
+  useEffect(() => {
+    startCompass();
   }, []);
 
   // Handle position updates
