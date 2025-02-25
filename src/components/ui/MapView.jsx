@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useMapStore } from "../../store/useMapStore";
@@ -19,6 +19,8 @@ export default function MapViewPage({
   showSelectionMarker = false,
   currentPosition,
 }) {
+  const [hasCompassPermission, setHasCompassPermission] = useState(false);
+
   const lng = 105.645323;
   const lat = 10.461975;
   const zoom = 17.5;
@@ -104,26 +106,48 @@ export default function MapViewPage({
   };
 
   const startCompass = async () => {
+    if (hasCompassPermission) {
+      window.addEventListener(
+        "deviceorientationabsolute",
+        handleOrientation,
+        true
+      );
+      return;
+    }
+
     const isIOS =
       navigator.userAgent.match(/(iPod|iPhone|iPad)/) &&
       navigator.userAgent.match(/AppleWebKit/);
+
     if (isIOS) {
       try {
-        const response = await DeviceOrientationEvent.requestPermission();
-        if (response === "granted") {
-          window.addEventListener("deviceorientation", handleOrientation, true);
-          window.addEventListener(
-            "deviceorientationabsolute",
-            handleOrientation,
-            true
-          );
+        // Only request if we haven't gotten permission yet
+        if (typeof DeviceOrientationEvent.requestPermission === "function") {
+          const response = await DeviceOrientationEvent.requestPermission();
+          if (response === "granted") {
+            setHasCompassPermission(true);
+            window.addEventListener(
+              "deviceorientation",
+              handleOrientation,
+              true
+            );
+            window.addEventListener(
+              "deviceorientationabsolute",
+              handleOrientation,
+              true
+            );
+          }
         } else {
-          console.warn("Compass not supported");
+          // If requestPermission is not available, assume granted (older iOS)
+          setHasCompassPermission(true);
+          window.addEventListener("deviceorientation", handleOrientation, true);
         }
       } catch (error) {
-        console.warn("Compass not supported");
+        console.warn("Compass not supported or permission denied:", error);
       }
     } else {
+      // For non-iOS devices, just add the listener
+      setHasCompassPermission(true);
       window.addEventListener(
         "deviceorientationabsolute",
         handleOrientation,
@@ -149,6 +173,7 @@ export default function MapViewPage({
       (position) => {
         const { latitude, longitude } = position.coords;
         setCurrentPosition({ latitude, longitude });
+        startCompass();
 
         // Update marker position
         if (markerRef.current) {
@@ -166,7 +191,6 @@ export default function MapViewPage({
 
   useEffect(() => {
     if (map.current) return; // stops map from intializing more than once
-    startCompass();
     map.current = new maplibregl.Map({
       container: mapContainer.current,
       style: `${mapUrl}goong_satellite.json?api_key=${mapKey}`,
@@ -184,7 +208,6 @@ export default function MapViewPage({
   useEffect(() => {
     if (!map.current || !showSelectionMarker || !currentPosition.latitude)
       return;
-
     startCompass();
 
     const tempMarker = new maplibregl.Marker({
