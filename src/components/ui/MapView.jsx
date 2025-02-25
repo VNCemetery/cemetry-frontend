@@ -148,6 +148,13 @@ export default function MapViewPage({
     startCompass();
   }, []);
 
+  useEffect(() => {
+    // If permission is still not granted, try again
+    if (!currentHeading) {
+      startCompass();
+    }
+  }, [currentPosition]);
+
   // Handle position updates
   useEffect(() => {
     const watchId = navigator.geolocation.watchPosition(
