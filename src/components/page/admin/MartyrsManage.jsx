@@ -86,19 +86,18 @@ export default function MartyrsManage() {
       sortConfig.key === key && sortConfig.direction === "ASC" ? "DESC" : "ASC";
     setSortConfig({ key, direction });
 
-    // Load data with new sort parameters
-    const sorts = [
-      {
-        key,
-        direction,
-      },
-    ];
-
-    loadData(currentPage - 1, DEFAULT_SEARCH_SIZE, [], sorts);
+    // Sửa lại cách gọi loadData khi sort
+    const sorts = [{
+      key,
+      direction,
+    }];
+    
+    // Luôn bắt đầu từ trang 0 khi sort
+    loadData(0, DEFAULT_SEARCH_SIZE, [], sorts);
   };
 
   const loadData = async (
-    page = currentPage || 0,
+    page = 0, // Mặc định page = 0 thay vì currentPage
     size = DEFAULT_SEARCH_SIZE,
     query_filters = [],
     sorts = []
@@ -108,16 +107,14 @@ export default function MartyrsManage() {
       const response = await loadMartyrs(
         debouncedSearch,
         page,
-        pageSize || size,
+        size,
         query_filters,
-        sorts // Pass sorts to loadMartyrs
+        sorts
       );
 
       if (response?.content) {
-        if (
-          !debouncedSearch &&
-          !Object.values(query_filters).some((val) => val)
-        ) {
+        // Chỉ cập nhật currentPage khi không có search và filter
+        if (!debouncedSearch && !Object.values(query_filters).some((val) => val)) {
           setCurrentPage(page + 1);
         }
       } else {
