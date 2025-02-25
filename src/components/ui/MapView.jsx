@@ -123,12 +123,16 @@ export default function MapViewPage({
     const isIOS =
       navigator.userAgent.match(/(iPod|iPhone|iPad)/) &&
       navigator.userAgent.match(/AppleWebKit/);
-
     if (isIOS) {
       try {
         const response = await DeviceOrientationEvent.requestPermission();
         if (response === "granted") {
           window.addEventListener("deviceorientation", handleOrientation, true);
+          window.addEventListener(
+            "deviceorientationabsolute",
+            handleOrientation,
+            true
+          );
         } else {
           console.warn("Compass not supported");
         }
