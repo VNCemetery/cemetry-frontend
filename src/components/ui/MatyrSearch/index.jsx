@@ -38,6 +38,7 @@ const MatyrSearch = ({
   clearPopupMartyr,
   onRouteFromCurrentLocation,
   onRouteFromGate,
+  handleCancelSelection,
   onSelectLocationOnMap,
   closeDrawer,
   openedDrawer,
@@ -186,6 +187,7 @@ const MatyrSearch = ({
         <MartyrDetail
           martyr={selectedMartyr}
           onRoute={() => {
+            handleCancelSelection();
             closeMartyrDetail();
             openRoutingHandlerPopup();
           }}
@@ -349,7 +351,10 @@ const MatyrSearch = ({
           openSearchPopup();
           searchInputRef.current.focus();
         }}
-        openRoutingHandlerPopup={openRoutingHandlerPopup}
+        openRoutingHandlerPopup={() => {
+          handleCancelSelection();
+          openRoutingHandlerPopup();
+        }}
         martyr={selectedMartyr}
         onViewDetail={openMartyrDetail}
         onShowRoute={onRouteFromCurrentLocation}

@@ -614,6 +614,7 @@ export default function RoutingPage() {
       </Modal>
 
       <MatyrSearch
+        handleCancelSelection={handleCancelSelection}
         clearPopupMartyr={clearPopupMartyr}
         openDrawer={() => {
           openDrawer();
