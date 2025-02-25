@@ -185,6 +185,8 @@ export default function MapViewPage({
     if (!map.current || !showSelectionMarker || !currentPosition.latitude)
       return;
 
+    startCompass();
+
     const tempMarker = new maplibregl.Marker({
       color: "#FF0000",
     })
