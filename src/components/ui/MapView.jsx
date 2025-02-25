@@ -39,22 +39,6 @@ export default function MapViewPage({
     }
   };
 
-  useEffect(() => {
-    if (map.current) return; // stops map from intializing more than once
-
-    map.current = new maplibregl.Map({
-      container: mapContainer.current,
-      style: `${mapUrl}goong_satellite.json?api_key=${mapKey}`,
-      center: [lng, lat],
-      zoom: zoom,
-      bearing: 55,
-    });
-
-    map.current.on("load", () => {
-      onMapLoad(map.current);
-    });
-  }, [mapKey, lng, lat, zoom, onMapLoad]);
-
   // Create and maintain marker
   useEffect(() => {
     if (!map.current) return;
@@ -179,6 +163,22 @@ export default function MapViewPage({
       navigator.geolocation.clearWatch(watchId);
     };
   }, []);
+
+  useEffect(() => {
+    if (map.current) return; // stops map from intializing more than once
+    startCompass();
+    map.current = new maplibregl.Map({
+      container: mapContainer.current,
+      style: `${mapUrl}goong_satellite.json?api_key=${mapKey}`,
+      center: [lng, lat],
+      zoom: zoom,
+      bearing: 55,
+    });
+
+    map.current.on("load", () => {
+      onMapLoad(map.current);
+    });
+  }, [mapKey, lng, lat, zoom, onMapLoad]);
 
   // Add temporary selection marker
   useEffect(() => {
