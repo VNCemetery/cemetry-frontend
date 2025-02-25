@@ -140,7 +140,7 @@ export default function MapViewPage({
             } else {
             }
           })
-          .catch(() => alert("not supported"));
+          .catch(() => {});
       } else {
       }
     } else {
