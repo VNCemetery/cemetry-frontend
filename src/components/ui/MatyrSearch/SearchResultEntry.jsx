@@ -22,14 +22,17 @@ export default function SearchResultEntry({ item, selectItem }) {
           <span className="font-medium">{item.homeTown || "Không rõ"}</span>
         </Text>
 
-        <Flex gap={2}>
-          <Badge size="xl" radius="lg">
+        <div className="flex flex-col sm:flex-row gap-2 ">
+          <Badge size="xl" radius="lg" className="w-full">
             Hàng: {item.graveRow.rowName}
           </Badge>
-          <Badge size="xl" bg={"green"} radius="lg">
+          <Badge size="xl" bg={"green"} radius="lg" className="w-full">
             Khu: {item.graveRow.areaName}
           </Badge>
-        </Flex>
+          <Badge bg="gray" size="xl" radius="lg" className="w-full">
+            Mộ: {item.graveCode}
+          </Badge>
+        </div>
       </Flex>
     </div>
   );
