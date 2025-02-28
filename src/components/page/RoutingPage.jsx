@@ -424,10 +424,7 @@ export default function RoutingPage() {
         font-family: 'Manrope', sans-serif;
         padding: 1px; text-align: center;">
           <p style="margin: 1px 0; color: #666; font-weight: 900">
-          HÀNG MỘ: ${selectedMartyr?.rowName || "Không có tên"}</p>   
-          SỐ MỘ: ${selectedMartyr?.graveCode || "Không có tên"}</p>
-          
-          LIỆT SĨ: ${selectedMartyr?.fullName || "Không có tên"}</p>
+          Đây là hàng mộ của liệt sĩ ${selectedMartyr?.fullName || "Không có tên"}</p>
         </div>`
       )
       .addTo(map.current);
