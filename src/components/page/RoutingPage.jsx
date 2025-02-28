@@ -132,6 +132,13 @@ export default function RoutingPage() {
       }
     });
 
+    if (map.current.getLayer("route-end-t")) {
+      map.current.removeLayer("route-end-t");
+    }
+    if (map.current.getSource("end-point-t")) {
+      map.current.removeSource("end-point-t");
+    }
+
     // Clean up sources
     ["route", "start-point", "end-point"].forEach((source) => {
       if (map.current.getSource(source)) {
