@@ -17,10 +17,6 @@ export default function AdminHeader({ opened, toggle }) {
         <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
         <Title order={3}>HeroVN Admin</Title>
       </Group>
-
-      <Button variant="subtle" onClick={handleLogout}>
-        Đăng xuất
-      </Button>
     </Group>
   );
 } 

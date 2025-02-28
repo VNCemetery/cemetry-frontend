@@ -24,7 +24,6 @@ export default function AppFooter() {
         key={index}
         className={classes.link}
         component="a"
-        href={link.link}
         onClick={(event) => {
           window.open(link.link, "_blank");
         }}

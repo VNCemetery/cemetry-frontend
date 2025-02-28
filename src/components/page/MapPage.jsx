@@ -130,11 +130,12 @@ export default function MapPage() {
                 <Text
                   className={classes.statValue}
                   style={{
-                    fontSize: "clamp(2.5rem, 4vw, 2.5rem)",
-
+                    fontSize: "clamp(1.8rem, 3vw, 2rem)",
                     width: "100%",
                     textAlign: "center",
-                    wordBreak: "break-word",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
                   }}
                   mt={45}
                   c={cardColors[index % cardColors.length].text}
@@ -144,7 +145,7 @@ export default function MapPage() {
                 <Text
                   size="sm"
                   c="dimmed"
-                  mt={5}
+                  mt={0}
                   style={{ fontSize: "1.1rem" }}
                 >
                   {stat.label}

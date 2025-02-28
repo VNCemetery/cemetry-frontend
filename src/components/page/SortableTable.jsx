@@ -77,13 +77,6 @@ export default function SortableTable({
 
   return (
     <ScrollArea>
-      <TextInput
-        placeholder="Search..."
-        mb="md"
-        leftSection={<FiSearch size={14} stroke={1.5} />}
-        value={search}
-        onChange={handleSearchChange}
-      />
       <Table
         horizontalSpacing="md"
         verticalSpacing="xs"
