@@ -240,7 +240,7 @@ export default function RoutingPage() {
       paint: {
         "circle-radius": 8, // Increased size
         "circle-color": "#2470ff", // Bright blue
-        "circle-stroke-width": 4, // Thicker border
+        "circle-stroke-width": 2, // Giảm từ 4 xuống 2
         "circle-stroke-color": "#FFFFFF", // Dark blue border for contrast
         "circle-opacity": 1,
       },
@@ -266,7 +266,7 @@ export default function RoutingPage() {
       paint: {
         "circle-radius": 8, // Increased size
         "circle-color": "#08cc5d", // Bright blue
-        "circle-stroke-width": 4, // Thicker border
+        "circle-stroke-width": 2, // Giảm từ 4 xuống 2
         "circle-stroke-color": "#FFFFFF", // Dark blue border for contrast
         "circle-opacity": 1,
       },
@@ -424,7 +424,8 @@ export default function RoutingPage() {
         font-family: 'Manrope', sans-serif;
         padding: 1px; text-align: center;">
           <p style="margin: 1px 0; color: #666; font-weight: 900">
-          Đây là hàng mộ của liệt sĩ ${selectedMartyr?.fullName || "Không có tên"}</p>
+          Đây là hàng mộ của liệt sĩ <br />
+          ${selectedMartyr?.fullName || "Không có tên"}</p>
         </div>`
       )
       .addTo(map.current);
@@ -450,7 +451,7 @@ export default function RoutingPage() {
       paint: {
         "circle-radius": 8,
         "circle-color": "#FF0000",
-        "circle-stroke-width": 4,
+        "circle-stroke-width": 2, // Changed from 2 to 1 for a thinner border
         "circle-stroke-color": "#FFFFFF",
         "circle-opacity": 1,
       },
